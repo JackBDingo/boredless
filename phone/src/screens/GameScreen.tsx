@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
+import { XCircle } from 'lucide-react';
 import { useConnectionStore } from '../store/connection';
 import { useGameStore } from '../store/game';
+import { useRoomStore } from '../store/room';
 import { ServerMessageType, PhaseType } from '@boredless/shared';
 import type { PhaseState } from '@boredless/shared';
 import { BBPhone } from '../games/bluff-battle/BBPhone';
@@ -8,6 +10,10 @@ import { VillagePhone } from '../games/village/VillagePhone';
 
 export function GameScreen() {
   const on = useConnectionStore((s) => s.on);
+  const send = useConnectionStore((s) => s.send);
+  const playerId = useConnectionStore((s) => s.playerId);
+  const room = useRoomStore((s) => s.room);
+  const isHost = room && playerId === room.hostPlayerId;
   const phase = useGameStore((s) => s.phase);
   const privateState = useGameStore((s) => s.privateState);
   const setPhase = useGameStore((s) => s.setPhase);
@@ -56,16 +62,39 @@ export function GameScreen() {
 
   const gameId = (privateState as Record<string, unknown>).gameId as string;
 
+  let gameComponent: React.ReactNode;
+
   switch (gameId) {
     case 'bluff_battle':
-      return <BBPhone phase={phase} privateState={privateState} />;
+      gameComponent = <BBPhone phase={phase} privateState={privateState} />;
+      break;
     case 'village_of_shadows':
-      return <VillagePhone phase={phase} privateState={privateState} />;
+      gameComponent = <VillagePhone phase={phase} privateState={privateState} />;
+      break;
     default:
-      return (
+      gameComponent = (
         <div className="flex items-center justify-center min-h-dvh bg-gray-950">
           <div className="text-white text-xl">Unknown game: {gameId}</div>
         </div>
       );
   }
+
+  return (
+    <div className="relative min-h-dvh">
+      {gameComponent}
+      {isHost && (
+        <button
+          onClick={() => {
+            if (confirm('End this game and return everyone to the lobby?')) {
+              send({ type: 'return_to_lobby' });
+            }
+          }}
+          className="fixed top-4 right-4 z-50 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-medium backdrop-blur-sm active:bg-red-500/25 transition-colors"
+        >
+          <XCircle size={14} />
+          End Game
+        </button>
+      )}
+    </div>
+  );
 }

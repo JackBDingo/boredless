@@ -5,7 +5,7 @@ import { GameScreen } from './screens/GameScreen';
 import { useConnectionStore } from './store/connection';
 import { useGameStore } from './store/game';
 import { useRoomStore } from './store/room';
-import { ServerMessageType } from '@boredless/shared';
+import { ServerMessageType, RoomStatus } from '@boredless/shared';
 import type { PublicRoomState } from '@boredless/shared';
 
 type AppScreen = 'join' | 'lobby' | 'game';
@@ -36,6 +36,16 @@ export default function App() {
     });
     return unsub;
   }, [on, resetGame, resetRoom]);
+
+  // Handle return-to-lobby (host quit game)
+  const room = useRoomStore((s) => s.room);
+
+  useEffect(() => {
+    if (room?.status === RoomStatus.IN_LOBBY && screen === 'game') {
+      resetGame();
+      setScreen('lobby');
+    }
+  }, [room?.status, screen, resetGame]);
 
   // If disconnected unexpectedly and not on join screen, go back
   useEffect(() => {

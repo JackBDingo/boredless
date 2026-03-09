@@ -192,6 +192,10 @@ class RoomManager {
     });
 
     logger.info('Player joined', { roomId, playerId, playerName });
+
+    // Broadcast full room state so all clients (phones + display) stay in sync
+    this.broadcastRoomState(roomId);
+
     return { session, player, room };
   }
 

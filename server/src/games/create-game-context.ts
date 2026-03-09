@@ -4,6 +4,7 @@ import { timerEngine } from '../engine/timer-engine.js';
 import { scoreEngine } from '../engine/score-engine.js';
 import { sendToSession, sendToSessions } from '../ws/send.js';
 import { logger } from '../utils/logger.js';
+import { ServerMessageType } from '@boredless/shared';
 
 /**
  * Factory: creates a GameContext bound to a specific room.
@@ -50,6 +51,33 @@ export function createGameContext(roomId: string): GameContext {
       }
     },
 
+    // ── Event Bus (Tier 2 — custom game events) ────────────────
+    emit(event, data) {
+      const sessionIds = getAllSessionIds();
+      sendToSessions(sessionIds, {
+        type: ServerMessageType.GAME_EVENT,
+        event,
+        data: data ?? null,
+      });
+    },
+    emitTo(sessionId, event, data) {
+      sendToSession(sessionId, {
+        type: ServerMessageType.GAME_EVENT,
+        event,
+        data: data ?? null,
+      });
+    },
+    emitToDisplay(event, data) {
+      const room = roomManager.getRoom(roomId);
+      if (room?.displaySessionId) {
+        sendToSession(room.displaySessionId, {
+          type: ServerMessageType.GAME_EVENT,
+          event,
+          data: data ?? null,
+        });
+      }
+    },
+
     // ── Scores ─────────────────────────────────────────────────
     initScores(playerIds) {
       scoreEngine.init(roomId, playerIds);
@@ -93,3 +121,5 @@ export function createGameContext(roomId: string): GameContext {
     },
   };
 }
+
+

@@ -184,6 +184,14 @@ export interface JoinedMessage {
   result: JoinResult;
 }
 
+export interface GameEventMessage {
+  type: ServerMessageType.GAME_EVENT;
+  /** The custom event name — e.g. 'bluff:reveal', 'village:vote-cast' */
+  event: string;
+  /** Arbitrary payload — platform passes through unmodified */
+  data: unknown;
+}
+
 /** Union of all server messages */
 export type ServerMessage =
   | RoomStateMessage
@@ -203,4 +211,7 @@ export type ServerMessage =
   | RoomClosedMessage
   | ErrorMessage
   | PongMessage
-  | JoinedMessage;
+  | JoinedMessage
+  | GameEventMessage;
+
+

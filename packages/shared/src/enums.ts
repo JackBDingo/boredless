@@ -122,4 +122,20 @@ export enum ServerMessageType {
   ERROR = 'error',
   PONG = 'pong',
   JOINED = 'joined',
+  /** Custom game event — platform routes without interpreting (Tier 2 event bus) */
+  GAME_EVENT = 'game_event',
 }
+
+// ── Tier 1 platform event names ────────────────────────────────────────────
+// These are the standard events the platform handles automatically.
+// Defined here so games can reference them without magic strings.
+export const PlatformEvent = {
+  PHASE_CHANGED:      'phase:changed',
+  SCORE_UPDATED:      'score:updated',
+  GAME_OVER:          'game:over',
+  PLAYER_ELIMINATED:  'player:eliminated',
+  TIMER_EXPIRED:      'timer:expired',
+} as const;
+
+export type PlatformEventName = typeof PlatformEvent[keyof typeof PlatformEvent];
+

@@ -1,14 +1,11 @@
 import { useState } from 'react';
 import { useConnectionStore } from '@phone/store/connection';
 import { useGameStore } from '@phone/store/game';
-import type { PhaseState } from '@boredless/shared';
+import type { PhaseState, GameEventHook } from '@boredless/shared';
 import type { BBPrivateState } from '../types.js';
 import { PhaseType, ClientMessageType, InputType, BB_MAX_ANSWER_LENGTH } from '@boredless/shared';
 import { Send, Check, Vote, Monitor, Trophy, Theater } from 'lucide-react';
 import { PoweredByLogo } from '@phone/components/PoweredByLogo';
-
-/** Signature for the useGameEvent hook passed in from GameScreen */
-type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
 
 interface Props {
   phase: PhaseState;
@@ -202,3 +199,5 @@ export function BBPhone({ phase, privateState, useGameEvent: _useGameEvent }: Pr
     </div>
   );
 }
+
+export default BBPhone;

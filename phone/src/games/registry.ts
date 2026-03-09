@@ -10,26 +10,28 @@ export interface PhoneProps {
   useGameEvent: GameEventHook;
 }
 
-// Auto-import all game entry points via glob
-// Each game's index.ts must export PhoneComponent
-const gameModules = import.meta.glob<{ PhoneComponent?: ComponentType<PhoneProps> }>(
-  '/games/*/index.ts',
+// Auto-import ONLY phone components to avoid pulling in @display/* imports at build time.
+// Glob the phone folder directly instead of the barrel index.ts.
+const phoneModules = import.meta.glob<{ default?: ComponentType<PhoneProps> }>(
+  '/games/*/phone/*.tsx',
   { eager: true },
 );
 
 export const phoneRegistry = new Map<string, ComponentType<PhoneProps>>();
 
-for (const [path, mod] of Object.entries(gameModules)) {
-  // Extract game directory name from path: /games/bluff-battle/index.ts → bluff-battle
-  const match = path.match(/^\/games\/([^/]+)\/index\.ts$/);
+for (const [path, mod] of Object.entries(phoneModules)) {
+  // Extract game directory name: /games/bluff-battle/phone/BBPhone.tsx → bluff-battle
+  const match = path.match(/^\/games\/([^/]+)\/phone\/[^/]+\.tsx$/);
   if (!match) continue;
 
   const gameDirName = match[1]; // e.g. "bluff-battle"
 
-  if (mod.PhoneComponent) {
+  // Each phone file's default export is the component
+  const Component = mod.default;
+  if (Component) {
     // Register by directory name (hyphen) and underscore variant
-    phoneRegistry.set(gameDirName, mod.PhoneComponent);
-    phoneRegistry.set(gameDirName.replace(/-/g, '_'), mod.PhoneComponent);
+    phoneRegistry.set(gameDirName, Component);
+    phoneRegistry.set(gameDirName.replace(/-/g, '_'), Component);
   }
 }
 

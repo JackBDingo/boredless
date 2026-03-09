@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateBBScores, type BBAnswer, type BBVote } from './scoring';
+import { calculateBBScores, type BBAnswer, type BBVote } from './scoring.js';
 
 describe('calculateBBScores', () => {
   const correctAnswer: BBAnswer = {

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { PROMPTS, getRandomPrompts } from './prompts';
+import { PROMPTS, getRandomPrompts } from './prompts.js';
 
 describe('PROMPTS', () => {
   it('has at least 50 prompts', () => {

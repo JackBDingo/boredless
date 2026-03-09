@@ -18,7 +18,6 @@ import {
   VOS_DAY_TIME_SECONDS,
   VOS_VOTE_TIME_SECONDS,
   VOS_VOTE_RESULT_TIME_SECONDS,
-  GAME_CATALOG,
 } from '@boredless/shared';
 import { distributeRoles, type RoleAssignment } from './roles.js';
 import { resolveNight, checkWinCondition, type NightAction } from './resolution.js';
@@ -67,9 +66,13 @@ interface VillageGameState {
 }
 
 class VillageModule implements GameModule {
-  readonly definition: GameDefinition = GAME_CATALOG.find(g => g.id === GameId.VILLAGE_OF_SHADOWS)!;
+  readonly definition: GameDefinition;
 
   private states = new Map<string, VillageGameState>();
+
+  constructor(definition: GameDefinition) {
+    this.definition = definition;
+  }
 
   setup(players: Player[], ctx: GameContext): void {
     const roomId = ctx.roomId;
@@ -627,9 +630,6 @@ class VillageModule implements GameModule {
   }
 }
 
-export function createModule(): GameModule {
-  return new VillageModule();
+export function createModule(definition: GameDefinition): GameModule {
+  return new VillageModule(definition);
 }
-
-// Legacy export for backward compatibility during migration
-export const villageModule = new VillageModule();

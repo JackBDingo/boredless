@@ -17,7 +17,6 @@ import {
   BB_REVEAL_TIME_SECONDS,
   BB_SCORES_TIME_SECONDS,
   BB_INSTRUCTIONS_TIME_SECONDS,
-  GAME_CATALOG,
 } from '@boredless/shared';
 import { nanoid } from 'nanoid';
 import { getRandomPrompts } from './prompts.js';
@@ -48,9 +47,13 @@ interface BBGameState {
 }
 
 class BluffBattleModule implements GameModule {
-  readonly definition: GameDefinition = GAME_CATALOG.find(g => g.id === GameId.BLUFF_BATTLE)!;
+  readonly definition: GameDefinition;
 
   private states = new Map<string, BBGameState>();
+
+  constructor(definition: GameDefinition) {
+    this.definition = definition;
+  }
 
   setup(players: Player[], ctx: GameContext): void {
     const roomId = ctx.roomId;
@@ -486,9 +489,6 @@ class BluffBattleModule implements GameModule {
   }
 }
 
-export function createModule(): GameModule {
-  return new BluffBattleModule();
+export function createModule(definition: GameDefinition): GameModule {
+  return new BluffBattleModule(definition);
 }
-
-// Legacy export for backward compatibility during migration
-export const bluffBattleModule = new BluffBattleModule();

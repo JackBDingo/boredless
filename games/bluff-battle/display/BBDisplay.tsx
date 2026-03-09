@@ -1,12 +1,9 @@
-import type { PhaseState, ScoreEntry } from '@boredless/shared';
+import type { PhaseState, ScoreEntry, GameEventHook } from '@boredless/shared';
 import type { BBPublicState } from '../types.js';
 import { PhaseType } from '@boredless/shared';
 import { Timer } from '@display/components/Timer';
 import { Scoreboard } from '@display/components/Scoreboard';
 import { Theater, Send, Vote, Sparkles } from 'lucide-react';
-
-/** Signature for the useGameEvent hook passed in from GameScreen */
-type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
 
 interface BBDisplayProps {
   phase: PhaseState;
@@ -140,3 +137,5 @@ export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEv
     </div>
   );
 }
+
+export default BBDisplay;

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { resolveNight, checkWinCondition, type NightAction } from './resolution';
-import { VillageRole } from '@boredless/shared';
-import type { RoleAssignment } from './roles';
+import { resolveNight, checkWinCondition, type NightAction } from './resolution.js';
+import { VillageRole } from '../types.js';
+import type { RoleAssignment } from './roles.js';
 
 describe('resolveNight', () => {
   const roles: RoleAssignment[] = [

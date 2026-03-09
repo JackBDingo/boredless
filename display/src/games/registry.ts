@@ -11,26 +11,28 @@ export interface DisplayProps {
   useGameEvent: GameEventHook;
 }
 
-// Auto-import all game entry points via glob
-// Each game's index.ts must export DisplayComponent
-const gameModules = import.meta.glob<{ DisplayComponent?: ComponentType<DisplayProps> }>(
-  '/games/*/index.ts',
+// Auto-import ONLY display components to avoid pulling in @phone/* imports at build time.
+// Glob the display folder directly instead of the barrel index.ts.
+const displayModules = import.meta.glob<{ default?: ComponentType<DisplayProps> }>(
+  '/games/*/display/*.tsx',
   { eager: true },
 );
 
 export const displayRegistry = new Map<string, ComponentType<DisplayProps>>();
 
-for (const [path, mod] of Object.entries(gameModules)) {
-  // Extract game directory name from path: /games/bluff-battle/index.ts → bluff-battle
-  const match = path.match(/^\/games\/([^/]+)\/index\.ts$/);
+for (const [path, mod] of Object.entries(displayModules)) {
+  // Extract game directory name: /games/bluff-battle/display/BBDisplay.tsx → bluff-battle
+  const match = path.match(/^\/games\/([^/]+)\/display\/[^/]+\.tsx$/);
   if (!match) continue;
 
   const gameDirName = match[1]; // e.g. "bluff-battle"
 
-  if (mod.DisplayComponent) {
+  // Each display file's default export is the component
+  const Component = mod.default;
+  if (Component) {
     // Register by directory name (hyphen) and underscore variant
-    displayRegistry.set(gameDirName, mod.DisplayComponent);
-    displayRegistry.set(gameDirName.replace(/-/g, '_'), mod.DisplayComponent);
+    displayRegistry.set(gameDirName, Component);
+    displayRegistry.set(gameDirName.replace(/-/g, '_'), Component);
   }
 }
 

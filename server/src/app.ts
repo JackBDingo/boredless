@@ -6,9 +6,7 @@ import { roomRoutes } from './routes/room.js';
 import { handleConnection } from './ws/handler.js';
 import { roomManager } from './engine/room-manager.js';
 import { gameRegistry } from './games/registry.js';
-import { bluffBattleModule } from './games/bluff-battle/index.js';
-import { villageModule } from './games/village/index.js';
-import { discoverGames } from './games/auto-discover.js';
+import { discoverGames, manifestToDefinition } from './games/auto-discover.js';
 import type { ServerConfig } from './config.js';
 
 export async function buildApp(config: ServerConfig) {
@@ -22,27 +20,23 @@ export async function buildApp(config: ServerConfig) {
 
   await app.register(websocket);
 
-  // Try auto-discovery from games/ directory
-  let autoDiscovered = false;
+  // Auto-discovery from games/ directory
   try {
     const discovered = await discoverGames();
     if (discovered.length > 0) {
       for (const game of discovered) {
-        // createModule() instantiates a fresh module per discovery
-        const mod = game.createModule();
+        // Build GameDefinition from manifest so games don't need GAME_CATALOG
+        const definition = manifestToDefinition(game.manifest);
+        const mod = game.createModule(definition);
         gameRegistry.register(mod);
       }
-      autoDiscovered = true;
       console.log(`[auto-discover] Loaded ${discovered.length} game(s): ${discovered.map(g => g.manifest.id).join(', ')}`);
+    } else {
+      console.warn('[auto-discover] No games discovered — game registry is empty');
     }
   } catch (err) {
-    console.warn('[auto-discover] Auto-discovery failed, using manual registry:', String(err));
-  }
-
-  // Fallback: manual registration (always done so existing tests keep working)
-  if (!autoDiscovered) {
-    gameRegistry.register(bluffBattleModule);
-    gameRegistry.register(villageModule);
+    console.error('[auto-discover] Auto-discovery failed:', String(err));
+    throw err; // Fail fast: no silent fallback to stale duplicated code
   }
 
   // Initialize room manager

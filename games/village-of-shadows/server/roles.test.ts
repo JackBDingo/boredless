@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { distributeRoles, getRoleInfo } from './roles';
-import { VillageRole, ROLE_DISTRIBUTIONS } from '@boredless/shared';
+import { distributeRoles, getRoleInfo } from './roles.js';
+import { VillageRole, ROLE_DISTRIBUTIONS } from '../types.js';
 import type { Player } from '@boredless/shared';
 import { PlayerStatus } from '@boredless/shared';
 

@@ -21,6 +21,31 @@ export function createGameContext(roomId: string): GameContext {
     return ids;
   }
 
+  function getPlayerSessionIds(excludePlayerId?: string): string[] {
+    const room = roomManager.getRoom(roomId);
+    if (!room) return [];
+    return room.players
+      .filter(p => p.status !== 'removed' && p.id !== excludePlayerId)
+      .map(p => p.sessionId);
+  }
+
+  /** Resolve a playerId to a sessionId for internal routing. */
+  function resolvePlayerSessionId(playerId: string): string | undefined {
+    const room = roomManager.getRoom(roomId);
+    if (!room) return undefined;
+    const player = room.players.find(p => p.id === playerId && p.status !== 'removed');
+    return player?.sessionId;
+  }
+
+  /** Get all active player IDs (excluding 'removed' players). */
+  function getActivePlayerIds(): string[] {
+    const room = roomManager.getRoom(roomId);
+    if (!room) return [];
+    return room.players
+      .filter(p => p.status !== 'removed')
+      .map(p => p.id);
+  }
+
   return {
     roomId,
 
@@ -41,8 +66,11 @@ export function createGameContext(roomId: string): GameContext {
       const sessionIds = getAllSessionIds();
       sendToSessions(sessionIds, message);
     },
-    sendToPlayer(sessionId, message) {
-      sendToSession(sessionId, message);
+    sendToPlayer(playerId, message) {
+      const sessionId = resolvePlayerSessionId(playerId);
+      if (sessionId) {
+        sendToSession(sessionId, message);
+      }
     },
     sendToDisplay(message) {
       const room = roomManager.getRoom(roomId);
@@ -60,12 +88,15 @@ export function createGameContext(roomId: string): GameContext {
         data: data ?? null,
       });
     },
-    emitTo(sessionId, event, data) {
-      sendToSession(sessionId, {
-        type: ServerMessageType.GAME_EVENT,
-        event,
-        data: data ?? null,
-      });
+    emitTo(playerId, event, data) {
+      const sessionId = resolvePlayerSessionId(playerId);
+      if (sessionId) {
+        sendToSession(sessionId, {
+          type: ServerMessageType.GAME_EVENT,
+          event,
+          data: data ?? null,
+        });
+      }
     },
     emitToDisplay(event, data) {
       const room = roomManager.getRoom(roomId);
@@ -106,6 +137,36 @@ export function createGameContext(roomId: string): GameContext {
       roomManager.setRoomStatus(roomId, status);
     },
     getAllSessionIds,
+    getPlayerSessionIds,
+
+    // ── Phase Broadcasting (convenience helpers) ───────────────
+    broadcastPhase(phase, publicState) {
+      const sessionIds = getAllSessionIds();
+      sendToSessions(sessionIds, {
+        type: ServerMessageType.PHASE_CHANGED,
+        phase,
+        gamePublicState: publicState,
+      });
+    },
+    broadcastPrivateState(getState) {
+      const playerIds = getActivePlayerIds();
+      for (const playerId of playerIds) {
+        const sessionId = resolvePlayerSessionId(playerId);
+        if (sessionId) {
+          sendToSession(sessionId, {
+            type: ServerMessageType.PRIVATE_STATE,
+            state: getState(playerId),
+          });
+        }
+      }
+    },
+    broadcastGameOver(finalState) {
+      const sessionIds = getAllSessionIds();
+      sendToSessions(sessionIds, {
+        type: ServerMessageType.GAME_OVER,
+        result: finalState,
+      });
+    },
 
     // ── Logging ────────────────────────────────────────────────
     log: {
@@ -121,5 +182,3 @@ export function createGameContext(roomId: string): GameContext {
     },
   };
 }
-
-

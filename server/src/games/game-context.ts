@@ -1,4 +1,4 @@
-import type { Room, ScoreEntry } from '@boredless/shared';
+import type { Room, ScoreEntry, PhaseState, GameOverState } from '@boredless/shared';
 import type { RoomStatus } from '@boredless/shared';
 import type { ServerMessage } from '@boredless/shared';
 
@@ -18,14 +18,15 @@ export interface GameContext {
 
   // ── Messaging ──────────────────────────────────────────────
   sendToAll(message: ServerMessage): void;
-  sendToPlayer(sessionId: string, message: ServerMessage): void;
+  /** Send a message to a specific player. Pass playerId — session resolution is internal. */
+  sendToPlayer(playerId: string, message: ServerMessage): void;
   sendToDisplay(message: ServerMessage): void;
 
   // ── Event Bus (Tier 2 — custom game events) ────────────────
   /** Emit a custom event to ALL connected clients (display + all players). */
   emit(event: string, data?: unknown): void;
   /** Emit a custom event to a single player's phone. */
-  emitTo(sessionId: string, event: string, data?: unknown): void;
+  emitTo(playerId: string, event: string, data?: unknown): void;
   /** Emit a custom event to the display (TV) only. */
   emitToDisplay(event: string, data?: unknown): void;
 
@@ -41,6 +42,16 @@ export interface GameContext {
   getRoom(): Room | undefined;
   setRoomStatus(status: RoomStatus): void;
   getAllSessionIds(): string[];
+  /** Returns session IDs for all active players (optionally excluding one player). */
+  getPlayerSessionIds(excludePlayerId?: string): string[];
+
+  // ── Phase Broadcasting (convenience helpers) ───────────────
+  /** Broadcast PHASE_CHANGED to all clients. */
+  broadcastPhase(phase: PhaseState, publicState: Record<string, unknown>): void;
+  /** Broadcast PRIVATE_STATE to each player with their personalized state. */
+  broadcastPrivateState(getState: (playerId: string) => Record<string, unknown>): void;
+  /** Broadcast GAME_OVER to all clients. */
+  broadcastGameOver(finalState: GameOverState): void;
 
   // ── Logging ────────────────────────────────────────────────
   log: {
@@ -49,4 +60,3 @@ export interface GameContext {
     warn(message: string, meta?: Record<string, unknown>): void;
   };
 }
-

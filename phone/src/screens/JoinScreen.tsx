@@ -63,9 +63,7 @@ export function JoinScreen({ onJoined }: Props) {
 
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-8 py-12">
         {/* Brand */}
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent mb-1">
-          Boredless
-        </h1>
+        <img src="/boredless-logo.png" alt="Boredless" className="w-40 mb-1" />
         <p className="text-gray-500 text-sm mb-12">Enter the code from the TV</p>
 
         {/* Code input */}

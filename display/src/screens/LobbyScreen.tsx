@@ -24,9 +24,7 @@ export function LobbyScreen({ qrDataUrl }: LobbyScreenProps) {
         {/* Header — brand + room code */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-              Boredless
-            </h1>
+            <img src="/boredless-logo.png" alt="Boredless" className="w-56" />
           </div>
           <div className="flex items-center gap-3 bg-white/5 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/10">
             <Users size={20} className="text-gray-400" />

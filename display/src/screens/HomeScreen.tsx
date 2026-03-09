@@ -43,9 +43,7 @@ export function HomeScreen({ onRoomCreated }: HomeScreenProps) {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl" />
 
       <div className="relative z-10 flex flex-col items-center gap-6">
-        <h1 className="text-8xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-          Boredless
-        </h1>
+        <img src="/boredless-logo.png" alt="Boredless" className="w-80" />
 
         {error ? (
           <p className="text-red-400/80 text-lg">{error}</p>

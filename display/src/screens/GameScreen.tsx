@@ -3,6 +3,7 @@ import { GameId, PhaseType } from '@boredless/shared';
 import { BBDisplay } from '../games/bluff-battle/BBDisplay';
 import { VillageDisplay } from '../games/village/VillageDisplay';
 import { Scoreboard } from '../components/Scoreboard';
+import { PoweredByLogo } from '../components/PoweredByLogo';
 import { Trophy, Moon, Users, Loader2 } from 'lucide-react';
 
 export function GameScreen() {
@@ -20,6 +21,7 @@ export function GameScreen() {
           <Loader2 size={24} className="animate-spin" />
           <span className="text-lg">Loading game...</span>
         </div>
+        <PoweredByLogo />
       </div>
     );
   }
@@ -53,6 +55,7 @@ export function GameScreen() {
           )}
           <Scoreboard scores={gameOverResult.finalScores} />
         </div>
+        <PoweredByLogo />
       </div>
     );
   }
@@ -60,14 +63,25 @@ export function GameScreen() {
   // Delegate to game-specific display
   switch (room.selectedGameId) {
     case GameId.BLUFF_BATTLE:
-      return <BBDisplay phase={phase} publicState={gamePublicState} scores={scores} />;
+      return (
+        <div className="relative h-full">
+          <BBDisplay phase={phase} publicState={gamePublicState} scores={scores} />
+          <PoweredByLogo />
+        </div>
+      );
     case GameId.VILLAGE_OF_SHADOWS:
-      return <VillageDisplay phase={phase} publicState={gamePublicState} />;
+      return (
+        <div className="relative h-full">
+          <VillageDisplay phase={phase} publicState={gamePublicState} />
+          <PoweredByLogo />
+        </div>
+      );
     default:
       return (
         <div className="flex items-center justify-center h-full bg-gray-950 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/40 via-gray-950 to-purple-950/30" />
           <p className="relative z-10 text-gray-500 text-lg">Unknown game</p>
+          <PoweredByLogo />
         </div>
       );
   }

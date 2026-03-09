@@ -1,8 +1,5 @@
-import { useConnectionStore } from '@phone/store/connection';
-import { useGameStore } from '@phone/store/game';
-import type { PhaseState, GameEventHook } from '@boredless/shared';
 import type { VillagePrivateState } from '../types.js';
-import { PhaseType, ClientMessageType, InputType } from '@boredless/shared';
+import { PhaseType } from '@boredless/shared';
 import { VillageRole } from '../types.js';
 import { getRoleInfo } from './roleInfo';
 import {
@@ -12,23 +9,15 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { PoweredByLogo } from '@phone/components/PoweredByLogo';
+import type { PhoneProps } from '@phone/games/types';
 
 const ROLE_ICONS: Record<string, LucideIcon> = {
   Users, Crosshair, Eye, Shield,
 };
 
-interface Props {
-  phase: PhaseState;
-  privateState: Record<string, unknown>;
-  /** Custom event listener — use to react to server events emitted via ctx.emitTo() */
-  useGameEvent: GameEventHook;
-}
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function VillagePhone({ phase, privateState, useGameEvent: _useGameEvent }: Props) {
+export function VillagePhone({ phase, privateState, timerMs, submitInput, useGameEvent: _useGameEvent }: PhoneProps) {
   const state = privateState as unknown as VillagePrivateState;
-  const send = useConnectionStore((s) => s.send);
-  const timerMs = useGameStore((s) => s.timerRemainingMs);
 
   const seconds = timerMs !== null ? Math.ceil(timerMs / 1000) : null;
   const isUrgent = seconds !== null && seconds <= 5;
@@ -36,19 +25,11 @@ export function VillagePhone({ phase, privateState, useGameEvent: _useGameEvent 
   const RoleIcon = ROLE_ICONS[roleInfo.lucideIcon] ?? Users;
 
   const handleNightAction = (targetPlayerId: string) => {
-    send({
-      type: ClientMessageType.SUBMIT_INPUT,
-      inputType: InputType.NIGHT_ACTION,
-      payload: { targetPlayerId },
-    });
+    submitInput('night_action', { targetPlayerId });
   };
 
   const handleVote = (targetPlayerId: string) => {
-    send({
-      type: ClientMessageType.SUBMIT_INPUT,
-      inputType: InputType.VOTE,
-      payload: { answerId: targetPlayerId },
-    });
+    submitInput('vote', { answerId: targetPlayerId });
   };
 
   // Role badge component
@@ -216,7 +197,7 @@ export function VillagePhone({ phase, privateState, useGameEvent: _useGameEvent 
         {phase.phaseType === PhaseType.VOS_DAY && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-amber-500/15 flex items-center justify-center">
-              <Sun size={32} className="text-amber-400" />
+              <Sun size={40} className="text-amber-400" />
             </div>
             <h2 className="text-2xl font-bold text-white">Discussion</h2>
             <p className="text-gray-500">Talk to the other players. Who seems suspicious?</p>

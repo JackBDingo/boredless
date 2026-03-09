@@ -1,14 +1,7 @@
 import type { ComponentType } from 'react';
-import type { PhaseState } from '@boredless/shared';
+import type { PhoneProps } from './types.js';
 
-/** Signature for the useGameEvent hook */
-type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
-
-export interface PhoneProps {
-  phase: PhaseState;
-  privateState: Record<string, unknown>;
-  useGameEvent: GameEventHook;
-}
+export type { PhoneProps } from './types.js';
 
 // Auto-import ONLY phone components to avoid pulling in @display/* imports at build time.
 // Glob the phone folder directly instead of the barrel index.ts.

@@ -1,15 +1,7 @@
 import type { ComponentType } from 'react';
-import type { PhaseState, ScoreEntry } from '@boredless/shared';
+import type { DisplayProps } from './types.js';
 
-/** Signature for the useGameEvent hook */
-type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
-
-export interface DisplayProps {
-  phase: PhaseState;
-  publicState: Record<string, unknown>;
-  scores: ScoreEntry[];
-  useGameEvent: GameEventHook;
-}
+export type { DisplayProps } from './types.js';
 
 // Auto-import ONLY display components to avoid pulling in @phone/* imports at build time.
 // Glob the display folder directly instead of the barrel index.ts.

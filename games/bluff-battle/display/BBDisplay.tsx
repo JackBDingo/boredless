@@ -1,20 +1,12 @@
-import type { PhaseState, ScoreEntry, GameEventHook } from '@boredless/shared';
 import type { BBPublicState } from '../types.js';
 import { PhaseType } from '@boredless/shared';
 import { Timer } from '@display/components/Timer';
 import { Scoreboard } from '@display/components/Scoreboard';
 import { Theater, Send, Vote, Sparkles } from 'lucide-react';
-
-interface BBDisplayProps {
-  phase: PhaseState;
-  publicState: Record<string, unknown>;
-  scores: ScoreEntry[];
-  /** Custom event listener — use to react to server events emitted via ctx.emit() */
-  useGameEvent: GameEventHook;
-}
+import type { DisplayProps } from '@display/games/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEvent }: BBDisplayProps) {
+export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEvent }: DisplayProps) {
   const state = publicState as unknown as BBPublicState;
 
   return (

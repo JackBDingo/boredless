@@ -1,18 +1,11 @@
-import type { PhaseState, GameEventHook } from '@boredless/shared';
 import type { VillagePublicState } from '../types.js';
 import { PhaseType } from '@boredless/shared';
 import { Timer } from '@display/components/Timer';
 import { Moon, Sun, Vote, Skull, MessageCircle } from 'lucide-react';
-
-interface VillageDisplayProps {
-  phase: PhaseState;
-  publicState: Record<string, unknown>;
-  /** Custom event listener — use to react to server events emitted via ctx.emit() */
-  useGameEvent: GameEventHook;
-}
+import type { DisplayProps } from '@display/games/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent }: VillageDisplayProps) {
+export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent }: DisplayProps) {
   const state = publicState as unknown as VillagePublicState;
 
   return (

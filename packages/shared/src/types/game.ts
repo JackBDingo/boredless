@@ -41,11 +41,21 @@ export interface ScoreEntry {
   roundScore: number;    // Points earned this round
 }
 
+/** Info about a player passed to game components */
+export interface PlayerInfo {
+  playerId: string;
+  playerName: string;
+  playerColor: string;
+  isAlive: boolean;
+}
+
 /** Game over state */
 export interface GameOverState {
   winnerId: string | null;     // null for team win
   winnerName: string | null;
   winnerTeam: string | null;   // For team-based games
+  /** Human-readable team label set by the game (e.g. "The Village", "The Werewolves") */
+  winnerTeamDisplay?: string;
   finalScores: ScoreEntry[];
   gameId: GameId;
 }

@@ -1,9 +1,11 @@
 import { useRoomStore } from '../store/room';
 import { PhaseType } from '@boredless/shared';
+import type { PlayerInfo } from '@boredless/shared';
+import type { PublicPlayerState } from '@boredless/shared';
 import { Scoreboard } from '../components/Scoreboard';
 import { PoweredByLogo } from '../components/PoweredByLogo';
 import { useGameEvent } from '../hooks/useGameEvent';
-import { Trophy, Moon, Users, Loader2 } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { getDisplayComponent } from '../games/registry';
 
 export function GameScreen() {
@@ -12,6 +14,7 @@ export function GameScreen() {
   const gamePublicState = useRoomStore((s) => s.gamePublicState);
   const scores = useRoomStore((s) => s.scores);
   const gameOverResult = useRoomStore((s) => s.gameOverResult);
+  const timerMs = useRoomStore((s) => s.timerRemainingMs);
 
   if (!room || !phase || !gamePublicState) {
     return (
@@ -26,8 +29,21 @@ export function GameScreen() {
     );
   }
 
-  // Game over screen
+  // Build players list from room's public player list
+  const players: PlayerInfo[] = room.players.map((p: PublicPlayerState) => ({
+    playerId: p.id,
+    playerName: p.name,
+    playerColor: p.color,
+    isAlive: p.status === 'connected' || p.status === 'disconnected',
+  }));
+
+  // Game over screen — generic, no game-specific code
   if (phase.phaseType === PhaseType.GAME_OVER && gameOverResult) {
+    const teamLabel = gameOverResult.winnerTeamDisplay
+      ?? (gameOverResult.winnerTeam
+        ? gameOverResult.winnerTeam.charAt(0).toUpperCase() + gameOverResult.winnerTeam.slice(1)
+        : null);
+
     return (
       <div className="flex flex-col items-center justify-center h-full gap-8 p-8 bg-gray-950 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/40 via-gray-950 to-purple-950/30" />
@@ -41,17 +57,8 @@ export function GameScreen() {
           {gameOverResult.winnerName && (
             <h2 className="text-3xl text-indigo-400 font-semibold">{gameOverResult.winnerName} wins!</h2>
           )}
-          {gameOverResult.winnerTeam && (
-            <div className="flex items-center gap-3">
-              {gameOverResult.winnerTeam === 'villagers' ? (
-                <Users size={28} className="text-emerald-400" />
-              ) : (
-                <Moon size={28} className="text-red-400" />
-              )}
-              <h2 className="text-3xl text-white font-semibold">
-                {gameOverResult.winnerTeam === 'villagers' ? 'Village wins!' : 'Werewolves win!'}
-              </h2>
-            </div>
+          {teamLabel && (
+            <h2 className="text-3xl text-white font-semibold">{teamLabel} wins!</h2>
           )}
           <Scoreboard scores={gameOverResult.finalScores} />
         </div>
@@ -70,7 +77,9 @@ export function GameScreen() {
         <DisplayComponent
           phase={phase}
           publicState={gamePublicState}
+          players={players}
           scores={scores}
+          timerMs={timerMs}
           useGameEvent={useGameEvent}
         />
         <PoweredByLogo />

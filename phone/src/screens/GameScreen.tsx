@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { XCircle } from 'lucide-react';
 import { useConnectionStore } from '../store/connection';
 import { useGameStore } from '../store/game';
 import { useRoomStore } from '../store/room';
-import { ServerMessageType, PhaseType } from '@boredless/shared';
-import type { PhaseState } from '@boredless/shared';
+import { ServerMessageType, PhaseType, ClientMessageType, InputType } from '@boredless/shared';
+import type { PhaseState, ScoreEntry, PlayerInfo } from '@boredless/shared';
+import type { PublicPlayerState } from '@boredless/shared';
 import { useGameEvent } from '../hooks/useGameEvent';
 import { getPhoneComponent } from '../games/registry';
 
@@ -16,15 +17,21 @@ export function GameScreen() {
   const isHost = room && playerId === room.hostPlayerId;
   const phase = useGameStore((s) => s.phase);
   const privateState = useGameStore((s) => s.privateState);
+  const publicState = useGameStore((s) => s.publicState);
+  const scores = useGameStore((s) => s.scores);
+  const timerMs = useGameStore((s) => s.timerRemainingMs);
   const setPhase = useGameStore((s) => s.setPhase);
   const setPrivateState = useGameStore((s) => s.setPrivateState);
+  const setPublicState = useGameStore((s) => s.setPublicState);
   const setTimer = useGameStore((s) => s.setTimer);
+  const setScores = useGameStore((s) => s.setScores);
 
   useEffect(() => {
     const unsubs = [
       on(ServerMessageType.PHASE_CHANGED, (msg) => {
-        const m = msg as { type: string; phase: PhaseState };
+        const m = msg as { type: string; phase: PhaseState; gamePublicState: Record<string, unknown> };
         setPhase(m.phase);
+        setPublicState(m.gamePublicState);
       }),
       on(ServerMessageType.PRIVATE_STATE, (msg) => {
         const m = msg as { type: string; state: Record<string, unknown> };
@@ -33,6 +40,10 @@ export function GameScreen() {
       on(ServerMessageType.TIMER_TICK, (msg) => {
         const m = msg as { type: string; remainingMs: number };
         setTimer(m.remainingMs);
+      }),
+      on(ServerMessageType.SCORE_UPDATE, (msg) => {
+        const m = msg as { type: string; scores: ScoreEntry[] };
+        setScores(m.scores);
       }),
       on(ServerMessageType.INPUT_ACCEPTED, () => {
         // Could show a toast notification in future
@@ -50,7 +61,30 @@ export function GameScreen() {
       }),
     ];
     return () => unsubs.forEach((fn) => fn());
-  }, [on, setPhase, setPrivateState, setTimer]);
+  }, [on, setPhase, setPrivateState, setPublicState, setTimer, setScores]);
+
+  // Build submitInput — abstracts WebSocket message construction from game components
+  const submitInput = useCallback(
+    (inputType: string, data: unknown) => {
+      send({
+        type: ClientMessageType.SUBMIT_INPUT,
+        inputType: inputType as InputType,
+        payload: data as Record<string, unknown>,
+      });
+    },
+    [send],
+  );
+
+  // Build myPlayer from connectionStore playerId + room player list
+  const myPlayer: PlayerInfo = (() => {
+    const player = room?.players.find((p: PublicPlayerState) => p.id === playerId);
+    return {
+      playerId: playerId ?? '',
+      playerName: player?.name ?? '',
+      playerColor: player?.color ?? '#6366f1',
+      isAlive: player?.status === 'connected' || player?.status === 'disconnected',
+    };
+  })();
 
   if (!phase || !privateState) {
     return (
@@ -64,7 +98,18 @@ export function GameScreen() {
   const PhoneComponent = gameId ? getPhoneComponent(gameId) : undefined;
 
   const gameComponent = PhoneComponent
-    ? <PhoneComponent phase={phase} privateState={privateState} useGameEvent={useGameEvent} />
+    ? (
+      <PhoneComponent
+        phase={phase}
+        publicState={publicState ?? {}}
+        privateState={privateState}
+        myPlayer={myPlayer}
+        scores={scores}
+        timerMs={timerMs}
+        submitInput={submitInput}
+        useGameEvent={useGameEvent}
+      />
+    )
     : (
       <div className="flex items-center justify-center min-h-dvh bg-gray-950">
         <div className="text-white text-xl">

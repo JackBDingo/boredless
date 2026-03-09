@@ -1,24 +1,13 @@
 import { useState } from 'react';
-import { useConnectionStore } from '@phone/store/connection';
-import { useGameStore } from '@phone/store/game';
-import type { PhaseState, GameEventHook } from '@boredless/shared';
 import type { BBPrivateState } from '../types.js';
-import { PhaseType, ClientMessageType, InputType, BB_MAX_ANSWER_LENGTH } from '@boredless/shared';
+import { PhaseType, BB_MAX_ANSWER_LENGTH } from '@boredless/shared';
 import { Send, Check, Vote, Monitor, Trophy, Theater } from 'lucide-react';
 import { PoweredByLogo } from '@phone/components/PoweredByLogo';
-
-interface Props {
-  phase: PhaseState;
-  privateState: Record<string, unknown>;
-  /** Custom event listener — use to react to server events emitted via ctx.emitTo() */
-  useGameEvent: GameEventHook;
-}
+import type { PhoneProps } from '@phone/games/types';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function BBPhone({ phase, privateState, useGameEvent: _useGameEvent }: Props) {
+export function BBPhone({ phase, privateState, timerMs, submitInput, useGameEvent: _useGameEvent }: PhoneProps) {
   const state = privateState as unknown as BBPrivateState;
-  const send = useConnectionStore((s) => s.send);
-  const timerMs = useGameStore((s) => s.timerRemainingMs);
   const [answer, setAnswer] = useState('');
 
   const seconds = timerMs !== null ? Math.ceil(timerMs / 1000) : null;
@@ -26,20 +15,12 @@ export function BBPhone({ phase, privateState, useGameEvent: _useGameEvent }: Pr
 
   const handleSubmit = () => {
     if (!answer.trim()) return;
-    send({
-      type: ClientMessageType.SUBMIT_INPUT,
-      inputType: InputType.TEXT,
-      payload: { answer: answer.trim() },
-    });
+    submitInput('text', { answer: answer.trim() });
     setAnswer('');
   };
 
   const handleVote = (answerId: string) => {
-    send({
-      type: ClientMessageType.SUBMIT_INPUT,
-      inputType: InputType.VOTE,
-      payload: { answerId },
-    });
+    submitInput('vote', { answerId });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

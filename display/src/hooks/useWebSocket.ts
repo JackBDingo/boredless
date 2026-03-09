@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useConnectionStore } from '../store/connection';
 import { useRoomStore } from '../store/room';
-import { ServerMessageType, RoomStatus } from '@boredless/shared';
+import { ServerMessageType, RoomStatus, PhaseType } from '@boredless/shared';
 import type { ServerMessage } from '@boredless/shared';
 
 /**
@@ -57,6 +57,11 @@ export function useWebSocketSync(): void {
     unsubs.push(on(ServerMessageType.GAME_OVER, (msg) => {
       const m = msg as Extract<ServerMessage, { type: 'game_over' }>;
       store.getState().setGameOver(m.result);
+      // Update phase to GAME_OVER so GameScreen renders the game-over view
+      const currentPhase = store.getState().phase;
+      if (currentPhase) {
+        store.getState().setPhase({ ...currentPhase, phaseType: PhaseType.GAME_OVER as any });
+      }
       const room = store.getState().room;
       if (room) {
         store.getState().setRoom({ ...room, status: RoomStatus.GAME_ENDED });

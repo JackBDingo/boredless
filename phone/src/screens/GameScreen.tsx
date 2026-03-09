@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useConnectionStore } from '../store/connection';
 import { useGameStore } from '../store/game';
-import { ServerMessageType } from '@boredless/shared';
+import { ServerMessageType, PhaseType } from '@boredless/shared';
 import type { PhaseState } from '@boredless/shared';
 import { BBPhone } from '../games/bluff-battle/BBPhone';
 import { VillagePhone } from '../games/village/VillagePhone';
@@ -34,6 +34,13 @@ export function GameScreen() {
       on(ServerMessageType.INPUT_REJECTED, (msg) => {
         const m = msg as { type: string; reason: string };
         console.warn('Input rejected:', m.reason);
+      }),
+      on(ServerMessageType.GAME_OVER, () => {
+        // Update phase to GAME_OVER so game components render the game-over view
+        const currentPhase = useGameStore.getState().phase;
+        if (currentPhase) {
+          setPhase({ ...currentPhase, phaseType: PhaseType.GAME_OVER as any });
+        }
       }),
     ];
     return () => unsubs.forEach((fn) => fn());

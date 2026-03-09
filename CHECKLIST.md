@@ -62,50 +62,50 @@ Check off items as they are completed. An agent starting fresh should:
 > File creation order: `AGENT_INSTRUCTIONS.md` Phase 3
 
 ### Server Core
-- [ ] `server/src/config.ts` (`BUILD_SPEC.md` Step 3.1)
-- [ ] `server/src/utils/logger.ts` (`BUILD_SPEC.md` Step 3.2)
-- [ ] `server/src/utils/id.ts` (`BUILD_SPEC.md` Step 3.3)
-- [ ] `server/src/utils/code.ts` (`BUILD_SPEC.md` Step 3.4)
+- [x] `server/src/config.ts` (`BUILD_SPEC.md` Step 3.1)
+- [x] `server/src/utils/logger.ts` (`BUILD_SPEC.md` Step 3.2)
+- [x] `server/src/utils/id.ts` (`BUILD_SPEC.md` Step 3.3)
+- [x] `server/src/utils/code.ts` (`BUILD_SPEC.md` Step 3.4)
 
 ### WebSocket Infrastructure
-- [ ] `server/src/ws/registry.ts` (`BUILD_SPEC.md` Step 3.5)
-- [ ] `server/src/ws/send.ts` (`BUILD_SPEC.md` Step 3.6)
+- [x] `server/src/ws/registry.ts` (`BUILD_SPEC.md` Step 3.5)
+- [x] `server/src/ws/send.ts` (`BUILD_SPEC.md` Step 3.6)
 
 ### Game Engine
-- [ ] `server/src/engine/timer-engine.ts` (`BUILD_SPEC.md` Step 3.7)
-- [ ] `server/src/engine/score-engine.ts` (`BUILD_SPEC.md` Step 3.8)
-- [ ] `server/src/engine/room-manager.ts` (`BUILD_SPEC.md` Step 3.9)
+- [x] `server/src/engine/timer-engine.ts` (`BUILD_SPEC.md` Step 3.7)
+- [x] `server/src/engine/score-engine.ts` (`BUILD_SPEC.md` Step 3.8)
+- [x] `server/src/engine/room-manager.ts` (`BUILD_SPEC.md` Step 3.9)
 
 ### Game Module Interface
-- [ ] `server/src/games/game-module.ts` (`BUILD_SPEC.md` Step 3.10)
-- [ ] `server/src/games/registry.ts` (`BUILD_SPEC.md` Step 3.11)
+- [x] `server/src/games/game-module.ts` (`BUILD_SPEC.md` Step 3.10)
+- [x] `server/src/games/registry.ts` (`BUILD_SPEC.md` Step 3.11)
 
 ### Bluff Battle
-- [ ] `server/src/games/bluff-battle/prompts.ts` — 55 trivia prompts (`BUILD_SPEC.md` Step 3.12)
-- [ ] `server/src/games/bluff-battle/scoring.ts` (`BUILD_SPEC.md` Step 3.13)
-- [ ] `server/src/games/bluff-battle/index.ts` — Full game module (`BUILD_SPEC.md` Step 3.14)
+- [x] `server/src/games/bluff-battle/prompts.ts` — 55 trivia prompts (`BUILD_SPEC.md` Step 3.12)
+- [x] `server/src/games/bluff-battle/scoring.ts` (`BUILD_SPEC.md` Step 3.13)
+- [x] `server/src/games/bluff-battle/index.ts` — Full game module (`BUILD_SPEC.md` Step 3.14)
 
 ### Village of Shadows
-- [ ] `server/src/games/village/roles.ts` — Role distribution (`BUILD_SPEC.md` Step 3.15)
-- [ ] `server/src/games/village/resolution.ts` — Night/win logic (`BUILD_SPEC.md` Step 3.16)
-- [ ] `server/src/games/village/index.ts` — Full game module (`BUILD_SPEC.md` Steps 3.17–3.20)
+- [x] `server/src/games/village/roles.ts` — Role distribution (`BUILD_SPEC.md` Step 3.15)
+- [x] `server/src/games/village/resolution.ts` — Night/win logic (`BUILD_SPEC.md` Step 3.16)
+- [x] `server/src/games/village/index.ts` — Full game module (`BUILD_SPEC.md` Steps 3.17–3.20)
 
 ### HTTP & WebSocket Routes
-- [ ] `server/src/ws/handler.ts` (`BUILD_SPEC.md` Step 3.21)
-- [ ] `server/src/routes/health.ts` (`BUILD_SPEC.md` Step 3.22)
-- [ ] `server/src/routes/room.ts` (`BUILD_SPEC.md` Step 3.23)
-- [ ] `server/src/app.ts` (`BUILD_SPEC.md` Step 3.24)
-- [ ] `server/src/index.ts` (`BUILD_SPEC.md` Step 3.25)
+- [x] `server/src/ws/handler.ts` (`BUILD_SPEC.md` Step 3.21)
+- [x] `server/src/routes/health.ts` (`BUILD_SPEC.md` Step 3.22)
+- [x] `server/src/routes/room.ts` (`BUILD_SPEC.md` Step 3.23)
+- [x] `server/src/app.ts` (`BUILD_SPEC.md` Step 3.24)
+- [x] `server/src/index.ts` (`BUILD_SPEC.md` Step 3.25)
 
 ### Server Verification
-- [ ] **VERIFY:** Server starts without errors
-- [ ] **VERIFY:** `curl http://localhost:3100/api/health` returns `{"status":"ok"}`
-- [ ] **VERIFY:** `POST /api/rooms` returns roomId, code, qrDataUrl
-- [ ] Write tests from `TESTS.md` Section 2 (all .test.ts files)
-- [ ] **VERIFY:** All server tests pass
-- [ ] Write integration tests from `TESTS.md` Section 3
-- [ ] **VERIFY:** Integration tests pass
-- [ ] `git commit -m "Phase 3: Game server"`
+- [x] **VERIFY:** Server starts without errors
+- [x] **VERIFY:** `curl http://localhost:3100/api/health` returns `{"status":"ok"}`
+- [x] **VERIFY:** `POST /api/rooms` returns roomId, code, qrDataUrl
+- [x] Write tests from `TESTS.md` Section 2 (all .test.ts files)
+- [x] **VERIFY:** All server tests pass
+- [x] Write integration tests from `TESTS.md` Section 3
+- [x] **VERIFY:** Integration tests pass
+- [x] `git commit -m "Phase 3: Game server"`
 
 ---
 
@@ -208,7 +208,8 @@ Check off items as they are completed. An agent starting fresh should:
 
 ## STATUS
 
-**Current Phase:** 2
-**Last Completed:** Phase 2 (Shared Types Package)
+**Current Phase:** 3 (complete)
+**Last Completed:** Phase 3 (Game Server)
+**Next:** Phase 4 (Display Client)
 **Blockers:** None
 **Notes:** —

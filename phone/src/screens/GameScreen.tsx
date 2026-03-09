@@ -56,7 +56,7 @@ export function GameScreen() {
         // Update phase to GAME_OVER so game components render the game-over view
         const currentPhase = useGameStore.getState().phase;
         if (currentPhase) {
-          setPhase({ ...currentPhase, phaseType: PhaseType.GAME_OVER as never });
+          setPhase({ ...currentPhase, phaseType: PhaseType.GAME_OVER });
         }
       }),
     ];
@@ -66,6 +66,9 @@ export function GameScreen() {
   // Build submitInput — abstracts WebSocket message construction from game components
   const submitInput = useCallback(
     (inputType: string, data: unknown) => {
+      if (!Object.values(InputType).includes(inputType as InputType)) {
+        console.warn(`submitInput: unknown inputType "${inputType}"`);
+      }
       send({
         type: ClientMessageType.SUBMIT_INPUT,
         inputType: inputType as InputType,

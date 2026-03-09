@@ -1,0 +1,27 @@
+id: bluff-battle
+name: Bluff Battle
+tagline: Submit fake answers, vote for the real one
+description: >
+  Players write convincing fake answers to trivia questions.
+  Everyone votes — fool the crowd, spot the truth, score big.
+players:
+  min: 3
+  max: 8
+estimatedMinutes: 10
+icon: swords
+accentColor: indigo
+categories: [bluffing, party, trivia]
+phases:
+  instructions:
+    duration: 10
+  submission:
+    duration: 60
+  voting:
+    duration: 30
+  reveal:
+    duration: 10
+  scores:
+    duration: 8
+scoring:
+  correct_answer: 1000
+  fooled_player: 500

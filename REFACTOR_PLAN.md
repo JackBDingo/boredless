@@ -8,7 +8,7 @@ Every game is fully self-contained in `games/<game-name>/`. The platform auto-di
 games/
   bluff-battle/
     index.ts                 <- single entry: exports manifest, ServerModule, DisplayComponent, PhoneComponent
-    manifest.ts              <- metadata, timing, constants, icon, accent color
+    manifest.yaml              <- metadata, timing, constants, icon, accent color
     types.ts                 <- BB-specific types (BBPublicState, BBPrivateState, etc.)
     server/
       index.ts               <- GameModule using injected GameContext
@@ -113,8 +113,8 @@ export interface GameContext {
 
   // --- Phase Broadcasting ---
   broadcastPhase(phase: PhaseState, publicState: Record<string, unknown>): void;
-  broadcastPrivateState(playerId: string, state: Record<string, unknown>): void;
-  broadcastGameOver(result: GameOverState): void;
+  broadcastPrivateState(getState: (playerId: string) => Record<string, unknown>): void;
+  broadcastGameOver(finalState: GameOverState): void;
 
   // --- Logging ---
   log: {
@@ -186,35 +186,87 @@ Games define their own event vocabulary. The platform is a dumb pipe for custom 
 
 ---
 
-## Game Manifest
+## Game Manifest (YAML)
+
+Each game declares its metadata in a `manifest.yaml` at the game root. This is **data, not code** — human-readable, schema-validated at startup, and editable without recompiling.
+
+```yaml
+# games/bluff-battle/manifest.yaml
+id: bluff-battle
+name: Bluff Battle
+tagline: Submit fake answers, vote for the real one
+description: >
+  Players write convincing fake answers to trivia questions.
+  Everyone votes — fool the crowd, spot the truth, score big.
+players:
+  min: 3
+  max: 12
+estimatedMinutes: 15
+icon: swords            # Lucide icon name
+accentColor: indigo     # Tailwind color
+categories: [bluffing, party, ai, trivia]
+phases:
+  instructions:
+    duration: 10
+  submission:
+    duration: 60
+  voting:
+    duration: 30
+  reveal:
+    duration: 15
+scoring:
+  correct_answer: 1000
+  fooled_player: 500
+  fastest_vote: 250
+```
+
+### Runtime Validation
+
+At startup, manifests are loaded and validated with a Zod schema:
 
 ```ts
-export interface GameManifest {
-  id: string;                    // unique slug: 'bluff_battle'
-  name: string;                  // display: 'Bluff Battle'
-  tagline: string;               // short desc for game cards
-  description: string;           // full description
-  minPlayers: number;
-  maxPlayers: number;
-  estimatedMinutes: number;
-  icon: string;                  // Lucide icon name
-  accentColor: string;           // tailwind color: 'indigo', 'violet', etc.
-  categories?: string[];         // ['bluffing', 'party', 'ai'] for filtering
-  timing: Record<string, number>; // phase timings in seconds
-  scoring?: {                    // optional scoring config
-    [key: string]: number;       // e.g. CORRECT_ANSWER: 1000
-  };
-}
+// server/src/games/manifest-schema.ts
+import { z } from "zod";
+
+export const ManifestSchema = z.object({
+  id: z.string().regex(/^[a-z0-9-]+$/),
+  name: z.string(),
+  tagline: z.string(),
+  description: z.string(),
+  players: z.object({
+    min: z.number().int().min(1),
+    max: z.number().int().min(1),
+  }),
+  estimatedMinutes: z.number().positive(),
+  icon: z.string(),
+  accentColor: z.string(),
+  categories: z.array(z.string()).optional(),
+  phases: z.record(z.object({
+    duration: z.number().positive(),  // seconds
+  })),
+  scoring: z.record(z.number()).optional(),
+});
+
+export type GameManifest = z.infer<typeof ManifestSchema>;
 ```
+
+Invalid manifests fail loudly at startup — no silent fallbacks.
+
+### Why YAML over TypeScript
+
+- Manifests are **data declarations**, not logic — YAML is the natural fit
+- Non-engineers (game designers, community) can create/edit manifests
+- A future game editor UI can read/write YAML without touching TypeScript
+- Schema validation gives full runtime type safety from the YAML boundary onward
+- Hot-reloading a config file is trivial; recompiling TS is not
 
 ## Game Entry Point (index.ts)
 
-Each game's root index.ts exports everything the platform needs:
+Each game's root index.ts exports the code components. The manifest is loaded separately from YAML:
 ```ts
-export { manifest } from './manifest';
-export { createModule } from './server';           // factory: () => GameModule
-export { BBDisplay as DisplayComponent } from './display/BBDisplay';
-export { BBPhone as PhoneComponent } from './phone/BBPhone';
+export { createModule } from "./server";           // factory: () => GameModule
+export { BBDisplay as DisplayComponent } from "./display/BBDisplay";
+export { BBPhone as PhoneComponent } from "./phone/BBPhone";
 ```
 
 ---
@@ -224,8 +276,10 @@ export { BBPhone as PhoneComponent } from './phone/BBPhone';
 ### Server (Node.js)
 ```ts
 // server/src/games/auto-discover.ts
-import { readdirSync } from 'fs';
+import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { parse as parseYaml } from 'yaml';
+import { ManifestSchema } from './manifest-schema.js';
 
 export async function discoverGames(): Promise<GameRegistration[]> {
   const gamesDir = join(__dirname, '../../../games');
@@ -234,9 +288,16 @@ export async function discoverGames(): Promise<GameRegistration[]> {
 
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    const mod = await import(join(gamesDir, entry.name, 'index.ts'));
+    const gameDir = join(gamesDir, entry.name);
+
+    // Load and validate YAML manifest
+    const rawYaml = readFileSync(join(gameDir, 'manifest.yaml'), 'utf-8');
+    const manifest = ManifestSchema.parse(parseYaml(rawYaml));
+
+    // Load code module
+    const mod = await import(join(gameDir, 'index.ts'));
     games.push({
-      manifest: mod.manifest,
+      manifest,
       createModule: mod.createModule,
     });
   }
@@ -250,7 +311,7 @@ const games = await discoverGames();
 for (const game of games) {
   gameRegistry.register(game);
 }
-// GAME_CATALOG is now generated from registered manifests
+// GAME_CATALOG is now generated from validated YAML manifests
 ```
 
 ### Client (Vite/React — build-time)
@@ -262,8 +323,8 @@ const displayModules = import.meta.glob('/games/*/display/*.tsx', { eager: true 
 // Auto-import all game phone components
 const phoneModules = import.meta.glob('/games/*/phone/*.tsx', { eager: true });
 
-// Auto-import all manifests
-const manifests = import.meta.glob('/games/*/manifest.ts', { eager: true });
+// Auto-import all manifests (YAML loaded as raw text, parsed at runtime)
+const manifests = import.meta.glob('/games/*/manifest.yaml', { as: 'raw', eager: true });
 ```
 
 GameScreen resolves component from registry by gameId — no switch statement.
@@ -290,8 +351,9 @@ GameScreen resolves component from registry by gameId — no switch statement.
 ### Phase 3: File Restructure + Auto-Discovery (Agent 2)
 - Create `games/` directory at repo root
 - Move all game files (server + display + phone + types + tests)
-- Create `manifest.ts` per game (extract from GAME_CATALOG + shared constants)
-- Create `index.ts` entry per game
+- Create `manifest.yaml` per game (extract from GAME_CATALOG + shared constants into YAML)
+- Add `manifest-schema.ts` with Zod validation (install `yaml` + `zod` deps)
+- Create `index.ts` entry per game (exports code only, not manifest)
 - Build auto-discovery for server
 - Build auto-discovery for clients (`import.meta.glob`)
 - Kill switch statements in GameScreen

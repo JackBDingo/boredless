@@ -1,0 +1,26 @@
+id: village-of-shadows
+name: Village of Shadows
+tagline: Hidden roles. Secret actions. Trust no one.
+description: >
+  Players are secretly assigned roles — villagers, werewolves, seer, doctor.
+  Each night the wolves hunt; each day the village votes. Who do you trust?
+players:
+  min: 5
+  max: 10
+estimatedMinutes: 15
+icon: moon
+accentColor: violet
+categories: [hidden-roles, party, strategy]
+phases:
+  role_reveal:
+    duration: 10
+  night:
+    duration: 30
+  night_result:
+    duration: 8
+  day:
+    duration: 120
+  vote:
+    duration: 30
+  vote_result:
+    duration: 8

@@ -1,3 +1,9 @@
+/**
+ * Signature for the useGameEvent hook passed in to game display/phone components.
+ * Defined once here so all game components share a single canonical type.
+ */
+export type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
+
 import { GameId, PhaseType, InputType } from '../enums.js';
 
 /** Game definition metadata (for catalog display) */

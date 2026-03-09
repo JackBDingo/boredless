@@ -1,11 +1,10 @@
 import { useRoomStore } from '../store/room';
-import { GameId, PhaseType } from '@boredless/shared';
-import { BBDisplay } from '../games/bluff-battle/BBDisplay';
-import { VillageDisplay } from '../games/village/VillageDisplay';
+import { PhaseType } from '@boredless/shared';
 import { Scoreboard } from '../components/Scoreboard';
 import { PoweredByLogo } from '../components/PoweredByLogo';
 import { useGameEvent } from '../hooks/useGameEvent';
 import { Trophy, Moon, Users, Loader2 } from 'lucide-react';
+import { getDisplayComponent } from '../games/registry';
 
 export function GameScreen() {
   const room = useRoomStore((s) => s.room);
@@ -61,29 +60,31 @@ export function GameScreen() {
     );
   }
 
-  // Delegate to game-specific display
-  switch (room.selectedGameId) {
-    case GameId.BLUFF_BATTLE:
-      return (
-        <div className="relative h-full">
-          <BBDisplay phase={phase} publicState={gamePublicState} scores={scores} useGameEvent={useGameEvent} />
-          <PoweredByLogo />
-        </div>
-      );
-    case GameId.VILLAGE_OF_SHADOWS:
-      return (
-        <div className="relative h-full">
-          <VillageDisplay phase={phase} publicState={gamePublicState} useGameEvent={useGameEvent} />
-          <PoweredByLogo />
-        </div>
-      );
-    default:
-      return (
-        <div className="flex items-center justify-center h-full bg-gray-950 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/40 via-gray-950 to-purple-950/30" />
-          <p className="relative z-10 text-gray-500 text-lg">Unknown game</p>
-          <PoweredByLogo />
-        </div>
-      );
+  // Delegate to game-specific display via auto-discovered registry
+  const gameId = room.selectedGameId;
+  const DisplayComponent = gameId ? getDisplayComponent(gameId) : undefined;
+
+  if (DisplayComponent) {
+    return (
+      <div className="relative h-full">
+        <DisplayComponent
+          phase={phase}
+          publicState={gamePublicState}
+          scores={scores}
+          useGameEvent={useGameEvent}
+        />
+        <PoweredByLogo />
+      </div>
+    );
   }
+
+  return (
+    <div className="flex items-center justify-center h-full bg-gray-950 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/40 via-gray-950 to-purple-950/30" />
+      <p className="relative z-10 text-gray-500 text-lg">
+        {gameId ? `Unknown game: ${gameId}` : 'No game selected'}
+      </p>
+      <PoweredByLogo />
+    </div>
+  );
 }

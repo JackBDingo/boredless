@@ -5,9 +5,8 @@ import { useGameStore } from '../store/game';
 import { useRoomStore } from '../store/room';
 import { ServerMessageType, PhaseType } from '@boredless/shared';
 import type { PhaseState } from '@boredless/shared';
-import { BBPhone } from '../games/bluff-battle/BBPhone';
-import { VillagePhone } from '../games/village/VillagePhone';
 import { useGameEvent } from '../hooks/useGameEvent';
+import { getPhoneComponent } from '../games/registry';
 
 export function GameScreen() {
   const on = useConnectionStore((s) => s.on);
@@ -46,7 +45,7 @@ export function GameScreen() {
         // Update phase to GAME_OVER so game components render the game-over view
         const currentPhase = useGameStore.getState().phase;
         if (currentPhase) {
-          setPhase({ ...currentPhase, phaseType: PhaseType.GAME_OVER as any });
+          setPhase({ ...currentPhase, phaseType: PhaseType.GAME_OVER as never });
         }
       }),
     ];
@@ -62,23 +61,17 @@ export function GameScreen() {
   }
 
   const gameId = (privateState as Record<string, unknown>).gameId as string;
+  const PhoneComponent = gameId ? getPhoneComponent(gameId) : undefined;
 
-  let gameComponent: React.ReactNode;
-
-  switch (gameId) {
-    case 'bluff_battle':
-      gameComponent = <BBPhone phase={phase} privateState={privateState} useGameEvent={useGameEvent} />;
-      break;
-    case 'village_of_shadows':
-      gameComponent = <VillagePhone phase={phase} privateState={privateState} useGameEvent={useGameEvent} />;
-      break;
-    default:
-      gameComponent = (
-        <div className="flex items-center justify-center min-h-dvh bg-gray-950">
-          <div className="text-white text-xl">Unknown game: {gameId}</div>
+  const gameComponent = PhoneComponent
+    ? <PhoneComponent phase={phase} privateState={privateState} useGameEvent={useGameEvent} />
+    : (
+      <div className="flex items-center justify-center min-h-dvh bg-gray-950">
+        <div className="text-white text-xl">
+          {gameId ? `Unknown game: ${gameId}` : 'No game loaded'}
         </div>
-      );
-  }
+      </div>
+    );
 
   return (
     <div className="relative min-h-dvh">

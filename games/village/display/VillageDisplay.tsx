@@ -1,7 +1,11 @@
-import type { PhaseState, VillagePublicState, GameEventHook } from '@boredless/shared';
+import type { PhaseState } from '@boredless/shared';
+import type { VillagePublicState } from '../types.js';
 import { PhaseType } from '@boredless/shared';
-import { Timer } from '../../components/Timer';
+import { Timer } from '@display/components/Timer';
 import { Moon, Sun, Vote, Skull, MessageCircle } from 'lucide-react';
+
+/** Signature for the useGameEvent hook passed in from GameScreen */
+type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
 
 interface VillageDisplayProps {
   phase: PhaseState;

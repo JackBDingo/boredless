@@ -1,7 +1,9 @@
-import { useConnectionStore } from '../../store/connection';
-import { useGameStore } from '../../store/game';
-import type { PhaseState, VillagePrivateState, GameEventHook } from '@boredless/shared';
-import { PhaseType, ClientMessageType, InputType, VillageRole } from '@boredless/shared';
+import { useConnectionStore } from '@phone/store/connection';
+import { useGameStore } from '@phone/store/game';
+import type { PhaseState } from '@boredless/shared';
+import type { VillagePrivateState } from '../types.js';
+import { PhaseType, ClientMessageType, InputType } from '@boredless/shared';
+import { VillageRole } from '../types.js';
 import { getRoleInfo } from './roleInfo';
 import {
   Users, Crosshair, Eye, Shield, Moon, Sun,
@@ -9,11 +11,14 @@ import {
   Check, Star
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { PoweredByLogo } from '../../components/PoweredByLogo';
+import { PoweredByLogo } from '@phone/components/PoweredByLogo';
 
 const ROLE_ICONS: Record<string, LucideIcon> = {
   Users, Crosshair, Eye, Shield,
 };
+
+/** Signature for the useGameEvent hook passed in from GameScreen */
+type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
 
 interface Props {
   phase: PhaseState;

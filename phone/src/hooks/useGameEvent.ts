@@ -32,7 +32,7 @@ export function useGameEvent(
 
   useEffect(() => {
     const unsub = on(ServerMessageType.GAME_EVENT, (msg: ServerMessage) => {
-      const m = msg as Extract<ServerMessage, { type: 'game_event' }>;
+      const m = msg as Extract<ServerMessage, { type: ServerMessageType.GAME_EVENT }>;
       if (m.event === event) {
         handlerRef.current(m.data);
       }

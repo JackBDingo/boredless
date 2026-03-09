@@ -228,7 +228,16 @@ class BluffBattleModule implements GameModule {
 
     state.submissions.set(playerId, answer);
 
-    // Broadcast updated submission count
+    // Send updated private state to the submitter (hasSubmitted: true)
+    const submitter = state.players.find(p => p.id === playerId);
+    if (submitter) {
+      sendToSession(submitter.sessionId, {
+        type: ServerMessageType.PRIVATE_STATE,
+        state: this.getPrivateState(state.roomId, playerId),
+      });
+    }
+
+    // Broadcast updated submission count to all (display shows checkmarks)
     this.broadcastState(state.roomId);
 
     // Check if all players submitted

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useConnectionStore } from '../store/connection';
 import { useRoomStore } from '../store/room';
-import { ServerMessageType } from '@boredless/shared';
+import { ServerMessageType, RoomStatus } from '@boredless/shared';
 import type { ServerMessage } from '@boredless/shared';
 
 /**
@@ -37,6 +37,11 @@ export function useWebSocketSync(): void {
       const m = msg as Extract<ServerMessage, { type: 'game_started' }>;
       store.getState().setPhase(m.phase);
       store.getState().setGamePublicState(m.gamePublicState);
+      // Update room status so App switches to game screen
+      const room = store.getState().room;
+      if (room) {
+        store.getState().setRoom({ ...room, status: RoomStatus.IN_GAME });
+      }
     }));
 
     unsubs.push(on(ServerMessageType.TIMER_TICK, (msg) => {
@@ -52,6 +57,10 @@ export function useWebSocketSync(): void {
     unsubs.push(on(ServerMessageType.GAME_OVER, (msg) => {
       const m = msg as Extract<ServerMessage, { type: 'game_over' }>;
       store.getState().setGameOver(m.result);
+      const room = store.getState().room;
+      if (room) {
+        store.getState().setRoom({ ...room, status: RoomStatus.GAME_ENDED });
+      }
     }));
 
     return () => unsubs.forEach(fn => fn());

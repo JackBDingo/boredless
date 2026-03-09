@@ -6,14 +6,13 @@ interface GameCardProps {
   onSelect: () => void;
 }
 
-export function GameCard({ game, isSelected, onSelect }: GameCardProps) {
+export function GameCard({ game, isSelected }: GameCardProps) {
   return (
-    <button
-      onClick={onSelect}
-      className={`p-6 rounded-2xl border-2 text-left transition-all ${
+    <div
+      className={`p-6 rounded-2xl border-2 text-left ${
         isSelected
           ? 'border-indigo-500 bg-indigo-500/20'
-          : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+          : 'border-gray-700 bg-gray-800/50'
       }`}
     >
       <div className="text-4xl mb-2">{game.icon}</div>
@@ -23,6 +22,6 @@ export function GameCard({ game, isSelected, onSelect }: GameCardProps) {
         <span>{game.minPlayers}-{game.maxPlayers} players</span>
         <span>~{game.estimatedMinutes} min</span>
       </div>
-    </button>
+    </div>
   );
 }

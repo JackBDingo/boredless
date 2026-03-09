@@ -3,6 +3,7 @@ import { useConnectionStore } from '../../store/connection';
 import { useGameStore } from '../../store/game';
 import type { PhaseState, BBPrivateState } from '@boredless/shared';
 import { PhaseType, ClientMessageType, InputType, BB_MAX_ANSWER_LENGTH } from '@boredless/shared';
+import { Send, Check, Vote, Monitor, Trophy, Theater } from 'lucide-react';
 
 interface Props {
   phase: PhaseState;
@@ -44,132 +45,149 @@ export function BBPhone({ phase, privateState }: Props) {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-dvh bg-gray-950 px-5 py-6 overflow-y-auto">
-      {/* Timer */}
-      {seconds !== null && (
-        <div className={`text-6xl font-bold mb-5 ${isUrgent ? 'text-red-400' : 'text-white'}`}>
-          {seconds}
-        </div>
-      )}
+    <div className="flex flex-col items-center min-h-dvh bg-gray-950 px-6 py-8 overflow-y-auto relative">
+      {/* Background */}
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/20 via-gray-950 to-gray-950" />
 
-      {/* SUBMIT phase — awaiting answer */}
-      {phase.phaseType === PhaseType.BB_SUBMIT && !state.hasSubmitted && (
-        <div className="w-full flex flex-col items-center gap-4">
-          <p className="text-indigo-400 text-2xl font-bold text-center leading-tight">
-            {state.prompt}
-          </p>
-          <p className="text-gray-500 text-sm text-center">
-            Write a fake answer that could fool others!
-          </p>
-          <textarea
-            className="
-              w-full min-h-[80px]
-              bg-gray-800 rounded-xl
-              text-white text-lg
-              px-4 py-3
-              border-2 border-gray-700 focus:border-indigo-500
-              outline-none resize-none
-            "
-            value={answer}
-            onChange={(e) => setAnswer(e.target.value.slice(0, BB_MAX_ANSWER_LENGTH))}
-            onKeyDown={handleKeyDown}
-            placeholder="Your fake answer..."
-            rows={3}
-          />
-          <p className="text-gray-600 text-xs self-end">
-            {answer.length}/{BB_MAX_ANSWER_LENGTH}
-          </p>
-          <button
-            onClick={handleSubmit}
-            disabled={!answer.trim()}
-            className="
-              w-full bg-indigo-600 hover:bg-indigo-500
-              disabled:opacity-40 disabled:cursor-not-allowed
-              text-white text-lg font-bold
-              rounded-xl py-4
-              min-h-[44px]
-              transition-colors
-            "
-          >
-            Submit Answer
-          </button>
-        </div>
-      )}
+      <div className="relative z-10 w-full flex flex-col items-center">
+        {/* Timer */}
+        {seconds !== null && (
+          <div className={`text-5xl font-bold tabular-nums mb-6 ${
+            isUrgent ? 'text-red-400' : 'text-white/30'
+          }`}>
+            {seconds}
+          </div>
+        )}
 
-      {/* SUBMIT phase — already submitted */}
-      {phase.phaseType === PhaseType.BB_SUBMIT && state.hasSubmitted && (
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-5xl">✅</div>
-          <h2 className="text-2xl font-bold text-white">Submitted!</h2>
-          <p className="text-gray-400">Waiting for others...</p>
-          {state.ownAnswer && (
-            <p className="text-gray-500 text-sm italic mt-4">
-              Your answer: "{state.ownAnswer}"
+        {/* SUBMIT — awaiting answer */}
+        {phase.phaseType === PhaseType.BB_SUBMIT && !state.hasSubmitted && (
+          <div className="w-full flex flex-col items-center gap-5">
+            <p className="text-indigo-400 text-xl font-semibold text-center leading-snug">
+              {state.prompt}
             </p>
-          )}
-        </div>
-      )}
+            <p className="text-gray-600 text-sm text-center">
+              Write a fake answer that could fool others
+            </p>
+            <textarea
+              className="w-full min-h-[80px]
+                bg-white/5 backdrop-blur-sm rounded-2xl
+                text-white text-lg px-4 py-3
+                border border-white/10 focus:border-indigo-500/50
+                outline-none resize-none
+                placeholder:text-gray-700
+                transition-colors"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value.slice(0, BB_MAX_ANSWER_LENGTH))}
+              onKeyDown={handleKeyDown}
+              placeholder="Your fake answer..."
+              rows={3}
+            />
+            <div className="w-full flex items-center justify-between">
+              <span className="text-gray-700 text-xs">
+                {answer.length}/{BB_MAX_ANSWER_LENGTH}
+              </span>
+              <button
+                onClick={handleSubmit}
+                disabled={!answer.trim()}
+                className="flex items-center gap-2
+                  bg-indigo-600 hover:bg-indigo-500
+                  disabled:bg-white/5 disabled:text-gray-600
+                  text-white font-semibold
+                  rounded-xl px-6 py-3
+                  min-h-[44px]
+                  transition-all duration-200"
+              >
+                Submit
+                <Send size={16} />
+              </button>
+            </div>
+          </div>
+        )}
 
-      {/* VOTING phase — choose an answer */}
-      {phase.phaseType === PhaseType.BB_VOTING && !state.hasVoted && state.voteOptions && (
-        <div className="w-full flex flex-col items-center gap-4">
-          <h2 className="text-2xl font-bold text-white text-center mb-2">
-            Which is the REAL answer?
-          </h2>
-          {state.voteOptions.map((option) => (
-            <button
-              key={option.answerId}
-              onClick={() => handleVote(option.answerId)}
-              className="
-                w-full
-                bg-gray-800 hover:bg-gray-700
-                text-white text-lg text-left
-                rounded-xl px-5 py-4
-                border border-gray-700 hover:border-indigo-500
-                min-h-[44px]
-                transition-colors
-              "
-            >
-              {option.text}
-            </button>
-          ))}
-        </div>
-      )}
+        {/* SUBMIT — already submitted */}
+        {phase.phaseType === PhaseType.BB_SUBMIT && state.hasSubmitted && (
+          <div className="flex flex-col items-center gap-4 text-center mt-8">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center">
+              <Check size={32} className="text-emerald-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Submitted</h2>
+            <p className="text-gray-500">Waiting for others...</p>
+            {state.ownAnswer && (
+              <div className="mt-4 px-5 py-3 bg-white/5 rounded-xl border border-white/10">
+                <p className="text-gray-400 text-sm italic">"{state.ownAnswer}"</p>
+              </div>
+            )}
+          </div>
+        )}
 
-      {/* VOTING phase — voted */}
-      {phase.phaseType === PhaseType.BB_VOTING && state.hasVoted && (
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-5xl">🗳️</div>
-          <h2 className="text-2xl font-bold text-white">Vote Cast!</h2>
-          <p className="text-gray-400">Waiting for others...</p>
-        </div>
-      )}
+        {/* VOTING — choose an answer */}
+        {phase.phaseType === PhaseType.BB_VOTING && !state.hasVoted && state.voteOptions && (
+          <div className="w-full flex flex-col items-center gap-4">
+            <h2 className="text-xl font-bold text-white text-center mb-2">
+              Which is the real answer?
+            </h2>
+            {state.voteOptions.map((option) => (
+              <button
+                key={option.answerId}
+                onClick={() => handleVote(option.answerId)}
+                className="w-full
+                  bg-white/[0.03] hover:bg-white/[0.06] active:bg-white/[0.08]
+                  text-white text-lg text-left
+                  rounded-2xl px-5 py-4
+                  border border-white/10 hover:border-indigo-500/40
+                  min-h-[44px]
+                  transition-all duration-200"
+              >
+                {option.text}
+              </button>
+            ))}
+          </div>
+        )}
 
-      {/* REVEAL or SCORES phase */}
-      {(phase.phaseType === PhaseType.BB_REVEAL || phase.phaseType === PhaseType.BB_SCORES) && (
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-5xl">📺</div>
-          <h2 className="text-2xl font-bold text-white">Look at the big screen!</h2>
-        </div>
-      )}
+        {/* VOTING — voted */}
+        {phase.phaseType === PhaseType.BB_VOTING && state.hasVoted && (
+          <div className="flex flex-col items-center gap-4 text-center mt-8">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-500/15 flex items-center justify-center">
+              <Vote size={32} className="text-indigo-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Vote Cast</h2>
+            <p className="text-gray-500">Waiting for others...</p>
+          </div>
+        )}
 
-      {/* INSTRUCTIONS phase */}
-      {phase.phaseType === PhaseType.INSTRUCTIONS && (
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-6xl">🎭</div>
-          <h2 className="text-2xl font-bold text-white">Bluff Battle</h2>
-          <p className="text-gray-400">Get ready!</p>
-        </div>
-      )}
+        {/* REVEAL or SCORES */}
+        {(phase.phaseType === PhaseType.BB_REVEAL || phase.phaseType === PhaseType.BB_SCORES) && (
+          <div className="flex flex-col items-center gap-4 text-center mt-8">
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/15 flex items-center justify-center">
+              <Monitor size={32} className="text-purple-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Look at the TV!</h2>
+            <p className="text-gray-500">Results are being revealed</p>
+          </div>
+        )}
 
-      {/* GAME OVER */}
-      {phase.phaseType === PhaseType.GAME_OVER && (
-        <div className="flex flex-col items-center gap-4 text-center">
-          <div className="text-6xl">🏆</div>
-          <h2 className="text-2xl font-bold text-white">Game Over!</h2>
-          <p className="text-gray-400">Check the big screen for results</p>
-        </div>
-      )}
+        {/* INSTRUCTIONS */}
+        {phase.phaseType === PhaseType.INSTRUCTIONS && (
+          <div className="flex flex-col items-center gap-4 text-center mt-8">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-500/15 flex items-center justify-center">
+              <Theater size={32} className="text-indigo-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Bluff Battle</h2>
+            <p className="text-gray-500">Get ready!</p>
+          </div>
+        )}
+
+        {/* GAME OVER */}
+        {phase.phaseType === PhaseType.GAME_OVER && (
+          <div className="flex flex-col items-center gap-4 text-center mt-8">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/15 flex items-center justify-center">
+              <Trophy size={32} className="text-amber-400" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Game Over</h2>
+            <p className="text-gray-500">Check the TV for final results</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

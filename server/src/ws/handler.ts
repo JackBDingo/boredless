@@ -9,6 +9,7 @@ import { sessionRegistry } from './registry.js';
 import { sendToSocket, sendError } from './send.js';
 import { roomManager } from '../engine/room-manager.js';
 import { gameRegistry } from '../games/registry.js';
+import { createGameContext } from '../games/create-game-context.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -240,7 +241,8 @@ function handleStartGame(ws: WebSocket): void {
   }
 
   // Start game
-  gameModule.setup(session.roomId, activePlayers);
+  const ctx = createGameContext(session.roomId);
+  gameModule.setup(activePlayers, ctx);
 }
 
 function handleSubmitInput(ws: WebSocket, msg: Extract<ClientMessage, { type: 'submit_input' }>): void {

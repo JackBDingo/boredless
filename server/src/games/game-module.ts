@@ -1,4 +1,5 @@
 import type { Player, PhaseState, GameDefinition, InputType } from '@boredless/shared';
+import type { GameContext } from './game-context.js';
 
 /**
  * GameModule interface.
@@ -10,7 +11,7 @@ export interface GameModule {
   readonly definition: GameDefinition;
 
   /** Initialize game state for a room. Called when host starts game. */
-  setup(roomId: string, players: Player[]): void;
+  setup(players: Player[], ctx: GameContext): void;
 
   /** Get the current phase state */
   getPhaseState(roomId: string): PhaseState;

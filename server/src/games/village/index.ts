@@ -1,4 +1,5 @@
 import type { GameModule } from '../game-module.js';
+import type { GameContext } from '../game-context.js';
 import type {
   Player,
   PhaseState,
@@ -25,16 +26,13 @@ import {
   VOS_VOTE_RESULT_TIME_SECONDS,
   GAME_CATALOG,
 } from '@boredless/shared';
-import { roomManager } from '../../engine/room-manager.js';
-import { timerEngine } from '../../engine/timer-engine.js';
-import { sendToSession, sendToSessions } from '../../ws/send.js';
-import { logger } from '../../utils/logger.js';
 import { distributeRoles, type RoleAssignment } from './roles.js';
 import { resolveNight, checkWinCondition, type NightAction } from './resolution.js';
 
 /** Internal game state */
 interface VillageGameState {
   roomId: string;
+  ctx: GameContext;
   players: Player[];
   roleAssignments: RoleAssignment[];
   dayNumber: number;
@@ -66,25 +64,19 @@ interface VillageGameState {
   winningTeam: 'villagers' | 'werewolves' | null;
 }
 
-function getAllSessionIds(roomId: string): string[] {
-  const room = roomManager.getRoom(roomId);
-  if (!room) return [];
-  const ids = room.players.filter(p => p.status !== 'removed').map(p => p.sessionId);
-  if (room.displaySessionId) ids.push(room.displaySessionId);
-  return ids;
-}
-
 class VillageModule implements GameModule {
   readonly definition: GameDefinition = GAME_CATALOG.find(g => g.id === GameId.VILLAGE_OF_SHADOWS)!;
 
   private states = new Map<string, VillageGameState>();
 
-  setup(roomId: string, players: Player[]): void {
+  setup(players: Player[], ctx: GameContext): void {
+    const roomId = ctx.roomId;
     const roles = distributeRoles(players);
     const alive = new Map<string, boolean>(players.map(p => [p.id, true]));
 
     const state: VillageGameState = {
       roomId,
+      ctx,
       players: [...players],
       roleAssignments: roles,
       dayNumber: 0,
@@ -104,11 +96,10 @@ class VillageModule implements GameModule {
     };
 
     this.states.set(roomId, state);
-    roomManager.setRoomStatus(roomId, RoomStatus.IN_GAME);
+    ctx.setRoomStatus(RoomStatus.IN_GAME);
 
     // Broadcast game started with public state
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    ctx.sendToAll({
       type: ServerMessageType.GAME_STARTED,
       gameId: GameId.VILLAGE_OF_SHADOWS,
       phase: this.getPhaseState(roomId),
@@ -117,18 +108,16 @@ class VillageModule implements GameModule {
 
     // Send private state to each player (their role)
     for (const player of players) {
-      sendToSession(player.sessionId, {
+      ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
     // Start role reveal timer then begin first night
-    timerEngine.start(
-      roomId,
+    ctx.startTimer(
       PhaseType.VOS_ROLE_REVEAL,
       VOS_ROLE_REVEAL_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s) return;
@@ -140,7 +129,7 @@ class VillageModule implements GameModule {
   getPhaseState(roomId: string): PhaseState {
     const state = this.states.get(roomId);
     if (!state) return { phaseType: PhaseType.LOBBY, roundNumber: 0, totalRounds: 0, timerRemainingMs: null, timerTotalMs: null };
-    const remaining = timerEngine.getRemaining(roomId);
+    const remaining = state.ctx.getTimerRemaining();
     let timerTotalMs: number | null = null;
     switch (state.currentPhase) {
       case PhaseType.VOS_ROLE_REVEAL: timerTotalMs = VOS_ROLE_REVEAL_TIME_SECONDS * 1000; break;
@@ -273,7 +262,10 @@ class VillageModule implements GameModule {
   }
 
   teardown(roomId: string): void {
-    timerEngine.stop(roomId);
+    const state = this.states.get(roomId);
+    if (state) {
+      state.ctx.stopTimer();
+    }
     this.states.delete(roomId);
   }
 
@@ -317,8 +309,7 @@ class VillageModule implements GameModule {
     state.nightActedPlayerIds.add(playerId);
 
     // Broadcast updated action count
-    const sessionIds = getAllSessionIds(state.roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(state.roomId),
       gamePublicState: this.getPublicState(state.roomId),
@@ -326,7 +317,7 @@ class VillageModule implements GameModule {
 
     // Check if all expected actions received
     if (state.nightActedPlayerIds.size >= state.expectedNightActions) {
-      timerEngine.stop(state.roomId);
+      state.ctx.stopTimer();
       this.resolveNightPhase(state.roomId);
     }
 
@@ -353,8 +344,7 @@ class VillageModule implements GameModule {
     state.dayVotes.set(playerId, targetPlayerId);
 
     // Broadcast updated vote count
-    const sessionIds = getAllSessionIds(state.roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(state.roomId),
       gamePublicState: this.getPublicState(state.roomId),
@@ -363,7 +353,7 @@ class VillageModule implements GameModule {
     // Check if all alive players voted
     const aliveCount = [...state.alive.values()].filter(Boolean).length;
     if (state.dayVotes.size >= aliveCount) {
-      timerEngine.stop(state.roomId);
+      state.ctx.stopTimer();
       this.resolveVote(state.roomId);
     }
 
@@ -388,8 +378,7 @@ class VillageModule implements GameModule {
       r => r.role !== VillageRole.VILLAGER,
     ).length;
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
@@ -397,18 +386,16 @@ class VillageModule implements GameModule {
 
     // Send updated private states (with night targets)
     for (const player of state.players.filter(p => state.alive.get(p.id))) {
-      sendToSession(player.sessionId, {
+      state.ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
     // Start night timer
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.VOS_NIGHT,
       VOS_NIGHT_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s || s.currentPhase !== PhaseType.VOS_NIGHT) return;
@@ -422,7 +409,7 @@ class VillageModule implements GameModule {
     if (!state) return;
     if (state.currentPhase !== PhaseType.VOS_NIGHT) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.VOS_NIGHT_RESULT;
 
     // Run resolution
@@ -459,8 +446,7 @@ class VillageModule implements GameModule {
       state.roleAssignments,
     );
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
@@ -468,18 +454,16 @@ class VillageModule implements GameModule {
 
     // Send updated private states
     for (const player of state.players) {
-      sendToSession(player.sessionId, {
+      state.ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
     if (winTeam) {
-      timerEngine.start(
-        roomId,
+      state.ctx.startTimer(
         PhaseType.VOS_NIGHT_RESULT,
         VOS_NIGHT_RESULT_TIME_SECONDS * 1000,
-        sessionIds,
         () => {
           const s = this.states.get(roomId);
           if (!s) return;
@@ -487,11 +471,9 @@ class VillageModule implements GameModule {
         },
       );
     } else {
-      timerEngine.start(
-        roomId,
+      state.ctx.startTimer(
         PhaseType.VOS_NIGHT_RESULT,
         VOS_NIGHT_RESULT_TIME_SECONDS * 1000,
-        sessionIds,
         () => {
           const s = this.states.get(roomId);
           if (!s || s.currentPhase !== PhaseType.VOS_NIGHT_RESULT) return;
@@ -505,23 +487,20 @@ class VillageModule implements GameModule {
     const state = this.states.get(roomId);
     if (!state) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.VOS_DAY;
     state.dayVotes = new Map();
     state.voteResultMessage = null;
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
     });
 
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.VOS_DAY,
       VOS_DAY_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s || s.currentPhase !== PhaseType.VOS_DAY) return;
@@ -534,12 +513,11 @@ class VillageModule implements GameModule {
     const state = this.states.get(roomId);
     if (!state) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.VOS_VOTE;
     state.dayVotes = new Map();
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
@@ -547,17 +525,15 @@ class VillageModule implements GameModule {
 
     // Send vote targets to each alive player
     for (const player of state.players.filter(p => state.alive.get(p.id))) {
-      sendToSession(player.sessionId, {
+      state.ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.VOS_VOTE,
       VOS_VOTE_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s || s.currentPhase !== PhaseType.VOS_VOTE) return;
@@ -571,7 +547,7 @@ class VillageModule implements GameModule {
     if (!state) return;
     if (state.currentPhase !== PhaseType.VOS_VOTE) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.VOS_VOTE_RESULT;
 
     // Tally votes
@@ -618,19 +594,16 @@ class VillageModule implements GameModule {
       state.roleAssignments,
     );
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
     });
 
     if (winTeam) {
-      timerEngine.start(
-        roomId,
+      state.ctx.startTimer(
         PhaseType.VOS_VOTE_RESULT,
         VOS_VOTE_RESULT_TIME_SECONDS * 1000,
-        sessionIds,
         () => {
           const s = this.states.get(roomId);
           if (!s) return;
@@ -638,11 +611,9 @@ class VillageModule implements GameModule {
         },
       );
     } else {
-      timerEngine.start(
-        roomId,
+      state.ctx.startTimer(
         PhaseType.VOS_VOTE_RESULT,
         VOS_VOTE_RESULT_TIME_SECONDS * 1000,
-        sessionIds,
         () => {
           const s = this.states.get(roomId);
           if (!s || s.currentPhase !== PhaseType.VOS_VOTE_RESULT) return;
@@ -656,12 +627,11 @@ class VillageModule implements GameModule {
     const state = this.states.get(roomId);
     if (!state) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.GAME_OVER;
     state.winningTeam = winTeam;
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.GAME_OVER,
       result: {
         winnerId: null,
@@ -672,8 +642,8 @@ class VillageModule implements GameModule {
       },
     });
 
-    roomManager.setRoomStatus(roomId, RoomStatus.GAME_ENDED);
-    logger.info('Village game ended', { roomId, winTeam });
+    state.ctx.setRoomStatus(RoomStatus.GAME_ENDED);
+    state.ctx.log.info('Village game ended', { winTeam });
   }
 
   private buildVoteTally(state: VillageGameState) {

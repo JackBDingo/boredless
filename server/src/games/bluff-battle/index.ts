@@ -1,4 +1,5 @@
 import type { GameModule } from '../game-module.js';
+import type { GameContext } from '../game-context.js';
 import type {
   Player,
   PhaseState,
@@ -22,18 +23,14 @@ import {
   BB_INSTRUCTIONS_TIME_SECONDS,
   GAME_CATALOG,
 } from '@boredless/shared';
-import { roomManager } from '../../engine/room-manager.js';
-import { timerEngine } from '../../engine/timer-engine.js';
-import { scoreEngine } from '../../engine/score-engine.js';
-import { sendToSession, sendToSessions } from '../../ws/send.js';
 import { generateId } from '../../utils/id.js';
-import { logger } from '../../utils/logger.js';
 import { getRandomPrompts } from './prompts.js';
 import { calculateBBScores, type BBAnswer, type BBVote } from './scoring.js';
 
-/** Internal game state (stored in roomManager.gameStates) */
+/** Internal game state (stored per room) */
 interface BBGameState {
   roomId: string;
+  ctx: GameContext;
   players: Player[];
   totalRounds: number;
   currentRound: number;
@@ -48,24 +45,16 @@ interface BBGameState {
   revealData: BBRevealData | null;
 }
 
-function getAllSessionIds(roomId: string): string[] {
-  const room = roomManager.getRoom(roomId);
-  if (!room) return [];
-  const ids = room.players
-    .filter(p => p.status !== 'removed')
-    .map(p => p.sessionId);
-  if (room.displaySessionId) ids.push(room.displaySessionId);
-  return ids;
-}
-
 class BluffBattleModule implements GameModule {
   readonly definition: GameDefinition = GAME_CATALOG.find(g => g.id === GameId.BLUFF_BATTLE)!;
 
   private states = new Map<string, BBGameState>();
 
-  setup(roomId: string, players: Player[]): void {
+  setup(players: Player[], ctx: GameContext): void {
+    const roomId = ctx.roomId;
     const state: BBGameState = {
       roomId,
+      ctx,
       players: [...players],
       totalRounds: BB_ROUNDS_DEFAULT,
       currentRound: 0,
@@ -81,14 +70,13 @@ class BluffBattleModule implements GameModule {
     this.states.set(roomId, state);
 
     // Initialize scores
-    scoreEngine.init(roomId, players.map(p => p.id));
+    ctx.initScores(players.map(p => p.id));
 
     // Update room status
-    roomManager.setRoomStatus(roomId, RoomStatus.IN_GAME);
+    ctx.setRoomStatus(RoomStatus.IN_GAME);
 
     // Broadcast game started
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    ctx.sendToAll({
       type: ServerMessageType.GAME_STARTED,
       gameId: GameId.BLUFF_BATTLE,
       phase: this.getPhaseState(roomId),
@@ -97,18 +85,16 @@ class BluffBattleModule implements GameModule {
 
     // Send private state to each player
     for (const player of players) {
-      sendToSession(player.sessionId, {
+      ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
     // Start instructions timer
-    timerEngine.start(
-      roomId,
+    ctx.startTimer(
       PhaseType.INSTRUCTIONS,
       BB_INSTRUCTIONS_TIME_SECONDS * 1000,
-      sessionIds,
       () => this.startRound(roomId),
     );
   }
@@ -118,7 +104,7 @@ class BluffBattleModule implements GameModule {
     if (!state) {
       return { phaseType: PhaseType.LOBBY, roundNumber: 0, totalRounds: 0, timerRemainingMs: null, timerTotalMs: null };
     }
-    const remaining = timerEngine.getRemaining(roomId);
+    const remaining = state.ctx.getTimerRemaining();
     let timerTotalMs: number | null = null;
     switch (state.currentPhase) {
       case PhaseType.BB_SUBMIT: timerTotalMs = BB_SUBMIT_TIME_SECONDS * 1000; break;
@@ -204,8 +190,11 @@ class BluffBattleModule implements GameModule {
   }
 
   teardown(roomId: string): void {
-    timerEngine.stop(roomId);
-    scoreEngine.clear(roomId);
+    const state = this.states.get(roomId);
+    if (state) {
+      state.ctx.stopTimer();
+      state.ctx.clearScores();
+    }
     this.states.delete(roomId);
   }
 
@@ -231,7 +220,7 @@ class BluffBattleModule implements GameModule {
     // Send updated private state to the submitter (hasSubmitted: true)
     const submitter = state.players.find(p => p.id === playerId);
     if (submitter) {
-      sendToSession(submitter.sessionId, {
+      state.ctx.sendToPlayer(submitter.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(state.roomId, playerId),
       });
@@ -242,7 +231,7 @@ class BluffBattleModule implements GameModule {
 
     // Check if all players submitted
     if (state.submissions.size >= state.players.length) {
-      timerEngine.stop(state.roomId);
+      state.ctx.stopTimer();
       this.startVoting(state.roomId);
     }
 
@@ -278,7 +267,7 @@ class BluffBattleModule implements GameModule {
     // Send updated private state to the voter
     const voter = state.players.find(p => p.id === playerId);
     if (voter) {
-      sendToSession(voter.sessionId, {
+      state.ctx.sendToPlayer(voter.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(state.roomId, playerId),
       });
@@ -286,7 +275,7 @@ class BluffBattleModule implements GameModule {
 
     // Check if all players voted
     if (state.votes.length >= state.players.length) {
-      timerEngine.stop(state.roomId);
+      state.ctx.stopTimer();
       this.startReveal(state.roomId);
     }
 
@@ -310,8 +299,7 @@ class BluffBattleModule implements GameModule {
     state.usedPromptIds.push(prompt.id);
 
     // Broadcast phase change
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
@@ -319,18 +307,16 @@ class BluffBattleModule implements GameModule {
 
     // Send private state (prompt) to each player
     for (const player of state.players) {
-      sendToSession(player.sessionId, {
+      state.ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
     // Start submission timer
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.BB_SUBMIT,
       BB_SUBMIT_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s || s.currentPhase !== PhaseType.BB_SUBMIT) return;
@@ -338,7 +324,7 @@ class BluffBattleModule implements GameModule {
       },
     );
 
-    logger.info('Round started', { roomId, round: state.currentRound });
+    state.ctx.log.info('Round started', { round: state.currentRound });
   }
 
   private startVoting(roomId: string): void {
@@ -346,7 +332,7 @@ class BluffBattleModule implements GameModule {
     if (!state || !state.currentPrompt) return;
     if (state.currentPhase !== PhaseType.BB_SUBMIT) return; // Guard against double-call
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.BB_VOTING;
 
     // Build answer list: all fake submissions + the correct answer
@@ -374,8 +360,7 @@ class BluffBattleModule implements GameModule {
     state.answers = answers.sort(() => Math.random() - 0.5);
 
     // Broadcast phase change
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
@@ -383,18 +368,16 @@ class BluffBattleModule implements GameModule {
 
     // Send private state (vote options) to each player
     for (const player of state.players) {
-      sendToSession(player.sessionId, {
+      state.ctx.sendToPlayer(player.sessionId, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
     }
 
     // Start voting timer
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.BB_VOTING,
       BB_VOTE_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s || s.currentPhase !== PhaseType.BB_VOTING) return;
@@ -408,7 +391,7 @@ class BluffBattleModule implements GameModule {
     if (!state) return;
     if (state.currentPhase !== PhaseType.BB_VOTING) return; // Guard against double-call
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.BB_REVEAL;
 
     // Calculate scores
@@ -417,7 +400,7 @@ class BluffBattleModule implements GameModule {
     // Apply scores
     const roundScores = new Map<string, number>();
     for (const [playerId, points] of result.roundPoints) {
-      scoreEngine.addPoints(roomId, playerId, points);
+      state.ctx.addPoints(playerId, points);
       roundScores.set(playerId, points);
     }
 
@@ -454,24 +437,21 @@ class BluffBattleModule implements GameModule {
           v => v.voterId === p.id && state.answers.find(a => a.answerId === v.answerId)?.isCorrect,
         ),
         roundPoints: roundScores.get(p.id) ?? 0,
-        totalPoints: scoreEngine.getScore(roomId, p.id),
+        totalPoints: state.ctx.getScore(p.id),
       })),
     };
 
     // Broadcast
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
     });
 
     // Start reveal timer → then show scores or next round
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.BB_REVEAL,
       BB_REVEAL_TIME_SECONDS * 1000,
-      sessionIds,
       () => {
         const s = this.states.get(roomId);
         if (!s || s.currentPhase !== PhaseType.BB_REVEAL) return;
@@ -484,14 +464,13 @@ class BluffBattleModule implements GameModule {
     const state = this.states.get(roomId);
     if (!state) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.BB_SCORES;
 
     // Broadcast scores
-    scoreEngine.broadcastScores(roomId);
+    state.ctx.broadcastScores();
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
@@ -510,11 +489,9 @@ class BluffBattleModule implements GameModule {
           this.startRound(roomId);
         };
 
-    timerEngine.start(
-      roomId,
+    state.ctx.startTimer(
       PhaseType.BB_SCORES,
       BB_SCORES_TIME_SECONDS * 1000,
-      sessionIds,
       nextAction,
     );
   }
@@ -523,14 +500,13 @@ class BluffBattleModule implements GameModule {
     const state = this.states.get(roomId);
     if (!state) return;
 
-    timerEngine.stop(roomId);
+    state.ctx.stopTimer();
     state.currentPhase = PhaseType.GAME_OVER;
 
-    const scores = scoreEngine.getScores(roomId);
+    const scores = state.ctx.getScores();
     const winner = scores[0]; // Highest score
 
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    state.ctx.sendToAll({
       type: ServerMessageType.GAME_OVER,
       result: {
         winnerId: winner?.playerId ?? null,
@@ -541,13 +517,14 @@ class BluffBattleModule implements GameModule {
       },
     });
 
-    roomManager.setRoomStatus(roomId, RoomStatus.GAME_ENDED);
-    logger.info('Game ended', { roomId, winnerId: winner?.playerId });
+    state.ctx.setRoomStatus(RoomStatus.GAME_ENDED);
+    state.ctx.log.info('Game ended', { winnerId: winner?.playerId });
   }
 
   private broadcastState(roomId: string): void {
-    const sessionIds = getAllSessionIds(roomId);
-    sendToSessions(sessionIds, {
+    const state = this.states.get(roomId);
+    if (!state) return;
+    state.ctx.sendToAll({
       type: ServerMessageType.PHASE_CHANGED,
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),

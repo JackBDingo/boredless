@@ -3,6 +3,7 @@ import { roomManager } from './engine/room-manager';
 import { bluffBattleModule } from './games/bluff-battle/index';
 import { villageModule } from './games/village/index';
 import { gameRegistry } from './games/registry';
+import { createGameContext } from './games/create-game-context';
 import { PhaseType } from '@boredless/shared';
 import type { Player } from '@boredless/shared';
 
@@ -36,7 +37,7 @@ describe('Integration: Bluff Battle full game', () => {
   });
 
   it('setup initializes game state', () => {
-    bluffBattleModule.setup(roomId, players);
+    bluffBattleModule.setup(players, createGameContext(roomId));
 
     const phase = bluffBattleModule.getPhaseState(roomId);
     expect(phase.phaseType).toBe(PhaseType.INSTRUCTIONS);
@@ -45,7 +46,7 @@ describe('Integration: Bluff Battle full game', () => {
   });
 
   it('public state has correct shape', () => {
-    bluffBattleModule.setup(roomId, players);
+    bluffBattleModule.setup(players, createGameContext(roomId));
     const pub = bluffBattleModule.getPublicState(roomId) as any;
     expect(pub.gameId).toBe('bluff_battle');
     expect(pub.totalRounds).toBe(3);
@@ -53,7 +54,7 @@ describe('Integration: Bluff Battle full game', () => {
   });
 
   it('private state has correct shape for each player', () => {
-    bluffBattleModule.setup(roomId, players);
+    bluffBattleModule.setup(players, createGameContext(roomId));
     for (const player of players) {
       const priv = bluffBattleModule.getPrivateState(roomId, player.id) as any;
       expect(priv.gameId).toBe('bluff_battle');
@@ -63,7 +64,7 @@ describe('Integration: Bluff Battle full game', () => {
   });
 
   it('teardown cleans up', () => {
-    bluffBattleModule.setup(roomId, players);
+    bluffBattleModule.setup(players, createGameContext(roomId));
     bluffBattleModule.teardown(roomId);
     const phase = bluffBattleModule.getPhaseState(roomId);
     expect(phase.phaseType).toBe(PhaseType.LOBBY); // Default when no state
@@ -97,7 +98,7 @@ describe('Integration: Village of Shadows setup', () => {
   });
 
   it('setup assigns roles to all players', () => {
-    villageModule.setup(roomId, players);
+    villageModule.setup(players, createGameContext(roomId));
 
     // Check each player gets private state with a role
     for (const player of players) {
@@ -109,7 +110,7 @@ describe('Integration: Village of Shadows setup', () => {
   });
 
   it('public state shows all players alive', () => {
-    villageModule.setup(roomId, players);
+    villageModule.setup(players, createGameContext(roomId));
     const pub = villageModule.getPublicState(roomId) as any;
     expect(pub.players).toHaveLength(5);
     expect(pub.players.every((p: any) => p.isAlive)).toBe(true);

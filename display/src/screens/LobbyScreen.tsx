@@ -15,6 +15,10 @@ export function LobbyScreen({ qrDataUrl }: LobbyScreenProps) {
 
   if (!room) return <div className="text-white p-8">Loading...</div>;
 
+  const selectedGame = GAME_CATALOG.find((g) => g.id === room.selectedGameId);
+  const playerCount = room.players.length;
+  const canStart = selectedGame && playerCount >= selectedGame.minPlayers;
+
   return (
     <div className="flex flex-col h-full p-8">
       {/* Header */}
@@ -44,6 +48,28 @@ export function LobbyScreen({ qrDataUrl }: LobbyScreenProps) {
             />
           ))}
         </div>
+      </div>
+
+      {/* Start Game Button */}
+      <div className="mt-6 flex justify-center">
+        {selectedGame ? (
+          <button
+            onClick={() => send({ type: 'start_game' })}
+            disabled={!canStart}
+            className={`px-12 py-4 rounded-2xl text-xl font-bold transition-all ${
+              canStart
+                ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/30 hover:scale-105'
+                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
+            }`}
+          >
+            {canStart
+              ? `Start ${selectedGame.name} 🚀`
+              : `Need ${selectedGame.minPlayers - playerCount} more player${selectedGame.minPlayers - playerCount === 1 ? '' : 's'}`
+            }
+          </button>
+        ) : (
+          <p className="text-gray-500 text-lg">Select a game above to begin</p>
+        )}
       </div>
     </div>
   );

@@ -179,15 +179,17 @@ function handleSelectGame(ws: WebSocket, msg: Extract<ClientMessage, { type: 'se
   const session = roomManager.getSession(sessionId);
   if (!session) return;
 
-  const player = roomManager.getPlayerBySessionId(sessionId);
-  if (!player) return;
-
   const room = roomManager.getRoom(session.roomId);
   if (!room) return;
 
-  if (room.hostPlayerId !== player.id) {
-    sendError(ws, 'NOT_HOST', 'Only the host can select a game');
-    return;
+  // Allow display session OR host player to select game
+  const isDisplay = room.displaySessionId === sessionId;
+  if (!isDisplay) {
+    const player = roomManager.getPlayerBySessionId(sessionId);
+    if (!player || room.hostPlayerId !== player.id) {
+      sendError(ws, 'NOT_HOST', 'Only the host can select a game');
+      return;
+    }
   }
 
   const gameModule = gameRegistry.get(msg.gameId);
@@ -196,7 +198,7 @@ function handleSelectGame(ws: WebSocket, msg: Extract<ClientMessage, { type: 'se
     return;
   }
 
-  roomManager.selectGame(session.roomId, player.id, msg.gameId);
+  roomManager.selectGame(session.roomId, room.hostPlayerId, msg.gameId);
 }
 
 function handleStartGame(ws: WebSocket): void {
@@ -206,15 +208,17 @@ function handleStartGame(ws: WebSocket): void {
   const session = roomManager.getSession(sessionId);
   if (!session) return;
 
-  const player = roomManager.getPlayerBySessionId(sessionId);
-  if (!player) return;
-
   const room = roomManager.getRoom(session.roomId);
   if (!room) return;
 
-  if (room.hostPlayerId !== player.id) {
-    sendError(ws, 'NOT_HOST', 'Only the host can start the game');
-    return;
+  // Allow display session OR host player to start game
+  const isDisplay = room.displaySessionId === sessionId;
+  if (!isDisplay) {
+    const player = roomManager.getPlayerBySessionId(sessionId);
+    if (!player || room.hostPlayerId !== player.id) {
+      sendError(ws, 'NOT_HOST', 'Only the host can start the game');
+      return;
+    }
   }
 
   if (!room.selectedGameId) {

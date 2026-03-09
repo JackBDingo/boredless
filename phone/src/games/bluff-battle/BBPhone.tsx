@@ -4,6 +4,7 @@ import { useGameStore } from '../../store/game';
 import type { PhaseState, BBPrivateState } from '@boredless/shared';
 import { PhaseType, ClientMessageType, InputType, BB_MAX_ANSWER_LENGTH } from '@boredless/shared';
 import { Send, Check, Vote, Monitor, Trophy, Theater } from 'lucide-react';
+import { PoweredByLogo } from '../../components/PoweredByLogo';
 
 interface Props {
   phase: PhaseState;
@@ -187,6 +188,9 @@ export function BBPhone({ phase, privateState }: Props) {
             <p className="text-gray-500">Check the TV for final results</p>
           </div>
         )}
+      </div>
+      <div className="fixed bottom-0 inset-x-0">
+        <PoweredByLogo />
       </div>
     </div>
   );

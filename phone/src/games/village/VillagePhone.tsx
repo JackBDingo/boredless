@@ -9,6 +9,7 @@ import {
   Check, Star
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { PoweredByLogo } from '../../components/PoweredByLogo';
 
 const ROLE_ICONS: Record<string, LucideIcon> = {
   Users, Crosshair, Eye, Shield,
@@ -74,6 +75,9 @@ export function VillagePhone({ phase, privateState }: Props) {
           <p className="text-gray-500 mb-4">You were the {roleInfo.name}</p>
           <RoleBadge />
           <p className="text-gray-600 text-sm mt-6">Watch the game on the TV</p>
+        </div>
+        <div className="fixed bottom-0 inset-x-0">
+          <PoweredByLogo />
         </div>
       </div>
     );
@@ -271,6 +275,9 @@ export function VillagePhone({ phase, privateState }: Props) {
             <p className="text-gray-500">Check the TV for final results</p>
           </div>
         )}
+      </div>
+      <div className="fixed bottom-0 inset-x-0">
+        <PoweredByLogo />
       </div>
     </div>
   );

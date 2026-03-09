@@ -6,6 +6,7 @@ import { ServerMessageType, GAME_CATALOG } from '@boredless/shared';
 import type { PhaseState } from '@boredless/shared';
 import { Crown, Users, Clock, ChevronRight, Check, Loader2 } from 'lucide-react';
 import { getGameIcon } from '../lib/gameIcons';
+import { PoweredByLogo } from '../components/PoweredByLogo';
 
 interface Props {
   onGameStarted: () => void;
@@ -67,6 +68,7 @@ export function LobbyScreen({ onGameStarted }: Props) {
           <div className="mt-10">
             <Loader2 size={24} className="text-gray-700 animate-spin" />
           </div>
+          <PoweredByLogo />
         </div>
       </div>
     );
@@ -174,6 +176,7 @@ export function LobbyScreen({ onGameStarted }: Props) {
             </div>
           )}
         </div>
+        <PoweredByLogo />
       </div>
     </div>
   );

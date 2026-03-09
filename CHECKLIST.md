@@ -41,19 +41,19 @@ Check off items as they are completed. An agent starting fresh should:
 > Reference: `BUILD_SPEC.md` Section 5, `TESTS.md` Section 1
 > File creation order: `AGENT_INSTRUCTIONS.md` Phase 2
 
-- [ ] `packages/shared/src/enums.ts` — All enums (`BUILD_SPEC.md` Step 2.3)
-- [ ] `packages/shared/src/constants.ts` — All constants (`BUILD_SPEC.md` Step 2.4)
-- [ ] `packages/shared/src/types/room.ts` — Room/player types (`BUILD_SPEC.md` Step 2.5)
-- [ ] `packages/shared/src/types/game.ts` — Game/phase types (`BUILD_SPEC.md` Step 2.6)
-- [ ] `packages/shared/src/types/messages.ts` — WebSocket messages (`BUILD_SPEC.md` Step 2.7)
-- [ ] `packages/shared/src/types/bluff-battle.ts` — BB-specific types (`BUILD_SPEC.md` Step 2.8)
-- [ ] `packages/shared/src/types/village.ts` — Village-specific types (`BUILD_SPEC.md` Step 2.9)
-- [ ] `packages/shared/src/validation.ts` — Zod schemas (`BUILD_SPEC.md` Step 2.10)
-- [ ] `packages/shared/src/index.ts` — Re-exports everything (`BUILD_SPEC.md` Step 2.11)
-- [ ] **VERIFY:** `npm run build --workspace=packages/shared` succeeds
-- [ ] Write tests from `TESTS.md` Section 1 (validation.test.ts, constants.test.ts)
-- [ ] **VERIFY:** All shared package tests pass
-- [ ] `git commit -m "Phase 2: Shared types package"`
+- [x] `packages/shared/src/enums.ts` — All enums (`BUILD_SPEC.md` Step 2.3)
+- [x] `packages/shared/src/constants.ts` — All constants (`BUILD_SPEC.md` Step 2.4)
+- [x] `packages/shared/src/types/room.ts` — Room/player types (`BUILD_SPEC.md` Step 2.5)
+- [x] `packages/shared/src/types/game.ts` — Game/phase types (`BUILD_SPEC.md` Step 2.6)
+- [x] `packages/shared/src/types/messages.ts` — WebSocket messages (`BUILD_SPEC.md` Step 2.7)
+- [x] `packages/shared/src/types/bluff-battle.ts` — BB-specific types (`BUILD_SPEC.md` Step 2.8)
+- [x] `packages/shared/src/types/village.ts` — Village-specific types (`BUILD_SPEC.md` Step 2.9)
+- [x] `packages/shared/src/validation.ts` — Zod schemas (`BUILD_SPEC.md` Step 2.10)
+- [x] `packages/shared/src/index.ts` — Re-exports everything (`BUILD_SPEC.md` Step 2.11)
+- [x] **VERIFY:** `npm run build --workspace=packages/shared` succeeds
+- [x] Write tests from `TESTS.md` Section 1 (validation.test.ts, constants.test.ts)
+- [x] **VERIFY:** All shared package tests pass
+- [x] `git commit -m "Phase 2: Shared types package"`
 
 ---
 
@@ -209,6 +209,6 @@ Check off items as they are completed. An agent starting fresh should:
 ## STATUS
 
 **Current Phase:** 2
-**Last Completed:** Phase 1 (Scaffolding)
+**Last Completed:** Phase 2 (Shared Types Package)
 **Blockers:** None
 **Notes:** —

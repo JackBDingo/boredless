@@ -15,12 +15,18 @@ const ROLE_ICONS: Record<string, LucideIcon> = {
   Users, Crosshair, Eye, Shield,
 };
 
+/** Signature for the useGameEvent hook passed in from GameScreen */
+type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
+
 interface Props {
   phase: PhaseState;
   privateState: Record<string, unknown>;
+  /** Custom event listener — use to react to server events emitted via ctx.emitTo() */
+  useGameEvent: GameEventHook;
 }
 
-export function VillagePhone({ phase, privateState }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function VillagePhone({ phase, privateState, useGameEvent: _useGameEvent }: Props) {
   const state = privateState as unknown as VillagePrivateState;
   const send = useConnectionStore((s) => s.send);
   const timerMs = useGameStore((s) => s.timerRemainingMs);

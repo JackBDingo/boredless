@@ -4,6 +4,7 @@ import { BBDisplay } from '../games/bluff-battle/BBDisplay';
 import { VillageDisplay } from '../games/village/VillageDisplay';
 import { Scoreboard } from '../components/Scoreboard';
 import { PoweredByLogo } from '../components/PoweredByLogo';
+import { useGameEvent } from '../hooks/useGameEvent';
 import { Trophy, Moon, Users, Loader2 } from 'lucide-react';
 
 export function GameScreen() {
@@ -65,14 +66,14 @@ export function GameScreen() {
     case GameId.BLUFF_BATTLE:
       return (
         <div className="relative h-full">
-          <BBDisplay phase={phase} publicState={gamePublicState} scores={scores} />
+          <BBDisplay phase={phase} publicState={gamePublicState} scores={scores} useGameEvent={useGameEvent} />
           <PoweredByLogo />
         </div>
       );
     case GameId.VILLAGE_OF_SHADOWS:
       return (
         <div className="relative h-full">
-          <VillageDisplay phase={phase} publicState={gamePublicState} />
+          <VillageDisplay phase={phase} publicState={gamePublicState} useGameEvent={useGameEvent} />
           <PoweredByLogo />
         </div>
       );

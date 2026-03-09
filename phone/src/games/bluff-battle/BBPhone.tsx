@@ -6,12 +6,18 @@ import { PhaseType, ClientMessageType, InputType, BB_MAX_ANSWER_LENGTH } from '@
 import { Send, Check, Vote, Monitor, Trophy, Theater } from 'lucide-react';
 import { PoweredByLogo } from '../../components/PoweredByLogo';
 
+/** Signature for the useGameEvent hook passed in from GameScreen */
+type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
+
 interface Props {
   phase: PhaseState;
   privateState: Record<string, unknown>;
+  /** Custom event listener — use to react to server events emitted via ctx.emitTo() */
+  useGameEvent: GameEventHook;
 }
 
-export function BBPhone({ phase, privateState }: Props) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function BBPhone({ phase, privateState, useGameEvent: _useGameEvent }: Props) {
   const state = privateState as unknown as BBPrivateState;
   const send = useConnectionStore((s) => s.send);
   const timerMs = useGameStore((s) => s.timerRemainingMs);

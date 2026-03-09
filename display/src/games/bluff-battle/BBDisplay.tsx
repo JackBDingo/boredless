@@ -4,13 +4,19 @@ import { Timer } from '../../components/Timer';
 import { Scoreboard } from '../../components/Scoreboard';
 import { Theater, Send, Vote, Sparkles } from 'lucide-react';
 
+/** Signature for the useGameEvent hook passed in from GameScreen */
+type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
+
 interface BBDisplayProps {
   phase: PhaseState;
   publicState: Record<string, unknown>;
   scores: ScoreEntry[];
+  /** Custom event listener — use to react to server events emitted via ctx.emit() */
+  useGameEvent: GameEventHook;
 }
 
-export function BBDisplay({ phase, publicState, scores }: BBDisplayProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEvent }: BBDisplayProps) {
   const state = publicState as unknown as BBPublicState;
 
   return (

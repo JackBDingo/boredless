@@ -7,6 +7,7 @@ import { ServerMessageType, PhaseType } from '@boredless/shared';
 import type { PhaseState } from '@boredless/shared';
 import { BBPhone } from '../games/bluff-battle/BBPhone';
 import { VillagePhone } from '../games/village/VillagePhone';
+import { useGameEvent } from '../hooks/useGameEvent';
 
 export function GameScreen() {
   const on = useConnectionStore((s) => s.on);
@@ -66,10 +67,10 @@ export function GameScreen() {
 
   switch (gameId) {
     case 'bluff_battle':
-      gameComponent = <BBPhone phase={phase} privateState={privateState} />;
+      gameComponent = <BBPhone phase={phase} privateState={privateState} useGameEvent={useGameEvent} />;
       break;
     case 'village_of_shadows':
-      gameComponent = <VillagePhone phase={phase} privateState={privateState} />;
+      gameComponent = <VillagePhone phase={phase} privateState={privateState} useGameEvent={useGameEvent} />;
       break;
     default:
       gameComponent = (

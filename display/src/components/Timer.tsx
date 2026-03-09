@@ -11,7 +11,7 @@ export function Timer() {
   return (
     <div
       className={`text-6xl font-bold tabular-nums ${
-        isUrgent ? 'text-red-500 animate-pulse' : 'text-white'
+        isUrgent ? 'text-red-400' : 'text-white/30'
       }`}
     >
       {seconds}

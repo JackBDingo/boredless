@@ -113,37 +113,37 @@ Check off items as they are completed. An agent starting fresh should:
 > Reference: `BUILD_SPEC.md` Section 7, `AGENT_INSTRUCTIONS.md` Phase 4
 
 ### Stores & Hooks
-- [ ] `display/src/styles/globals.css` (`BUILD_SPEC.md` Step 4.5)
-- [ ] `display/src/store/connection.ts` (`BUILD_SPEC.md` Step 4.6)
-- [ ] `display/src/store/room.ts` (`BUILD_SPEC.md` Step 4.7)
-- [ ] `display/src/hooks/useWebSocket.ts` (`BUILD_SPEC.md` Step 4.8)
+- [x] `display/src/styles/globals.css` (`BUILD_SPEC.md` Step 4.5)
+- [x] `display/src/store/connection.ts` (`BUILD_SPEC.md` Step 4.6)
+- [x] `display/src/store/room.ts` (`BUILD_SPEC.md` Step 4.7)
+- [x] `display/src/hooks/useWebSocket.ts` (`BUILD_SPEC.md` Step 4.8)
 
 ### Components
-- [ ] `display/src/components/QRCode.tsx` (`BUILD_SPEC.md` Step 4.9)
-- [ ] `display/src/components/PlayerList.tsx` (`BUILD_SPEC.md` Step 4.10)
-- [ ] `display/src/components/Timer.tsx` (`BUILD_SPEC.md` Step 4.11)
-- [ ] `display/src/components/Scoreboard.tsx` (`BUILD_SPEC.md` Step 4.12)
-- [ ] `display/src/components/GameCard.tsx` (`BUILD_SPEC.md` Step 4.13)
+- [x] `display/src/components/QRCode.tsx` (`BUILD_SPEC.md` Step 4.9)
+- [x] `display/src/components/PlayerList.tsx` (`BUILD_SPEC.md` Step 4.10)
+- [x] `display/src/components/Timer.tsx` (`BUILD_SPEC.md` Step 4.11)
+- [x] `display/src/components/Scoreboard.tsx` (`BUILD_SPEC.md` Step 4.12)
+- [x] `display/src/components/GameCard.tsx` (`BUILD_SPEC.md` Step 4.13)
 
 ### Screens
-- [ ] `display/src/screens/HomeScreen.tsx` (`BUILD_SPEC.md` Step 4.14)
-- [ ] `display/src/screens/LobbyScreen.tsx` (`BUILD_SPEC.md` Step 4.15)
-- [ ] `display/src/screens/GameScreen.tsx` (`BUILD_SPEC.md` Step 4.16)
+- [x] `display/src/screens/HomeScreen.tsx` (`BUILD_SPEC.md` Step 4.14)
+- [x] `display/src/screens/LobbyScreen.tsx` (`BUILD_SPEC.md` Step 4.15)
+- [x] `display/src/screens/GameScreen.tsx` (`BUILD_SPEC.md` Step 4.16)
 
 ### Game Displays
-- [ ] `display/src/games/bluff-battle/BBDisplay.tsx` (`BUILD_SPEC.md` Step 4.17)
-- [ ] `display/src/games/village/VillageDisplay.tsx` (`BUILD_SPEC.md` Step 4.18)
+- [x] `display/src/games/bluff-battle/BBDisplay.tsx` (`BUILD_SPEC.md` Step 4.17)
+- [x] `display/src/games/village/VillageDisplay.tsx` (`BUILD_SPEC.md` Step 4.18)
 
 ### App Entry
-- [ ] `display/src/App.tsx` (`BUILD_SPEC.md` Step 4.19)
-- [ ] `display/src/main.tsx` (`BUILD_SPEC.md` Step 4.20)
+- [x] `display/src/App.tsx` (`BUILD_SPEC.md` Step 4.19)
+- [x] `display/src/main.tsx` (`BUILD_SPEC.md` Step 4.20)
 
 ### Display Verification
-- [ ] **VERIFY:** `npm run dev:display` opens without console errors
-- [ ] **VERIFY:** "Boredless" title renders
-- [ ] **VERIFY:** "Create Room" button creates room and shows lobby
-- [ ] **VERIFY:** QR code renders in lobby
-- [ ] `git commit -m "Phase 4: Display client"`
+- [x] **VERIFY:** `npm run dev:display` opens without console errors
+- [x] **VERIFY:** "Boredless" title renders
+- [x] **VERIFY:** "Create Room" button creates room and shows lobby
+- [x] **VERIFY:** QR code renders in lobby
+- [x] `git commit -m "Phase 4: Display client"`
 
 ---
 
@@ -208,8 +208,8 @@ Check off items as they are completed. An agent starting fresh should:
 
 ## STATUS
 
-**Current Phase:** 3 (complete)
-**Last Completed:** Phase 3 (Game Server)
-**Next:** Phase 4 (Display Client)
+**Current Phase:** 4 (complete)
+**Last Completed:** Phase 4 (Display Client)
+**Next:** Phase 5 (Phone Controller)
 **Blockers:** None
-**Notes:** —
+**Notes:** Display client built and verified. Vite starts cleanly, TypeScript compiles with 0 errors.

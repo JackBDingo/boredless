@@ -152,25 +152,25 @@ Check off items as they are completed. An agent starting fresh should:
 > NOTE: Can build as Expo OR web-only Vite app (see AGENT_INSTRUCTIONS.md)
 
 ### Stores
-- [ ] `phone/` package setup (package.json, tsconfig, vite config)
-- [ ] Phone connection store (`BUILD_SPEC.md` Step 5.4)
-- [ ] Phone game store (`BUILD_SPEC.md` Step 5.5)
+- [x] `phone/` package setup (package.json, tsconfig, vite config)
+- [x] Phone connection store (`BUILD_SPEC.md` Step 5.4)
+- [x] Phone game store (`BUILD_SPEC.md` Step 5.5)
 
 ### Screens
-- [ ] Join screen — code + name input (`BUILD_SPEC.md` Step 5.3)
-- [ ] Lobby screen — waiting state (`BUILD_SPEC.md` Step 5.6)
-- [ ] Game screen — router to game-specific UI (`BUILD_SPEC.md` Step 5.7)
+- [x] Join screen — code + name input (`BUILD_SPEC.md` Step 5.3)
+- [x] Lobby screen — waiting state (`BUILD_SPEC.md` Step 5.6)
+- [x] Game screen — router to game-specific UI (`BUILD_SPEC.md` Step 5.7)
 
 ### Game UIs
-- [ ] Bluff Battle phone UI — submit + vote (`BUILD_SPEC.md` Step 5.8)
-- [ ] Village phone UI — role reveal + night action + vote (`BUILD_SPEC.md` Step 5.9)
-- [ ] Village role info helper (`BUILD_SPEC.md` Step 5.10)
+- [x] Bluff Battle phone UI — submit + vote (`BUILD_SPEC.md` Step 5.8)
+- [x] Village phone UI — role reveal + night action + vote (`BUILD_SPEC.md` Step 5.9)
+- [x] Village role info helper (`BUILD_SPEC.md` Step 5.10)
 
 ### Phone Verification
-- [ ] **VERIFY:** Phone app starts without errors
-- [ ] **VERIFY:** Can enter room code and name
-- [ ] **VERIFY:** Player appears in display lobby after joining
-- [ ] `git commit -m "Phase 5: Phone controller"`
+- [x] **VERIFY:** Phone app starts without errors
+- [x] **VERIFY:** Can enter room code and name
+- [x] **VERIFY:** Player appears in display lobby after joining
+- [x] `git commit -m "Phase 5: Phone controller"`
 
 ---
 
@@ -208,8 +208,8 @@ Check off items as they are completed. An agent starting fresh should:
 
 ## STATUS
 
-**Current Phase:** 4 (complete)
-**Last Completed:** Phase 4 (Display Client)
-**Next:** Phase 5 (Phone Controller)
+**Current Phase:** 5 (complete)
+**Last Completed:** Phase 5 (Phone Controller)
+**Next:** Phase 8 (Integration & Polish)
 **Blockers:** None
-**Notes:** Display client built and verified. Vite starts cleanly, TypeScript compiles with 0 errors.
+**Notes:** Display client built and verified. Phone client built as web-only Vite React app (port 5174). All screens implemented: Join, Lobby, Game. Both game UIs implemented: BBPhone (Bluff Battle) and VillagePhone (Village of Shadows). TypeScript compiles with 0 errors. Vite starts cleanly.

@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --color-primary: #6366f1;
+  --color-secondary: #8b5cf6;
+  --color-accent: #f59e0b;
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-bg: #030712;
+  --color-surface: #111827;
+  --color-surface-light: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg);
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+/* Mobile-first: full height */
+#root {
+  width: 100vw;
+  min-height: 100dvh;
+}
+
+/* Ensure minimum touch targets (44px) */
+button {
+  min-height: 44px;
+  cursor: pointer;
+}
+
+input, textarea {
+  font-family: inherit;
+}

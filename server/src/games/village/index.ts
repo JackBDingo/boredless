@@ -107,12 +107,7 @@ class VillageModule implements GameModule {
     });
 
     // Send private state to each player (their role)
-    for (const player of players) {
-      ctx.sendToPlayer(player.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(roomId, player.id),
-      });
-    }
+    ctx.broadcastPrivateState(playerId => this.getPrivateState(roomId, playerId));
 
     // Start role reveal timer then begin first night
     ctx.startTimer(
@@ -309,11 +304,7 @@ class VillageModule implements GameModule {
     state.nightActedPlayerIds.add(playerId);
 
     // Broadcast updated action count
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(state.roomId),
-      gamePublicState: this.getPublicState(state.roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(state.roomId), this.getPublicState(state.roomId));
 
     // Check if all expected actions received
     if (state.nightActedPlayerIds.size >= state.expectedNightActions) {
@@ -344,11 +335,7 @@ class VillageModule implements GameModule {
     state.dayVotes.set(playerId, targetPlayerId);
 
     // Broadcast updated vote count
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(state.roomId),
-      gamePublicState: this.getPublicState(state.roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(state.roomId), this.getPublicState(state.roomId));
 
     // Check if all alive players voted
     const aliveCount = [...state.alive.values()].filter(Boolean).length;
@@ -378,15 +365,11 @@ class VillageModule implements GameModule {
       r => r.role !== VillageRole.VILLAGER,
     ).length;
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
-    // Send updated private states (with night targets)
+    // Send updated private states (with night targets) to alive players only
     for (const player of state.players.filter(p => state.alive.get(p.id))) {
-      state.ctx.sendToPlayer(player.sessionId, {
+      state.ctx.sendToPlayer(player.id, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
@@ -446,19 +429,10 @@ class VillageModule implements GameModule {
       state.roleAssignments,
     );
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
-    // Send updated private states
-    for (const player of state.players) {
-      state.ctx.sendToPlayer(player.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(roomId, player.id),
-      });
-    }
+    // Send updated private states to all players
+    state.ctx.broadcastPrivateState(playerId => this.getPrivateState(roomId, playerId));
 
     if (winTeam) {
       state.ctx.startTimer(
@@ -492,11 +466,7 @@ class VillageModule implements GameModule {
     state.dayVotes = new Map();
     state.voteResultMessage = null;
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
     state.ctx.startTimer(
       PhaseType.VOS_DAY,
@@ -517,15 +487,11 @@ class VillageModule implements GameModule {
     state.currentPhase = PhaseType.VOS_VOTE;
     state.dayVotes = new Map();
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
     // Send vote targets to each alive player
     for (const player of state.players.filter(p => state.alive.get(p.id))) {
-      state.ctx.sendToPlayer(player.sessionId, {
+      state.ctx.sendToPlayer(player.id, {
         type: ServerMessageType.PRIVATE_STATE,
         state: this.getPrivateState(roomId, player.id),
       });
@@ -594,11 +560,7 @@ class VillageModule implements GameModule {
       state.roleAssignments,
     );
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
     if (winTeam) {
       state.ctx.startTimer(
@@ -631,15 +593,12 @@ class VillageModule implements GameModule {
     state.currentPhase = PhaseType.GAME_OVER;
     state.winningTeam = winTeam;
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.GAME_OVER,
-      result: {
-        winnerId: null,
-        winnerName: null,
-        winnerTeam: winTeam,
-        finalScores: [],
-        gameId: GameId.VILLAGE_OF_SHADOWS,
-      },
+    state.ctx.broadcastGameOver({
+      winnerId: null,
+      winnerName: null,
+      winnerTeam: winTeam,
+      finalScores: [],
+      gameId: GameId.VILLAGE_OF_SHADOWS,
     });
 
     state.ctx.setRoomStatus(RoomStatus.GAME_ENDED);

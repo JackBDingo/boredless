@@ -23,7 +23,7 @@ import {
   BB_INSTRUCTIONS_TIME_SECONDS,
   GAME_CATALOG,
 } from '@boredless/shared';
-import { generateId } from '../../utils/id.js';
+import { nanoid } from 'nanoid';
 import { getRandomPrompts } from './prompts.js';
 import { calculateBBScores, type BBAnswer, type BBVote } from './scoring.js';
 
@@ -84,12 +84,7 @@ class BluffBattleModule implements GameModule {
     });
 
     // Send private state to each player
-    for (const player of players) {
-      ctx.sendToPlayer(player.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(roomId, player.id),
-      });
-    }
+    ctx.broadcastPrivateState(playerId => this.getPrivateState(roomId, playerId));
 
     // Start instructions timer
     ctx.startTimer(
@@ -218,13 +213,10 @@ class BluffBattleModule implements GameModule {
     state.submissions.set(playerId, answer);
 
     // Send updated private state to the submitter (hasSubmitted: true)
-    const submitter = state.players.find(p => p.id === playerId);
-    if (submitter) {
-      state.ctx.sendToPlayer(submitter.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(state.roomId, playerId),
-      });
-    }
+    state.ctx.sendToPlayer(playerId, {
+      type: ServerMessageType.PRIVATE_STATE,
+      state: this.getPrivateState(state.roomId, playerId),
+    });
 
     // Broadcast updated submission count to all (display shows checkmarks)
     this.broadcastState(state.roomId);
@@ -265,13 +257,10 @@ class BluffBattleModule implements GameModule {
     this.broadcastState(state.roomId);
 
     // Send updated private state to the voter
-    const voter = state.players.find(p => p.id === playerId);
-    if (voter) {
-      state.ctx.sendToPlayer(voter.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(state.roomId, playerId),
-      });
-    }
+    state.ctx.sendToPlayer(playerId, {
+      type: ServerMessageType.PRIVATE_STATE,
+      state: this.getPrivateState(state.roomId, playerId),
+    });
 
     // Check if all players voted
     if (state.votes.length >= state.players.length) {
@@ -298,20 +287,9 @@ class BluffBattleModule implements GameModule {
     state.currentPrompt = prompt;
     state.usedPromptIds.push(prompt.id);
 
-    // Broadcast phase change
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
-
-    // Send private state (prompt) to each player
-    for (const player of state.players) {
-      state.ctx.sendToPlayer(player.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(roomId, player.id),
-      });
-    }
+    // Broadcast phase change with private state per player
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
+    state.ctx.broadcastPrivateState(playerId => this.getPrivateState(roomId, playerId));
 
     // Start submission timer
     state.ctx.startTimer(
@@ -341,7 +319,7 @@ class BluffBattleModule implements GameModule {
     // Add player submissions
     for (const [playerId, text] of state.submissions) {
       answers.push({
-        answerId: generateId(),
+        answerId: nanoid(),
         text,
         submittedByPlayerId: playerId,
         isCorrect: false,
@@ -350,7 +328,7 @@ class BluffBattleModule implements GameModule {
 
     // Add correct answer
     answers.push({
-      answerId: generateId(),
+      answerId: nanoid(),
       text: state.currentPrompt.correctAnswer,
       submittedByPlayerId: null,
       isCorrect: true,
@@ -359,20 +337,9 @@ class BluffBattleModule implements GameModule {
     // Shuffle
     state.answers = answers.sort(() => Math.random() - 0.5);
 
-    // Broadcast phase change
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
-
-    // Send private state (vote options) to each player
-    for (const player of state.players) {
-      state.ctx.sendToPlayer(player.sessionId, {
-        type: ServerMessageType.PRIVATE_STATE,
-        state: this.getPrivateState(roomId, player.id),
-      });
-    }
+    // Broadcast phase change with private state per player
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
+    state.ctx.broadcastPrivateState(playerId => this.getPrivateState(roomId, playerId));
 
     // Start voting timer
     state.ctx.startTimer(
@@ -441,12 +408,8 @@ class BluffBattleModule implements GameModule {
       })),
     };
 
-    // Broadcast
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    // Broadcast reveal phase
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
     // Start reveal timer → then show scores or next round
     state.ctx.startTimer(
@@ -470,11 +433,7 @@ class BluffBattleModule implements GameModule {
     // Broadcast scores
     state.ctx.broadcastScores();
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
 
     // Check if game is over
     const nextAction = state.currentRound >= state.totalRounds
@@ -506,15 +465,12 @@ class BluffBattleModule implements GameModule {
     const scores = state.ctx.getScores();
     const winner = scores[0]; // Highest score
 
-    state.ctx.sendToAll({
-      type: ServerMessageType.GAME_OVER,
-      result: {
-        winnerId: winner?.playerId ?? null,
-        winnerName: winner?.playerName ?? null,
-        winnerTeam: null,
-        finalScores: scores,
-        gameId: GameId.BLUFF_BATTLE,
-      },
+    state.ctx.broadcastGameOver({
+      winnerId: winner?.playerId ?? null,
+      winnerName: winner?.playerName ?? null,
+      winnerTeam: null,
+      finalScores: scores,
+      gameId: GameId.BLUFF_BATTLE,
     });
 
     state.ctx.setRoomStatus(RoomStatus.GAME_ENDED);
@@ -524,11 +480,7 @@ class BluffBattleModule implements GameModule {
   private broadcastState(roomId: string): void {
     const state = this.states.get(roomId);
     if (!state) return;
-    state.ctx.sendToAll({
-      type: ServerMessageType.PHASE_CHANGED,
-      phase: this.getPhaseState(roomId),
-      gamePublicState: this.getPublicState(roomId),
-    });
+    state.ctx.broadcastPhase(this.getPhaseState(roomId), this.getPublicState(roomId));
   }
 }
 

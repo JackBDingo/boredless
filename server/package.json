@@ -1,0 +1,29 @@
+{
+  "name": "@boredless/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@boredless/shared": "*",
+    "fastify": "^5.0.0",
+    "@fastify/cors": "^10.0.0",
+    "@fastify/websocket": "^11.0.0",
+    "ws": "^8.18.0",
+    "nanoid": "^5.0.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.0",
+    "@types/qrcode": "^1.5.5",
+    "tsx": "^4.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

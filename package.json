@@ -1,0 +1,26 @@
+{
+  "name": "boredless",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "server",
+    "display",
+    "phone"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=server & npm run dev --workspace=display",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:display": "npm run dev --workspace=display",
+    "dev:phone": "npm run dev --workspace=phone",
+    "build": "npm run build --workspace=packages/shared && npm run build --workspace=server && npm run build --workspace=display",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.6.0"
+  }
+}

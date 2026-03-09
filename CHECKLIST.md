@@ -22,18 +22,18 @@ Check off items as they are completed. An agent starting fresh should:
 ## PHASE 1: Scaffolding
 > Reference: `BUILD_SPEC.md` Section 4, `AGENT_INSTRUCTIONS.md` Phase 1
 
-- [ ] Create root `package.json` with workspaces (`BUILD_SPEC.md` Step 1.1)
-- [ ] Create root `tsconfig.base.json` (`BUILD_SPEC.md` Step 1.2)
-- [ ] Create `packages/shared/package.json` (`BUILD_SPEC.md` Step 2.1)
-- [ ] Create `packages/shared/tsconfig.json` (`BUILD_SPEC.md` Step 2.2)
-- [ ] Create `server/package.json` (`BUILD_SPEC.md` Step 3.1)
-- [ ] Create `server/tsconfig.json` (`BUILD_SPEC.md` Step 3.2)
-- [ ] Create `display/package.json` (`BUILD_SPEC.md` Step 4.1)
-- [ ] Create `display/tsconfig.json` (`BUILD_SPEC.md` Step 4.2)
-- [ ] Create `display/vite.config.ts` (`BUILD_SPEC.md` Step 4.3)
-- [ ] Create `display/index.html` (`BUILD_SPEC.md` Step 4.4)
-- [ ] Run `npm install` — must succeed with no errors
-- [ ] `git commit -m "Phase 1: Project scaffolding"`
+- [x] Create root `package.json` with workspaces (`BUILD_SPEC.md` Step 1.1)
+- [x] Create root `tsconfig.base.json` (`BUILD_SPEC.md` Step 1.2)
+- [x] Create `packages/shared/package.json` (`BUILD_SPEC.md` Step 2.1)
+- [x] Create `packages/shared/tsconfig.json` (`BUILD_SPEC.md` Step 2.2)
+- [x] Create `server/package.json` (`BUILD_SPEC.md` Step 3.1)
+- [x] Create `server/tsconfig.json` (`BUILD_SPEC.md` Step 3.2)
+- [x] Create `display/package.json` (`BUILD_SPEC.md` Step 4.1)
+- [x] Create `display/tsconfig.json` (`BUILD_SPEC.md` Step 4.2)
+- [x] Create `display/vite.config.ts` (`BUILD_SPEC.md` Step 4.3)
+- [x] Create `display/index.html` (`BUILD_SPEC.md` Step 4.4)
+- [x] Run `npm install` — must succeed with no errors
+- [x] `git commit -m "Phase 1: Project scaffolding"`
 
 ---
 
@@ -208,7 +208,7 @@ Check off items as they are completed. An agent starting fresh should:
 
 ## STATUS
 
-**Current Phase:** 1
-**Last Completed:** None
+**Current Phase:** 2
+**Last Completed:** Phase 1 (Scaffolding)
 **Blockers:** None
 **Notes:** —

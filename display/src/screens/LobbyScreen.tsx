@@ -57,7 +57,7 @@ export function LobbyScreen({ qrDataUrl }: LobbyScreenProps) {
             {/* Code entry */}
             <div className="flex flex-col items-center gap-4">
               <p className="text-gray-400 text-lg">Go to</p>
-              <p className="text-indigo-400 text-xl font-medium tracking-wide">boredless.com</p>
+              <p className="text-indigo-400 text-xl font-medium tracking-wide">boredless.live</p>
               <p className="text-gray-500 text-sm">and enter code</p>
               <div className="flex gap-3">
                 {room.code.split('').map((char, i) => (

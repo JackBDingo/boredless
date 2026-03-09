@@ -332,6 +332,9 @@ class RoomManager {
       gameName: gameId, // Game registry will provide proper name
     });
 
+    // Also broadcast full room state so all clients update
+    this.broadcastRoomState(roomId);
+
     return true;
   }
 

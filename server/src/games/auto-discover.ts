@@ -5,7 +5,6 @@ import { parse as parseYaml } from 'yaml';
 import { ManifestSchema, type GameManifest } from './manifest-schema.js';
 import type { GameModule } from './game-module.js';
 import type { GameDefinition } from '@boredless/shared';
-import { GameId } from '@boredless/shared';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,20 +15,12 @@ export interface GameRegistration {
 }
 
 /**
- * Convert a validated YAML manifest into a GameDefinition (as required by GameModule).
- * The manifest id (hyphen format: "bluff-battle") is mapped to the GameId enum
- * by normalising hyphens to underscores.
+ * Convert a validated YAML manifest into a GameDefinition.
+ * The manifest id (hyphen format: "bluff-battle") is used directly as the game id string.
  */
-function manifestToDefinition(manifest: GameManifest): GameDefinition {
-  // Manifest ids use hyphens ("bluff-battle"), GameId enum uses underscores ("bluff_battle")
-  const enumKey = manifest.id.replace(/-/g, '_').toUpperCase() as keyof typeof GameId;
-  const gameId = GameId[enumKey];
-  if (!gameId) {
-    throw new Error(`[auto-discover] Manifest id "${manifest.id}" does not map to a known GameId enum value`);
-  }
-
+export function manifestToDefinition(manifest: GameManifest): GameDefinition {
   return {
-    id: gameId,
+    id: manifest.id,
     name: manifest.name,
     description: manifest.description,
     minPlayers: manifest.players.min,
@@ -99,6 +90,3 @@ export async function discoverGames(): Promise<GameRegistration[]> {
 
   return games;
 }
-
-// Re-export so callers can build GameDefinition from manifest without reimporting
-export { manifestToDefinition };

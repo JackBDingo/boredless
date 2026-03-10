@@ -33,33 +33,11 @@ export enum Visibility {
   HOST = 'host',               // Host only
 }
 
-/** Game IDs — one per game module */
-export enum GameId {
-  BLUFF_BATTLE = 'bluff_battle',
-  VILLAGE_OF_SHADOWS = 'village_of_shadows',
-}
-
-/** Generic phase types used across games */
+/** Shared phase types — game-specific phases are defined locally in each game */
 export enum PhaseType {
-  // Shared phases
   LOBBY = 'lobby',
   INSTRUCTIONS = 'instructions',
   GAME_OVER = 'game_over',
-
-  // Bluff Battle phases
-  BB_PROMPT = 'bb_prompt',
-  BB_SUBMIT = 'bb_submit',
-  BB_VOTING = 'bb_voting',
-  BB_REVEAL = 'bb_reveal',
-  BB_SCORES = 'bb_scores',
-
-  // Village of Shadows phases
-  VOS_ROLE_REVEAL = 'vos_role_reveal',
-  VOS_NIGHT = 'vos_night',
-  VOS_NIGHT_RESULT = 'vos_night_result',
-  VOS_DAY = 'vos_day',
-  VOS_VOTE = 'vos_vote',
-  VOS_VOTE_RESULT = 'vos_vote_result',
 }
 
 /** Input types that players can submit */
@@ -67,15 +45,6 @@ export enum InputType {
   TEXT = 'text',
   VOTE = 'vote',
   CONFIRM = 'confirm',
-  NIGHT_ACTION = 'night_action',
-}
-
-/** Village of Shadows roles */
-export enum VillageRole {
-  VILLAGER = 'villager',
-  WEREWOLF = 'werewolf',
-  SEER = 'seer',
-  DOCTOR = 'doctor',
 }
 
 /** WebSocket close codes */
@@ -138,4 +107,3 @@ export const PlatformEvent = {
 } as const;
 
 export type PlatformEventName = typeof PlatformEvent[keyof typeof PlatformEvent];
-

@@ -1,4 +1,4 @@
-import { BB_POINTS_CORRECT_ANSWER, BB_POINTS_FOOLED_PLAYER } from '@boredless/shared';
+import { BB_POINTS_CORRECT_ANSWER, BB_POINTS_FOOLED_PLAYER } from '../constants.js';
 
 export interface BBVote {
   voterId: string;

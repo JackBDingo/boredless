@@ -4,11 +4,11 @@
  */
 export type GameEventHook = (event: string, handler: (data: unknown) => void) => void;
 
-import { GameId, PhaseType, InputType } from '../enums.js';
+import { InputType } from '../enums.js';
 
 /** Game definition metadata (for catalog display) */
 export interface GameDefinition {
-  id: GameId;
+  id: string;
   name: string;
   description: string;
   minPlayers: number;
@@ -19,7 +19,7 @@ export interface GameDefinition {
 
 /** Current phase state (sent to clients) */
 export interface PhaseState {
-  phaseType: PhaseType;
+  phaseType: string;
   roundNumber: number;
   totalRounds: number;
   timerRemainingMs: number | null;
@@ -57,27 +57,5 @@ export interface GameOverState {
   /** Human-readable team label set by the game (e.g. "The Village", "The Werewolves") */
   winnerTeamDisplay?: string;
   finalScores: ScoreEntry[];
-  gameId: GameId;
+  gameId: string;
 }
-
-/** Available game catalog entry */
-export const GAME_CATALOG: GameDefinition[] = [
-  {
-    id: GameId.BLUFF_BATTLE,
-    name: 'Bluff Battle',
-    description: 'Submit fake answers, fool your friends, spot the truth. The best liars win!',
-    minPlayers: 3,
-    maxPlayers: 8,
-    estimatedMinutes: 10,
-    icon: '🎭',
-  },
-  {
-    id: GameId.VILLAGE_OF_SHADOWS,
-    name: 'Village of Shadows',
-    description: 'Hidden roles. Secret actions. Trust no one. Will the village survive the night?',
-    minPlayers: 5,
-    maxPlayers: 10,
-    estimatedMinutes: 15,
-    icon: '🐺',
-  },
-];

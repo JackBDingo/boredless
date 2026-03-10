@@ -30,29 +30,6 @@ export const PLAYER_COLORS = [
   '#AED6F1', // Light Blue
 ] as const;
 
-/** Bluff Battle settings */
-export const BB_MIN_PLAYERS = 3;
-export const BB_MAX_PLAYERS = 8;
-export const BB_ROUNDS_DEFAULT = 3;
-export const BB_SUBMIT_TIME_SECONDS = 60;
-export const BB_VOTE_TIME_SECONDS = 30;
-export const BB_REVEAL_TIME_SECONDS = 10;
-export const BB_SCORES_TIME_SECONDS = 8;
-export const BB_INSTRUCTIONS_TIME_SECONDS = 10;
-export const BB_MAX_ANSWER_LENGTH = 100;
-export const BB_POINTS_CORRECT_ANSWER = 1000;    // Voting for the correct answer
-export const BB_POINTS_FOOLED_PLAYER = 500;      // Each player fooled by your fake
-
-/** Village of Shadows settings */
-export const VOS_MIN_PLAYERS = 5;
-export const VOS_MAX_PLAYERS = 10;
-export const VOS_ROLE_REVEAL_TIME_SECONDS = 10;
-export const VOS_NIGHT_TIME_SECONDS = 30;
-export const VOS_NIGHT_RESULT_TIME_SECONDS = 8;
-export const VOS_DAY_TIME_SECONDS = 120;         // 2 minutes discussion
-export const VOS_VOTE_TIME_SECONDS = 30;
-export const VOS_VOTE_RESULT_TIME_SECONDS = 8;
-
 /** Server settings */
 export const DEFAULT_PORT = 3100;
 export const CORS_ORIGINS = ['http://localhost:5173', 'http://localhost:8081'];

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { BBPrivateState } from '../types.js';
-import { PhaseType, BB_MAX_ANSWER_LENGTH } from '@boredless/shared';
+import { PhaseType } from '@boredless/shared';
+import { BB_MAX_ANSWER_LENGTH } from '../constants.js';
+import { BBPhase } from '../phases.js';
 import { Send, Check, Vote, Monitor, Trophy, Theater } from 'lucide-react';
 import { PoweredByLogo } from '@phone/components/PoweredByLogo';
 import type { PhoneProps } from '@phone/games/types';
@@ -46,7 +48,7 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, useGameEven
         )}
 
         {/* SUBMIT — awaiting answer */}
-        {phase.phaseType === PhaseType.BB_SUBMIT && !state.hasSubmitted && (
+        {phase.phaseType === BBPhase.SUBMIT && !state.hasSubmitted && (
           <div className="w-full flex flex-col items-center gap-5">
             <p className="text-indigo-400 text-xl font-semibold text-center leading-snug">
               {state.prompt}
@@ -91,7 +93,7 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, useGameEven
         )}
 
         {/* SUBMIT — already submitted */}
-        {phase.phaseType === PhaseType.BB_SUBMIT && state.hasSubmitted && (
+        {phase.phaseType === BBPhase.SUBMIT && state.hasSubmitted && (
           <div className="flex flex-col items-center gap-4 text-center mt-8">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/15 flex items-center justify-center">
               <Check size={32} className="text-emerald-400" />
@@ -107,7 +109,7 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, useGameEven
         )}
 
         {/* VOTING — choose an answer */}
-        {phase.phaseType === PhaseType.BB_VOTING && !state.hasVoted && state.voteOptions && (
+        {phase.phaseType === BBPhase.VOTING && !state.hasVoted && state.voteOptions && (
           <div className="w-full flex flex-col items-center gap-4">
             <h2 className="text-xl font-bold text-white text-center mb-2">
               Which is the real answer?
@@ -131,7 +133,7 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, useGameEven
         )}
 
         {/* VOTING — voted */}
-        {phase.phaseType === PhaseType.BB_VOTING && state.hasVoted && (
+        {phase.phaseType === BBPhase.VOTING && state.hasVoted && (
           <div className="flex flex-col items-center gap-4 text-center mt-8">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/15 flex items-center justify-center">
               <Vote size={32} className="text-indigo-400" />
@@ -142,7 +144,7 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, useGameEven
         )}
 
         {/* REVEAL or SCORES */}
-        {(phase.phaseType === PhaseType.BB_REVEAL || phase.phaseType === PhaseType.BB_SCORES) && (
+        {(phase.phaseType === BBPhase.REVEAL || phase.phaseType === BBPhase.SCORES) && (
           <div className="flex flex-col items-center gap-4 text-center mt-8">
             <div className="w-16 h-16 rounded-2xl bg-purple-500/15 flex items-center justify-center">
               <Monitor size={32} className="text-purple-400" />

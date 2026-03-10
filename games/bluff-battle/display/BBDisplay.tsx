@@ -1,5 +1,6 @@
 import type { BBPublicState } from '../types.js';
 import { PhaseType } from '@boredless/shared';
+import { BBPhase } from '../phases.js';
 import { Timer } from '@display/components/Timer';
 import { Scoreboard } from '@display/components/Scoreboard';
 import { Theater, Send, Vote, Sparkles } from 'lucide-react';
@@ -34,7 +35,7 @@ export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEv
         )}
 
         {/* PROMPT */}
-        {phase.phaseType === PhaseType.BB_PROMPT && (
+        {phase.phaseType === BBPhase.PROMPT && (
           <div className="text-center">
             <h2 className="text-4xl font-bold text-white leading-snug">{state.currentPrompt}</h2>
             <p className="text-gray-500 mt-4">Check your phones — submit your best fake answer</p>
@@ -43,7 +44,7 @@ export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEv
         )}
 
         {/* SUBMIT */}
-        {phase.phaseType === PhaseType.BB_SUBMIT && (
+        {phase.phaseType === BBPhase.SUBMIT && (
           <div className="text-center">
             <h2 className="text-3xl font-bold text-white mb-6 leading-snug">{state.currentPrompt}</h2>
             <div className="flex items-center justify-center gap-3">
@@ -57,7 +58,7 @@ export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEv
         )}
 
         {/* VOTING */}
-        {phase.phaseType === PhaseType.BB_VOTING && (
+        {phase.phaseType === BBPhase.VOTING && (
           <div className="text-center w-full">
             <h2 className="text-2xl font-bold text-white mb-6">{state.currentPrompt}</h2>
             <div className="grid gap-3">
@@ -77,7 +78,7 @@ export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEv
         )}
 
         {/* REVEAL */}
-        {phase.phaseType === PhaseType.BB_REVEAL && state.revealData && (
+        {phase.phaseType === BBPhase.REVEAL && state.revealData && (
           <div className="text-center w-full">
             <div className="flex items-center justify-center gap-3 mb-6">
               <Sparkles size={24} className="text-amber-400" />
@@ -118,7 +119,7 @@ export function BBDisplay({ phase, publicState, scores, useGameEvent: _useGameEv
         )}
 
         {/* SCORES */}
-        {phase.phaseType === PhaseType.BB_SCORES && (
+        {phase.phaseType === BBPhase.SCORES && (
           <div className="text-center w-full">
             <h2 className="text-3xl font-bold text-white mb-6">Scores</h2>
             <Scoreboard scores={scores} showRoundScore />

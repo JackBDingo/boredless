@@ -6,18 +6,20 @@ import type {
   GameDefinition,
 } from '@boredless/shared';
 import {
-  GameId,
   PhaseType,
   InputType,
   ServerMessageType,
   RoomStatus,
+} from '@boredless/shared';
+import {
   BB_ROUNDS_DEFAULT,
   BB_SUBMIT_TIME_SECONDS,
   BB_VOTE_TIME_SECONDS,
   BB_REVEAL_TIME_SECONDS,
   BB_SCORES_TIME_SECONDS,
   BB_INSTRUCTIONS_TIME_SECONDS,
-} from '@boredless/shared';
+} from '../constants.js';
+import { BBPhase } from '../phases.js';
 import { nanoid } from 'nanoid';
 import { getRandomPrompts } from './prompts.js';
 import { calculateBBScores, type BBAnswer, type BBVote } from './scoring.js';
@@ -35,7 +37,7 @@ interface BBGameState {
   players: Player[];
   totalRounds: number;
   currentRound: number;
-  currentPhase: PhaseType;
+  currentPhase: string;
   usedPromptIds: number[];
 
   // Current round state
@@ -83,7 +85,7 @@ class BluffBattleModule implements GameModule {
     // Broadcast game started
     ctx.sendToAll({
       type: ServerMessageType.GAME_STARTED,
-      gameId: GameId.BLUFF_BATTLE,
+      gameId: 'bluff-battle',
       phase: this.getPhaseState(roomId),
       gamePublicState: this.getPublicState(roomId),
     });
@@ -107,10 +109,10 @@ class BluffBattleModule implements GameModule {
     const remaining = state.ctx.getTimerRemaining();
     let timerTotalMs: number | null = null;
     switch (state.currentPhase) {
-      case PhaseType.BB_SUBMIT: timerTotalMs = BB_SUBMIT_TIME_SECONDS * 1000; break;
-      case PhaseType.BB_VOTING: timerTotalMs = BB_VOTE_TIME_SECONDS * 1000; break;
-      case PhaseType.BB_REVEAL: timerTotalMs = BB_REVEAL_TIME_SECONDS * 1000; break;
-      case PhaseType.BB_SCORES: timerTotalMs = BB_SCORES_TIME_SECONDS * 1000; break;
+      case BBPhase.SUBMIT: timerTotalMs = BB_SUBMIT_TIME_SECONDS * 1000; break;
+      case BBPhase.VOTING: timerTotalMs = BB_VOTE_TIME_SECONDS * 1000; break;
+      case BBPhase.REVEAL: timerTotalMs = BB_REVEAL_TIME_SECONDS * 1000; break;
+      case BBPhase.SCORES: timerTotalMs = BB_SCORES_TIME_SECONDS * 1000; break;
       case PhaseType.INSTRUCTIONS: timerTotalMs = BB_INSTRUCTIONS_TIME_SECONDS * 1000; break;
     }
     return {
@@ -131,9 +133,9 @@ class BluffBattleModule implements GameModule {
       currentPrompt: state.currentPrompt?.question ?? null,
       roundNumber: state.currentRound,
       totalRounds: state.totalRounds,
-      answers: state.currentPhase === PhaseType.BB_VOTING
+      answers: state.currentPhase === BBPhase.VOTING
         ? state.answers.map(a => ({ answerId: a.answerId, text: a.text }))
-        : state.currentPhase === PhaseType.BB_REVEAL && state.revealData
+        : state.currentPhase === BBPhase.REVEAL && state.revealData
         ? state.revealData.answers.map(a => ({
             answerId: a.answerId,
             text: a.text,
@@ -156,11 +158,11 @@ class BluffBattleModule implements GameModule {
 
     const privateState: BBPrivateState = {
       gameId: 'bluff_battle',
-      prompt: state.currentPhase === PhaseType.BB_SUBMIT ? state.currentPrompt?.question ?? null : null,
+      prompt: state.currentPhase === BBPhase.SUBMIT ? state.currentPrompt?.question ?? null : null,
       hasSubmitted: state.submissions.has(playerId),
       hasVoted: state.votes.some(v => v.voterId === playerId),
       ownAnswer: state.submissions.get(playerId) ?? null,
-      voteOptions: state.currentPhase === PhaseType.BB_VOTING
+      voteOptions: state.currentPhase === BBPhase.VOTING
         ? state.answers
             .filter(a => a.submittedByPlayerId !== playerId) // Can't vote for own answer
             .map(a => ({ answerId: a.answerId, text: a.text }))
@@ -173,7 +175,7 @@ class BluffBattleModule implements GameModule {
   handleInput(
     roomId: string,
     playerId: string,
-    inputType: InputType,
+    inputType: string,
     payload: Record<string, unknown>,
   ): { accepted: boolean; reason?: string } {
     const state = this.states.get(roomId);
@@ -205,7 +207,7 @@ class BluffBattleModule implements GameModule {
     playerId: string,
     payload: Record<string, unknown>,
   ): { accepted: boolean; reason?: string } {
-    if (state.currentPhase !== PhaseType.BB_SUBMIT) {
+    if (state.currentPhase !== BBPhase.SUBMIT) {
       return { accepted: false, reason: 'Not in submission phase' };
     }
     if (state.submissions.has(playerId)) {
@@ -240,7 +242,7 @@ class BluffBattleModule implements GameModule {
     playerId: string,
     payload: Record<string, unknown>,
   ): { accepted: boolean; reason?: string } {
-    if (state.currentPhase !== PhaseType.BB_VOTING) {
+    if (state.currentPhase !== BBPhase.VOTING) {
       return { accepted: false, reason: 'Not in voting phase' };
     }
     if (state.votes.some(v => v.voterId === playerId)) {
@@ -281,7 +283,7 @@ class BluffBattleModule implements GameModule {
     if (!state) return;
 
     state.currentRound++;
-    state.currentPhase = PhaseType.BB_SUBMIT;
+    state.currentPhase = BBPhase.SUBMIT;
     state.submissions = new Map();
     state.answers = [];
     state.votes = [];
@@ -298,11 +300,11 @@ class BluffBattleModule implements GameModule {
 
     // Start submission timer
     state.ctx.startTimer(
-      PhaseType.BB_SUBMIT,
+      BBPhase.SUBMIT,
       BB_SUBMIT_TIME_SECONDS * 1000,
       () => {
         const s = this.states.get(roomId);
-        if (!s || s.currentPhase !== PhaseType.BB_SUBMIT) return;
+        if (!s || s.currentPhase !== BBPhase.SUBMIT) return;
         this.startVoting(roomId);
       },
     );
@@ -313,10 +315,10 @@ class BluffBattleModule implements GameModule {
   private startVoting(roomId: string): void {
     const state = this.states.get(roomId);
     if (!state || !state.currentPrompt) return;
-    if (state.currentPhase !== PhaseType.BB_SUBMIT) return; // Guard against double-call
+    if (state.currentPhase !== BBPhase.SUBMIT) return; // Guard against double-call
 
     state.ctx.stopTimer();
-    state.currentPhase = PhaseType.BB_VOTING;
+    state.currentPhase = BBPhase.VOTING;
 
     // Build answer list: all fake submissions + the correct answer
     const answers: BBAnswer[] = [];
@@ -348,11 +350,11 @@ class BluffBattleModule implements GameModule {
 
     // Start voting timer
     state.ctx.startTimer(
-      PhaseType.BB_VOTING,
+      BBPhase.VOTING,
       BB_VOTE_TIME_SECONDS * 1000,
       () => {
         const s = this.states.get(roomId);
-        if (!s || s.currentPhase !== PhaseType.BB_VOTING) return;
+        if (!s || s.currentPhase !== BBPhase.VOTING) return;
         this.startReveal(roomId);
       },
     );
@@ -361,10 +363,10 @@ class BluffBattleModule implements GameModule {
   private startReveal(roomId: string): void {
     const state = this.states.get(roomId);
     if (!state) return;
-    if (state.currentPhase !== PhaseType.BB_VOTING) return; // Guard against double-call
+    if (state.currentPhase !== BBPhase.VOTING) return; // Guard against double-call
 
     state.ctx.stopTimer();
-    state.currentPhase = PhaseType.BB_REVEAL;
+    state.currentPhase = BBPhase.REVEAL;
 
     // Calculate scores
     const result = calculateBBScores(state.answers, state.votes);
@@ -418,11 +420,11 @@ class BluffBattleModule implements GameModule {
 
     // Start reveal timer → then show scores or next round
     state.ctx.startTimer(
-      PhaseType.BB_REVEAL,
+      BBPhase.REVEAL,
       BB_REVEAL_TIME_SECONDS * 1000,
       () => {
         const s = this.states.get(roomId);
-        if (!s || s.currentPhase !== PhaseType.BB_REVEAL) return;
+        if (!s || s.currentPhase !== BBPhase.REVEAL) return;
         this.showScores(roomId);
       },
     );
@@ -433,7 +435,7 @@ class BluffBattleModule implements GameModule {
     if (!state) return;
 
     state.ctx.stopTimer();
-    state.currentPhase = PhaseType.BB_SCORES;
+    state.currentPhase = BBPhase.SCORES;
 
     // Broadcast scores
     state.ctx.broadcastScores();
@@ -444,17 +446,17 @@ class BluffBattleModule implements GameModule {
     const nextAction = state.currentRound >= state.totalRounds
       ? () => {
           const s = this.states.get(roomId);
-          if (!s || s.currentPhase !== PhaseType.BB_SCORES) return;
+          if (!s || s.currentPhase !== BBPhase.SCORES) return;
           this.endGame(roomId);
         }
       : () => {
           const s = this.states.get(roomId);
-          if (!s || s.currentPhase !== PhaseType.BB_SCORES) return;
+          if (!s || s.currentPhase !== BBPhase.SCORES) return;
           this.startRound(roomId);
         };
 
     state.ctx.startTimer(
-      PhaseType.BB_SCORES,
+      BBPhase.SCORES,
       BB_SCORES_TIME_SECONDS * 1000,
       nextAction,
     );
@@ -475,7 +477,7 @@ class BluffBattleModule implements GameModule {
       winnerName: winner?.playerName ?? null,
       winnerTeam: null,
       finalScores: scores,
-      gameId: GameId.BLUFF_BATTLE,
+      gameId: 'bluff-battle',
     });
 
     state.ctx.setRoomStatus(RoomStatus.GAME_ENDED);

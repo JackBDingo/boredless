@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useConnectionStore } from '../store/connection';
 import { useRoomStore } from '../store/room';
 import { useGameStore } from '../store/game';
-import { ServerMessageType, GAME_CATALOG } from '@boredless/shared';
-import type { PhaseState } from '@boredless/shared';
+import { ServerMessageType } from '@boredless/shared';
+import type { PhaseState, GameDefinition } from '@boredless/shared';
 import { Crown, Users, Clock, ChevronRight, Check, Loader2 } from 'lucide-react';
-import { getGameIcon } from '../lib/gameIcons';
+import { getIconConfig } from '../lib/gameIcons';
 import { PoweredByLogo } from '../components/PoweredByLogo';
 
 interface Props {
@@ -20,8 +20,18 @@ export function LobbyScreen({ onGameStarted }: Props) {
   const setPrivateState = useGameStore((s) => s.setPrivateState);
   const room = useRoomStore((s) => s.room);
 
+  const [gameCatalog, setGameCatalog] = useState<GameDefinition[]>([]);
+
+  // Fetch available games from the server registry
+  useEffect(() => {
+    fetch('/api/games')
+      .then((res) => res.json())
+      .then((data: GameDefinition[]) => setGameCatalog(data))
+      .catch((err) => console.error('Failed to load game catalog:', err));
+  }, []);
+
   const isHost = room && playerId === room.hostPlayerId;
-  const selectedGame = room ? GAME_CATALOG.find((g) => g.id === room.selectedGameId) : null;
+  const selectedGame = room ? gameCatalog.find((g) => g.id === room.selectedGameId) : null;
   const playerCount = room?.players.length ?? 0;
   const canStart = selectedGame && playerCount >= selectedGame.minPlayers;
 
@@ -97,54 +107,61 @@ export function LobbyScreen({ onGameStarted }: Props) {
 
         {/* Game cards */}
         <div className="flex flex-col gap-3 flex-1">
-          {GAME_CATALOG.map((game) => {
-            const selected = room.selectedGameId === game.id;
-            const enoughPlayers = playerCount >= game.minPlayers;
-            const gi = getGameIcon(game.id);
-            const IconComponent = gi.icon;
+          {gameCatalog.length === 0 ? (
+            <div className="flex items-center justify-center py-12 text-gray-600">
+              <Loader2 size={24} className="animate-spin mr-2" />
+              Loading games…
+            </div>
+          ) : (
+            gameCatalog.map((game) => {
+              const selected = room.selectedGameId === game.id;
+              const enoughPlayers = playerCount >= game.minPlayers;
+              const gi = getIconConfig(game.icon);
+              const IconComponent = gi.icon;
 
-            return (
-              <button
-                key={game.id}
-                onClick={() => send({ type: 'select_game', gameId: game.id })}
-                className={`p-5 rounded-2xl border text-left transition-all duration-200 ${
-                  selected
-                    ? 'border-indigo-500/60 bg-indigo-500/10'
-                    : 'border-white/8 bg-white/[0.03] active:bg-white/[0.06]'
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className={`w-12 h-12 rounded-xl ${gi.bg} flex items-center justify-center shrink-0`}>
-                    <IconComponent size={24} className={gi.color} />
-                  </div>
+              return (
+                <button
+                  key={game.id}
+                  onClick={() => send({ type: 'select_game', gameId: game.id })}
+                  className={`p-5 rounded-2xl border text-left transition-all duration-200 ${
+                    selected
+                      ? 'border-indigo-500/60 bg-indigo-500/10'
+                      : 'border-white/8 bg-white/[0.03] active:bg-white/[0.06]'
+                  }`}
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl ${gi.bg} flex items-center justify-center shrink-0`}>
+                      <IconComponent size={24} className={gi.color} />
+                    </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="text-lg font-semibold text-white">{game.name}</h3>
-                      {selected && (
-                        <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
-                          <Check size={14} className="text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-gray-500 text-sm leading-relaxed mb-2">{game.description}</p>
-                    <div className="flex items-center gap-4 text-xs">
-                      <span className={`flex items-center gap-1 ${enoughPlayers ? 'text-gray-500' : 'text-amber-400/80'}`}>
-                        <Users size={12} />
-                        {game.minPlayers}–{game.maxPlayers}
-                      </span>
-                      <span className="flex items-center gap-1 text-gray-600">
-                        <Clock size={12} />
-                        {game.estimatedMinutes} min
-                      </span>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-lg font-semibold text-white">{game.name}</h3>
+                        {selected && (
+                          <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
+                            <Check size={14} className="text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-gray-500 text-sm leading-relaxed mb-2">{game.description}</p>
+                      <div className="flex items-center gap-4 text-xs">
+                        <span className={`flex items-center gap-1 ${enoughPlayers ? 'text-gray-500' : 'text-amber-400/80'}`}>
+                          <Users size={12} />
+                          {game.minPlayers}–{game.maxPlayers}
+                        </span>
+                        <span className="flex items-center gap-1 text-gray-600">
+                          <Clock size={12} />
+                          {game.estimatedMinutes} min
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })
+          )}
         </div>
 
         {/* Start button */}

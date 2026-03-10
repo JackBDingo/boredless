@@ -1,5 +1,5 @@
 import type { VillagePublicState } from '../types.js';
-import { PhaseType } from '@boredless/shared';
+import { VOSPhase } from '../phases.js';
 import { Timer } from '@display/components/Timer';
 import { Moon, Sun, Vote, Skull, MessageCircle } from 'lucide-react';
 import type { DisplayProps } from '@display/games/types';
@@ -16,7 +16,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
 
       <div className="relative z-10 flex flex-col items-center gap-6 p-8">
         {/* Day indicator */}
-        {phase.phaseType !== PhaseType.VOS_ROLE_REVEAL && (
+        {phase.phaseType !== VOSPhase.ROLE_REVEAL && (
           <div className="text-gray-500 text-lg tracking-wider uppercase">Day {phase.roundNumber}</div>
         )}
 
@@ -46,7 +46,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
         </div>
 
         {/* ROLE REVEAL */}
-        {phase.phaseType === PhaseType.VOS_ROLE_REVEAL && (
+        {phase.phaseType === VOSPhase.ROLE_REVEAL && (
           <div className="text-center mt-4">
             <div className="w-20 h-20 rounded-2xl bg-violet-500/15 flex items-center justify-center mx-auto mb-4">
               <Moon size={40} className="text-violet-400" />
@@ -58,7 +58,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
         )}
 
         {/* NIGHT */}
-        {phase.phaseType === PhaseType.VOS_NIGHT && (
+        {phase.phaseType === VOSPhase.NIGHT && (
           <div className="text-center mt-4">
             <div className="w-20 h-20 rounded-2xl bg-blue-500/15 flex items-center justify-center mx-auto mb-4">
               <Moon size={40} className="text-blue-400" />
@@ -73,7 +73,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
         )}
 
         {/* NIGHT RESULT */}
-        {phase.phaseType === PhaseType.VOS_NIGHT_RESULT && (
+        {phase.phaseType === VOSPhase.NIGHT_RESULT && (
           <div className="text-center mt-4">
             <div className="w-20 h-20 rounded-2xl bg-amber-500/15 flex items-center justify-center mx-auto mb-4">
               <Sun size={40} className="text-amber-400" />
@@ -90,7 +90,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
         )}
 
         {/* DAY */}
-        {phase.phaseType === PhaseType.VOS_DAY && (
+        {phase.phaseType === VOSPhase.DAY && (
           <div className="text-center mt-4">
             <div className="w-20 h-20 rounded-2xl bg-amber-500/15 flex items-center justify-center mx-auto mb-4">
               <MessageCircle size={40} className="text-amber-400" />
@@ -102,7 +102,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
         )}
 
         {/* VOTE */}
-        {phase.phaseType === PhaseType.VOS_VOTE && (
+        {phase.phaseType === VOSPhase.VOTE && (
           <div className="text-center mt-4">
             <div className="w-20 h-20 rounded-2xl bg-red-500/15 flex items-center justify-center mx-auto mb-4">
               <Vote size={40} className="text-red-400" />
@@ -124,7 +124,7 @@ export function VillageDisplay({ phase, publicState, useGameEvent: _useGameEvent
         )}
 
         {/* VOTE RESULT */}
-        {phase.phaseType === PhaseType.VOS_VOTE_RESULT && (
+        {phase.phaseType === VOSPhase.VOTE_RESULT && (
           <div className="text-center mt-4">
             <h2 className="text-3xl font-bold text-white">{state.voteResultMessage}</h2>
             {state.eliminatedPlayerName && state.eliminatedPlayerRole && (

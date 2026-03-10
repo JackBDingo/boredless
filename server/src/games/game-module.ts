@@ -1,4 +1,4 @@
-import type { Player, PhaseState, GameDefinition, InputType } from '@boredless/shared';
+import type { Player, PhaseState, GameDefinition } from '@boredless/shared';
 import type { GameContext } from './game-context.js';
 
 /**
@@ -29,7 +29,7 @@ export interface GameModule {
   handleInput(
     roomId: string,
     playerId: string,
-    inputType: InputType,
+    inputType: string,
     payload: Record<string, unknown>,
   ): { accepted: boolean; reason?: string };
 

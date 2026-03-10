@@ -2,9 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   playerNameSchema,
   roomCodeSchema,
-  bbSubmitSchema,
+  textSubmitSchema,
   voteSchema,
-  nightActionSchema,
 } from './validation';
 import { InputType } from './enums';
 
@@ -48,17 +47,17 @@ describe('roomCodeSchema', () => {
   });
 });
 
-describe('bbSubmitSchema', () => {
+describe('textSubmitSchema', () => {
   it('accepts valid text submission', () => {
-    const result = bbSubmitSchema.parse({
+    const result = textSubmitSchema.parse({
       inputType: InputType.TEXT,
-      payload: { answer: 'My fake answer' },
+      payload: { answer: 'My answer' },
     });
-    expect(result.payload.answer).toBe('My fake answer');
+    expect(result.payload.answer).toBe('My answer');
   });
 
   it('trims answer whitespace', () => {
-    const result = bbSubmitSchema.parse({
+    const result = textSubmitSchema.parse({
       inputType: InputType.TEXT,
       payload: { answer: '  trimmed  ' },
     });
@@ -66,21 +65,14 @@ describe('bbSubmitSchema', () => {
   });
 
   it('rejects empty answer', () => {
-    expect(() => bbSubmitSchema.parse({
+    expect(() => textSubmitSchema.parse({
       inputType: InputType.TEXT,
       payload: { answer: '' },
     })).toThrow();
   });
 
-  it('rejects answer over 100 chars', () => {
-    expect(() => bbSubmitSchema.parse({
-      inputType: InputType.TEXT,
-      payload: { answer: 'A'.repeat(101) },
-    })).toThrow();
-  });
-
   it('rejects wrong input type', () => {
-    expect(() => bbSubmitSchema.parse({
+    expect(() => textSubmitSchema.parse({
       inputType: InputType.VOTE,
       payload: { answer: 'test' },
     })).toThrow();
@@ -101,15 +93,5 @@ describe('voteSchema', () => {
       inputType: InputType.VOTE,
       payload: { answerId: '' },
     })).toThrow();
-  });
-});
-
-describe('nightActionSchema', () => {
-  it('accepts valid night action', () => {
-    const result = nightActionSchema.parse({
-      inputType: InputType.NIGHT_ACTION,
-      payload: { targetPlayerId: 'player1' },
-    });
-    expect(result.payload.targetPlayerId).toBe('player1');
   });
 });

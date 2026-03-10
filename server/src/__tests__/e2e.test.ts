@@ -15,12 +15,45 @@ import {
   ServerMessageType,
   ClientMessageType,
   PhaseType,
-  GameId,
   InputType,
-  VillageRole,
-  ROLE_DISTRIBUTIONS,
-  BB_MAX_PLAYERS,
 } from '@boredless/shared';
+// BB/VOS game constants — local copies so tests don't cross rootDir boundaries
+// These must stay in sync with games/bluff-battle/phases.ts etc.
+const BBPhase = {
+  PROMPT: 'bb_prompt',
+  SUBMIT: 'bb_submit',
+  VOTING: 'bb_voting',
+  REVEAL: 'bb_reveal',
+  SCORES: 'bb_scores',
+} as const;
+
+const BB_MAX_PLAYERS = 8;
+
+const VOSPhase = {
+  ROLE_REVEAL: 'vos_role_reveal',
+  NIGHT: 'vos_night',
+  NIGHT_RESULT: 'vos_night_result',
+  DAY: 'vos_day',
+  VOTE: 'vos_vote',
+  VOTE_RESULT: 'vos_vote_result',
+} as const;
+
+const VillageRole = {
+  VILLAGER: 'villager',
+  WEREWOLF: 'werewolf',
+  SEER: 'seer',
+  DOCTOR: 'doctor',
+} as const;
+type VillageRole = typeof VillageRole[keyof typeof VillageRole];
+
+const ROLE_DISTRIBUTIONS: Record<number, { werewolves: number; seers: number; doctors: number; villagers: number }> = {
+  5: { werewolves: 1, seers: 1, doctors: 1, villagers: 2 },
+  6: { werewolves: 1, seers: 1, doctors: 1, villagers: 3 },
+  7: { werewolves: 2, seers: 1, doctors: 1, villagers: 3 },
+  8: { werewolves: 2, seers: 1, doctors: 1, villagers: 4 },
+  9: { werewolves: 2, seers: 1, doctors: 1, villagers: 5 },
+  10: { werewolves: 3, seers: 1, doctors: 1, villagers: 5 },
+};
 import type {
   ServerMessage,
   JoinedMessage,
@@ -41,6 +74,13 @@ import type {
   TimerTickMessage,
 } from '@boredless/shared';
 import type { FastifyInstance } from 'fastify';
+
+// Game ID strings (from manifests)
+const GameId = {
+  BLUFF_BATTLE: 'bluff-battle',
+  VILLAGE_OF_SHADOWS: 'village-of-shadows',
+} as const;
+type GameId = typeof GameId[keyof typeof GameId];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SERVER LIFECYCLE
@@ -120,7 +160,7 @@ function waitForMessage<T extends ServerMessage>(
  */
 async function waitForPhase(
   ws: WebSocket,
-  phaseType: PhaseType,
+  phaseType: string,
   timeoutMs: number,
 ): Promise<PhaseChangedMessage> {
   return new Promise((resolve, reject) => {
@@ -388,10 +428,10 @@ async function performNightActions(
   const specialRoles = [VillageRole.WEREWOLF, VillageRole.SEER, VillageRole.DOCTOR];
   for (let i = 0; i < players.length; i++) {
     const state = nightPrivates[i].state as VillagePrivate;
-    if (specialRoles.includes(state.role) && state.nightTargets && state.nightTargets.length > 0) {
+    if ((specialRoles as string[]).includes(state.role) && state.nightTargets && state.nightTargets.length > 0) {
       send(players[i].ws, {
         type: ClientMessageType.SUBMIT_INPUT,
-        inputType: InputType.NIGHT_ACTION,
+        inputType: 'night_action',
         payload: { targetPlayerId: state.nightTargets[0].playerId },
       });
       await new Promise(r => setTimeout(r, 50));
@@ -712,7 +752,7 @@ describe('Room Lifecycle — Edge Cases & Errors', () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice']);
     const errorPromise = waitForMessage<ErrorMessage>(players[0].ws, ServerMessageType.ERROR);
-    send(players[0].ws, { type: ClientMessageType.SELECT_GAME, gameId: 'not_a_game' as GameId });
+    send(players[0].ws, { type: ClientMessageType.SELECT_GAME, gameId: 'not_a_game' });
     const err = await errorPromise;
     expect(err.code).toBe('INVALID_GAME');
     await closeAll(players);
@@ -833,8 +873,8 @@ describe('Bluff Battle — Full Happy Path', () => {
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await waitForMessage<GameStartedMessage>(players[0].ws, ServerMessageType.GAME_STARTED);
-    const submitPhase = await waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
-    expect(submitPhase.phase.phaseType).toBe(PhaseType.BB_SUBMIT);
+    const submitPhase = await waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
+    expect(submitPhase.phase.phaseType).toBe(BBPhase.SUBMIT);
     expect(submitPhase.phase.roundNumber).toBe(1);
     await closeAll(players);
   }, 20_000);
@@ -842,24 +882,24 @@ describe('Bluff Battle — Full Happy Path', () => {
   it('all players submit answers → immediately advances to BB_VOTING', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhasePromise = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhasePromise;
-    const votingPromise = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPromise = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     const voting = await votingPromise;
-    expect(voting.phase.phaseType).toBe(PhaseType.BB_VOTING);
+    expect(voting.phase.phaseType).toBe(BBPhase.VOTING);
     await closeAll(players);
   }, 25_000);
 
   it('voting phase: each player gets voteOptions excluding their own answer', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhasePromise = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhasePromise;
     const voteOptionsPromise = preRegisterVoteOptions(players);
-    const votingPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPhasePromise = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     await votingPhasePromise;
     const voteOptions = await voteOptionsPromise;
@@ -874,15 +914,15 @@ describe('Bluff Battle — Full Happy Path', () => {
   it('all players vote → advances to BB_REVEAL with reveal data', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhasePromise = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhasePromise;
     const voteOptionsPromise = preRegisterVoteOptions(players);
-    const votingPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPhasePromise = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     await votingPhasePromise;
     const voteOptions = await voteOptionsPromise;
-    const revealPhaseP = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+    const revealPhaseP = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
     await voteAll(players, voteOptions);
     const reveal = await revealPhaseP;
     const pub = reveal.gamePublicState as { revealData: { correctAnswerId: string } | null };
@@ -894,15 +934,15 @@ describe('Bluff Battle — Full Happy Path', () => {
   it('REVEAL shows correct answer highlighted and round scores', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhasePromise = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhasePromise;
     const voteOptionsPromise = preRegisterVoteOptions(players);
-    const votingPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPhasePromise = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     await votingPhasePromise;
     const voteOptions = await voteOptionsPromise;
-    const revealPhaseP = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+    const revealPhaseP = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
     await voteAll(players, voteOptions);
     const reveal = await revealPhaseP;
     const pub = reveal.gamePublicState as {
@@ -920,15 +960,15 @@ describe('Bluff Battle — Full Happy Path', () => {
   it('SCORE_UPDATE broadcast after reveal phase', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhasePromise = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhasePromise;
     const voteOptionsPromise = preRegisterVoteOptions(players);
-    const votingPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPhasePromise = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     await votingPhasePromise;
     const voteOptions = await voteOptionsPromise;
-    const revealPhaseP2 = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+    const revealPhaseP2 = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
     await voteAll(players, voteOptions);
     // Register SCORE_UPDATE waiter before REVEAL phase resolves to avoid missing it
     const scoreUpdateP2 = waitForMessage<ScoreUpdateMessage>(
@@ -949,20 +989,20 @@ describe('Bluff Battle — Full Happy Path', () => {
   it('game ends after 3 rounds → GAME_OVER with final scores', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const firstSubmitPhase = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const firstSubmitPhase = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     for (let round = 0; round < 3; round++) {
-      if (round === 0) { await firstSubmitPhase; } else { await waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000); }
+      if (round === 0) { await firstSubmitPhase; } else { await waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000); }
       const voteOptionsP = preRegisterVoteOptions(players);
-      const votingPhaseP = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+      const votingPhaseP = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
       await submitAllAnswers(players);
       await votingPhaseP;
       const voteOptions = await voteOptionsP;
-      const revealP3 = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+      const revealP3 = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
       await voteAll(players, voteOptions);
       await revealP3;
       // Register BB_SCORES waiter before the 10s REVEAL timer expires
-      const scoresPhaseP3 = waitForPhase(players[0].ws, PhaseType.BB_SCORES, 20_000);
+      const scoresPhaseP3 = waitForPhase(players[0].ws, BBPhase.SCORES, 20_000);
       await scoresPhaseP3;
     }
     const gameOver = await waitForMessage<GameOverMessage>(
@@ -980,20 +1020,20 @@ describe('Bluff Battle — Full Happy Path', () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
     const gameOverPromise = waitForMessage<GameOverMessage>(players[0].ws, ServerMessageType.GAME_OVER, 180_000);
-    const firstSubmitPhase = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const firstSubmitPhase = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     // Play through all 3 rounds to reach GAME_OVER faster
     for (let round = 0; round < 3; round++) {
-      if (round === 0) { await firstSubmitPhase; } else { await waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 20_000); }
+      if (round === 0) { await firstSubmitPhase; } else { await waitForPhase(players[0].ws, BBPhase.SUBMIT, 20_000); }
       const voteOptionsP = preRegisterVoteOptions(players);
-      const votingP = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+      const votingP = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
       await submitAllAnswers(players);
       await votingP;
       const voteOptions = await voteOptionsP;
-      const revealP = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+      const revealP = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
       await voteAll(players, voteOptions);
       await revealP;
-      await waitForPhase(players[0].ws, PhaseType.BB_SCORES, 20_000);
+      await waitForPhase(players[0].ws, BBPhase.SCORES, 20_000);
     }
     const gameOver = await gameOverPromise;
     expect(gameOver.result.gameId).toBe(GameId.BLUFF_BATTLE);
@@ -1038,7 +1078,7 @@ describe('Bluff Battle — Alternative Paths', () => {
   it('player submits answer twice → second rejected with Already submitted', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhaseP = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhaseP = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhaseP;
     const accepted = waitForMessage<InputAcceptedMessage>(
@@ -1069,11 +1109,11 @@ describe('Bluff Battle — Alternative Paths', () => {
   it('player votes twice → second vote rejected with Already voted', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhaseP = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhaseP = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhaseP;
     const voteOptionsPromise = preRegisterVoteOptions(players);
-    const votingPhasePromise = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPhasePromise = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     await votingPhasePromise;
     const voteOptions = await voteOptionsPromise;
@@ -1105,11 +1145,11 @@ describe('Bluff Battle — Alternative Paths', () => {
   it('vote with invalid answerId → rejected with Invalid answer', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhaseP = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhaseP = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhaseP;
     const _voteOpts = preRegisterVoteOptions(players);
-    const votingPhaseInvalid = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+    const votingPhaseInvalid = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
     await submitAllAnswers(players);
     await votingPhaseInvalid;
     await _voteOpts; // ensure private state received
@@ -1188,7 +1228,7 @@ describe('Bluff Battle — Alternative Paths', () => {
   it('public state shows submittedCount updating as players submit', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhaseP = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhaseP = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhaseP;
     send(players[0].ws, {
@@ -1210,17 +1250,17 @@ describe('Bluff Battle — Alternative Paths', () => {
   it('score accumulates correctly across 2 rounds', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const firstSubmitP = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const firstSubmitP = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     let prevTotal = 0;
     for (let round = 0; round < 2; round++) {
-      if (round === 0) { await firstSubmitP; } else { await waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000); }
+      if (round === 0) { await firstSubmitP; } else { await waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000); }
       const voteOptionsP = preRegisterVoteOptions(players);
-      const votingPhaseP = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+      const votingPhaseP = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
       await submitAllAnswers(players);
       await votingPhaseP;
       const voteOptions = await voteOptionsP;
-      const revealP4 = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+      const revealP4 = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
       await voteAll(players, voteOptions);
       await revealP4;
       // Register SCORE_UPDATE and BB_SCORES phase watchers before the 10s REVEAL timer expires
@@ -1229,7 +1269,7 @@ describe('Bluff Battle — Alternative Paths', () => {
         ServerMessageType.SCORE_UPDATE,
         15_000,
       );
-      const scoresPhaseP = waitForPhase(players[0].ws, PhaseType.BB_SCORES, 20_000);
+      const scoresPhaseP = waitForPhase(players[0].ws, BBPhase.SCORES, 20_000);
       const scoreUpdate = await scoreUpdateP;
       const currentTotal = scoreUpdate.scores.reduce((s, e) => s + e.score, 0);
       if (round > 0) {
@@ -1244,7 +1284,7 @@ describe('Bluff Battle — Alternative Paths', () => {
   it('player who does not submit still shows in round (timer advances phase)', async () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
-    const submitPhaseP = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const submitPhaseP = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     await submitPhaseP;
     // Only Alice and Bob submit, Charlie does not.
@@ -1326,7 +1366,7 @@ describe('Village of Shadows — Full Happy Path', () => {
     selectAndStartGame(players[0].ws, GameId.VILLAGE_OF_SHADOWS);
     const started = await Promise.all(startedPromises);
     for (const s of started) {
-      expect(s.phase.phaseType).toBe(PhaseType.VOS_ROLE_REVEAL);
+      expect(s.phase.phaseType).toBe(VOSPhase.ROLE_REVEAL);
       const pub = s.gamePublicState as { players: { isAlive: boolean }[] };
       expect(pub.players.every(p => p.isAlive)).toBe(true);
     }
@@ -1344,7 +1384,7 @@ describe('Village of Shadows — Full Happy Path', () => {
     const wolfIdx = privates.findIndex(p => (p.state as VillagePrivate).role === VillageRole.WEREWOLF);
     // Register night state watcher BEFORE the NIGHT phase fires
     const wolfNightPrivateP = waitForNightPrivateState(players[wolfIdx].ws, 15_000);
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const wolfNightPrivate = await wolfNightPrivateP;
     const wolfState = wolfNightPrivate.state as VillagePrivate;
     expect(wolfState.nightTargets).not.toBeNull();
@@ -1362,9 +1402,9 @@ describe('Village of Shadows — Full Happy Path', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers and NIGHT phase watcher simultaneously
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
-    const nightResultPromise = waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+    const nightResultPromise = waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
     await performNightActions(players, nightPrivates);
     const nightResult = await nightResultPromise;
     const pub = nightResult.gamePublicState as { nightResultMessage: string | null };
@@ -1382,13 +1422,13 @@ describe('Village of Shadows — Full Happy Path', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
-    const nightResultP = waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+    const nightResultP = waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
     await performNightActions(players, nightPrivates);
     await nightResultP;
-    const dayPhase = await waitForPhase(players[0].ws, PhaseType.VOS_DAY, 20_000);
-    expect(dayPhase.phase.phaseType).toBe(PhaseType.VOS_DAY);
+    const dayPhase = await waitForPhase(players[0].ws, VOSPhase.DAY, 20_000);
+    expect(dayPhase.phase.phaseType).toBe(VOSPhase.DAY);
     expect(dayPhase.phase.timerTotalMs).toBeGreaterThan(0);
     await closeAll(players);
   }, 70_000);
@@ -1403,15 +1443,15 @@ describe('Village of Shadows — Full Happy Path', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
-    const nightResultP = waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+    const nightResultP = waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
     await performNightActions(players, nightPrivates);
     await nightResultP;
-    await waitForPhase(players[0].ws, PhaseType.VOS_DAY, 20_000);
+    await waitForPhase(players[0].ws, VOSPhase.DAY, 20_000);
     // Register vote private state watchers BEFORE VOTE phase fires
     const votePrivatePromises = players.map(p => waitForVotePrivateState(p.ws, 185_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_VOTE, 175_000);
+    await waitForPhase(players[0].ws, VOSPhase.VOTE, 175_000);
     const votePrivates = await Promise.all(votePrivatePromises);
     // All alive players vote for first available target
     const votedPromises: Promise<unknown>[] = [];
@@ -1428,7 +1468,7 @@ describe('Village of Shadows — Full Happy Path', () => {
       });
     }
     await Promise.all(votedPromises);
-    const voteResult = await waitForPhase(players[0].ws, PhaseType.VOS_VOTE_RESULT, 45_000);
+    const voteResult = await waitForPhase(players[0].ws, VOSPhase.VOTE_RESULT, 45_000);
     const pub = voteResult.gamePublicState as { voteResultMessage: string | null };
     expect(pub.voteResultMessage).toBeTruthy();
     await closeAll(players);
@@ -1508,7 +1548,7 @@ describe('Village of Shadows — Alternative Paths', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
     const villagerIdx = nightPrivates.findIndex(
       p => (p.state as VillagePrivate).role === VillageRole.VILLAGER,
@@ -1522,7 +1562,7 @@ describe('Village of Shadows — Alternative Paths', () => {
       const targetId = players[(villagerIdx + 1) % players.length].playerId;
       send(players[villagerIdx].ws, {
         type: ClientMessageType.SUBMIT_INPUT,
-        inputType: InputType.NIGHT_ACTION,
+        inputType: 'night_action',
         payload: { targetPlayerId: targetId },
       });
       const rejected = await rejectedPromise;
@@ -1541,7 +1581,7 @@ describe('Village of Shadows — Alternative Paths', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
     const seerIdx = nightPrivates.findIndex(
       p => (p.state as VillagePrivate).role === VillageRole.SEER,
@@ -1555,7 +1595,7 @@ describe('Village of Shadows — Alternative Paths', () => {
         );
         send(players[seerIdx].ws, {
           type: ClientMessageType.SUBMIT_INPUT,
-          inputType: InputType.NIGHT_ACTION,
+          inputType: 'night_action',
           payload: { targetPlayerId: seerState.nightTargets[0].playerId },
         });
         await accepted;
@@ -1565,7 +1605,7 @@ describe('Village of Shadows — Alternative Paths', () => {
           ServerMessageType.PRIVATE_STATE,
           45_000,
         );
-        await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+        await waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
         const seerNightResult = await seerNightResultP;
         const sr = seerNightResult.state as VillagePrivate;
         expect(sr.seerResult).not.toBeNull();
@@ -1586,7 +1626,7 @@ describe('Village of Shadows — Alternative Paths', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
     const wolfIdx = nightPrivates.findIndex(p => (p.state as VillagePrivate).role === VillageRole.WEREWOLF);
     const doctorIdx = nightPrivates.findIndex(p => (p.state as VillagePrivate).role === VillageRole.DOCTOR);
@@ -1597,7 +1637,7 @@ describe('Village of Shadows — Alternative Paths', () => {
         const wolfTarget = wolfState.nightTargets[0].playerId;
         send(players[wolfIdx].ws, {
           type: ClientMessageType.SUBMIT_INPUT,
-          inputType: InputType.NIGHT_ACTION,
+          inputType: 'night_action',
           payload: { targetPlayerId: wolfTarget },
         });
         if (doctorState.nightTargets) {
@@ -1606,7 +1646,7 @@ describe('Village of Shadows — Alternative Paths', () => {
           if (targetToProtect.playerId === wolfTarget) {
             send(players[doctorIdx].ws, {
               type: ClientMessageType.SUBMIT_INPUT,
-              inputType: InputType.NIGHT_ACTION,
+              inputType: 'night_action',
               payload: { targetPlayerId: wolfTarget },
             });
           }
@@ -1615,7 +1655,7 @@ describe('Village of Shadows — Alternative Paths', () => {
     }
     // Doctor+wolf actions alone won't trigger early resolution (need all 3 special roles)
     // so NIGHT_RESULT fires at 30s timer; safe to await here
-    const nightResult = await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+    const nightResult = await waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
     const pub = nightResult.gamePublicState as { nightResultMessage: string | null };
     expect(pub.nightResultMessage).toBeTruthy();
     await closeAll(players);
@@ -1631,15 +1671,15 @@ describe('Village of Shadows — Alternative Paths', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
-    const nightResultP = waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+    const nightResultP = waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
     await performNightActions(players, nightPrivates);
     await nightResultP;
-    await waitForPhase(players[0].ws, PhaseType.VOS_DAY, 20_000);
+    await waitForPhase(players[0].ws, VOSPhase.DAY, 20_000);
     // Register vote private state watchers BEFORE VOTE phase fires
     const votePrivatePromises = players.map(p => waitForVotePrivateState(p.ws, 185_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_VOTE, 175_000);
+    await waitForPhase(players[0].ws, VOSPhase.VOTE, 175_000);
     const votePrivates = await Promise.all(votePrivatePromises);
     // Split votes to create a tie
     const alivePlayers = players
@@ -1664,7 +1704,7 @@ describe('Village of Shadows — Alternative Paths', () => {
         }
       }
     }
-    const voteResult = await waitForPhase(players[0].ws, PhaseType.VOS_VOTE_RESULT, 45_000);
+    const voteResult = await waitForPhase(players[0].ws, VOSPhase.VOTE_RESULT, 45_000);
     const pub = voteResult.gamePublicState as { voteResultMessage: string | null };
     expect(pub.voteResultMessage).toBeTruthy();
     await closeAll(players);
@@ -1680,7 +1720,7 @@ describe('Village of Shadows — Alternative Paths', () => {
     await Promise.all(privatePromises);
     // Register night private state watchers BEFORE NIGHT phase fires (they come together)
     const nightPrivatePromises = players.map(p => waitForNightPrivateState(p.ws, 15_000));
-    await waitForPhase(players[0].ws, PhaseType.VOS_NIGHT, 15_000);
+    await waitForPhase(players[0].ws, VOSPhase.NIGHT, 15_000);
     const nightPrivates = await Promise.all(nightPrivatePromises);
     // Wolf kills a specific target
     const wolfIdx = nightPrivates.findIndex(p => (p.state as VillagePrivate).role === VillageRole.WEREWOLF);
@@ -1689,16 +1729,16 @@ describe('Village of Shadows — Alternative Paths', () => {
       if (wolfState.nightTargets && wolfState.nightTargets.length > 0) {
         send(players[wolfIdx].ws, {
           type: ClientMessageType.SUBMIT_INPUT,
-          inputType: InputType.NIGHT_ACTION,
+          inputType: 'night_action',
           payload: { targetPlayerId: wolfState.nightTargets[0].playerId },
         });
       }
     }
-    const nightResultP2 = waitForPhase(players[0].ws, PhaseType.VOS_NIGHT_RESULT, 40_000);
+    const nightResultP2 = waitForPhase(players[0].ws, VOSPhase.NIGHT_RESULT, 40_000);
     await performNightActions(players, nightPrivates); // let all others act too
     await nightResultP2;
-    await waitForPhase(players[0].ws, PhaseType.VOS_DAY, 20_000);
-    await waitForPhase(players[0].ws, PhaseType.VOS_VOTE, 175_000);
+    await waitForPhase(players[0].ws, VOSPhase.DAY, 20_000);
+    await waitForPhase(players[0].ws, VOSPhase.VOTE, 175_000);
     // Get updated vote phase private states
     const votePrivates = await Promise.all(
       players.map(p => waitForMessage<PrivateStateMessage>(p.ws, ServerMessageType.PRIVATE_STATE, 5_000)),
@@ -1880,19 +1920,19 @@ describe('Cross-Cutting Concerns', () => {
       ServerMessageType.GAME_OVER,
       180_000,
     );
-    const firstSubmitP_seq = waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 15_000);
+    const firstSubmitP_seq = waitForPhase(players[0].ws, BBPhase.SUBMIT, 15_000);
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     // Play through game to reach GAME_OVER quickly
     for (let round = 0; round < 3; round++) {
-      if (round === 0) { await firstSubmitP_seq; } else { await waitForPhase(players[0].ws, PhaseType.BB_SUBMIT, 20_000); }
+      if (round === 0) { await firstSubmitP_seq; } else { await waitForPhase(players[0].ws, BBPhase.SUBMIT, 20_000); }
       const voteOptsSeq = preRegisterVoteOptions(players);
-      const votingSeq = waitForPhase(players[0].ws, PhaseType.BB_VOTING, 5_000);
+      const votingSeq = waitForPhase(players[0].ws, BBPhase.VOTING, 5_000);
       await submitAllAnswers(players);
       await votingSeq;
-      const revealSeq = waitForPhase(players[0].ws, PhaseType.BB_REVEAL, 5_000);
+      const revealSeq = waitForPhase(players[0].ws, BBPhase.REVEAL, 5_000);
       await voteAll(players, await voteOptsSeq);
       await revealSeq;
-      await waitForPhase(players[0].ws, PhaseType.BB_SCORES, 20_000);
+      await waitForPhase(players[0].ws, BBPhase.SCORES, 20_000);
     }
     const gameOver1 = await gameOver1Promise;
     expect(gameOver1.result.gameId).toBe(GameId.BLUFF_BATTLE);
@@ -1918,12 +1958,12 @@ describe('Cross-Cutting Concerns', () => {
     const { code } = await createRoom();
     const players = await connectPlayers(code, ['Alice', 'Bob', 'Charlie']);
     const allSubmitPhasePromise = Promise.all(
-      players.map(p => waitForPhase(p.ws, PhaseType.BB_SUBMIT, 20_000)),
+      players.map(p => waitForPhase(p.ws, BBPhase.SUBMIT, 20_000)),
     );
     selectAndStartGame(players[0].ws, GameId.BLUFF_BATTLE);
     const allSubmitPhase = await allSubmitPhasePromise;
     for (const phase of allSubmitPhase) {
-      expect(phase.phase.phaseType).toBe(PhaseType.BB_SUBMIT);
+      expect(phase.phase.phaseType).toBe(BBPhase.SUBMIT);
     }
     await closeAll(players);
   }, 25_000);

@@ -3,7 +3,6 @@ import type { ClientMessage } from '@boredless/shared';
 import {
   ClientMessageType,
   ServerMessageType,
-  InputType,
 } from '@boredless/shared';
 import { sessionRegistry } from './registry.js';
 import { sendToSocket, sendError } from './send.js';
@@ -261,14 +260,14 @@ function handleSubmitInput(ws: WebSocket, msg: Extract<ClientMessage, { type: 's
   const result = gameModule.handleInput(
     session.roomId,
     session.playerId,
-    msg.inputType as InputType,
+    msg.inputType,
     msg.payload,
   );
 
   if (result.accepted) {
-    sendToSocket(ws, { type: ServerMessageType.INPUT_ACCEPTED, inputType: msg.inputType as InputType });
+    sendToSocket(ws, { type: ServerMessageType.INPUT_ACCEPTED, inputType: msg.inputType });
   } else {
-    sendToSocket(ws, { type: ServerMessageType.INPUT_REJECTED, inputType: msg.inputType as InputType, reason: result.reason ?? 'Rejected' });
+    sendToSocket(ws, { type: ServerMessageType.INPUT_REJECTED, inputType: msg.inputType, reason: result.reason ?? 'Rejected' });
   }
 }
 

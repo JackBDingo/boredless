@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { roomManager } from '../engine/room-manager.js';
+import { gameRegistry } from '../games/registry.js';
 
 export async function roomRoutes(app: FastifyInstance): Promise<void> {
   /** Create a new room. Returns roomId, code, and QR code. */
@@ -25,5 +26,11 @@ export async function roomRoutes(app: FastifyInstance): Promise<void> {
       maxPlayers: 12,
       hostName: host?.name ?? 'Unknown',
     };
+  });
+
+  /** Get available games catalog from the auto-discovered registry */
+  app.get('/api/games', async (_request, reply) => {
+    const games = gameRegistry.getAll().map(mod => mod.definition);
+    return reply.send(games);
   });
 }

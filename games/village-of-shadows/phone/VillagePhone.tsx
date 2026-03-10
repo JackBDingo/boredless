@@ -1,5 +1,6 @@
 import type { VillagePrivateState } from '../types.js';
 import { PhaseType } from '@boredless/shared';
+import { VOSPhase } from '../phases.js';
 import { VillageRole } from '../types.js';
 import { getRoleInfo } from './roleInfo';
 import {
@@ -91,7 +92,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         </div>
 
         {/* ROLE REVEAL */}
-        {phase.phaseType === PhaseType.VOS_ROLE_REVEAL && (
+        {phase.phaseType === VOSPhase.ROLE_REVEAL && (
           <div className="flex flex-col items-center gap-4 text-center w-full">
             <div className="w-16 h-16 rounded-2xl bg-violet-500/15 flex items-center justify-center">
               <Star size={32} className="text-violet-400" />
@@ -107,7 +108,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* NIGHT — werewolf/seer/doctor act */}
-        {phase.phaseType === PhaseType.VOS_NIGHT &&
+        {phase.phaseType === VOSPhase.NIGHT &&
           state.role !== VillageRole.VILLAGER &&
           !state.hasActed &&
           state.nightTargets && (
@@ -141,7 +142,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
           )}
 
         {/* NIGHT — already acted */}
-        {phase.phaseType === PhaseType.VOS_NIGHT &&
+        {phase.phaseType === VOSPhase.NIGHT &&
           state.role !== VillageRole.VILLAGER &&
           state.hasActed && (
             <div className="flex flex-col items-center gap-4 text-center mt-4">
@@ -154,7 +155,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
           )}
 
         {/* NIGHT — villager sleeps */}
-        {phase.phaseType === PhaseType.VOS_NIGHT && state.role === VillageRole.VILLAGER && (
+        {phase.phaseType === VOSPhase.NIGHT && state.role === VillageRole.VILLAGER && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-blue-500/15 flex items-center justify-center">
               <Moon size={32} className="text-blue-400" />
@@ -165,7 +166,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* NIGHT RESULT — seer */}
-        {phase.phaseType === PhaseType.VOS_NIGHT_RESULT && state.seerResult && (
+        {phase.phaseType === VOSPhase.NIGHT_RESULT && state.seerResult && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-violet-500/15 flex items-center justify-center">
               <Eye size={32} className="text-violet-400" />
@@ -183,7 +184,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* NIGHT RESULT — non-seer */}
-        {phase.phaseType === PhaseType.VOS_NIGHT_RESULT && !state.seerResult && (
+        {phase.phaseType === VOSPhase.NIGHT_RESULT && !state.seerResult && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-purple-500/15 flex items-center justify-center">
               <Monitor size={32} className="text-purple-400" />
@@ -194,7 +195,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* DAY — discussion */}
-        {phase.phaseType === PhaseType.VOS_DAY && (
+        {phase.phaseType === VOSPhase.DAY && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-amber-500/15 flex items-center justify-center">
               <Sun size={40} className="text-amber-400" />
@@ -205,7 +206,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* VOTE — choose */}
-        {phase.phaseType === PhaseType.VOS_VOTE && !state.hasVoted && state.voteTargets && (
+        {phase.phaseType === VOSPhase.VOTE && !state.hasVoted && state.voteTargets && (
           <div className="w-full flex flex-col items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-red-500/15 flex items-center justify-center">
               <Vote size={32} className="text-red-400" />
@@ -230,7 +231,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* VOTE — voted */}
-        {phase.phaseType === PhaseType.VOS_VOTE && state.hasVoted && (
+        {phase.phaseType === VOSPhase.VOTE && state.hasVoted && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/15 flex items-center justify-center">
               <Vote size={32} className="text-indigo-400" />
@@ -241,7 +242,7 @@ export function VillagePhone({ phase, privateState, timerMs, submitInput, useGam
         )}
 
         {/* VOTE RESULT */}
-        {phase.phaseType === PhaseType.VOS_VOTE_RESULT && (
+        {phase.phaseType === VOSPhase.VOTE_RESULT && (
           <div className="flex flex-col items-center gap-4 text-center mt-4">
             <div className="w-16 h-16 rounded-2xl bg-purple-500/15 flex items-center justify-center">
               <Monitor size={32} className="text-purple-400" />

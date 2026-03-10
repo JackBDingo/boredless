@@ -3,7 +3,7 @@ import { XCircle } from 'lucide-react';
 import { useConnectionStore } from '../store/connection';
 import { useGameStore } from '../store/game';
 import { useRoomStore } from '../store/room';
-import { ServerMessageType, PhaseType, ClientMessageType, InputType } from '@boredless/shared';
+import { ServerMessageType, PhaseType, ClientMessageType } from '@boredless/shared';
 import type { PhaseState, ScoreEntry, PlayerInfo } from '@boredless/shared';
 import type { PublicPlayerState } from '@boredless/shared';
 import { useGameEvent } from '../hooks/useGameEvent';
@@ -66,12 +66,9 @@ export function GameScreen() {
   // Build submitInput — abstracts WebSocket message construction from game components
   const submitInput = useCallback(
     (inputType: string, data: unknown) => {
-      if (!Object.values(InputType).includes(inputType as InputType)) {
-        console.warn(`submitInput: unknown inputType "${inputType}"`);
-      }
       send({
         type: ClientMessageType.SUBMIT_INPUT,
-        inputType: inputType as InputType,
+        inputType: inputType,
         payload: data as Record<string, unknown>,
       });
     },

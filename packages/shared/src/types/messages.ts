@@ -1,8 +1,6 @@
 import {
   ClientMessageType,
   ServerMessageType,
-  GameId,
-  InputType,
 } from '../enums.js';
 import { PublicRoomState, JoinResult } from './room.js';
 import { PhaseState, ScoreEntry, GameOverState } from './game.js';
@@ -31,7 +29,7 @@ export interface JoinDisplayMessage {
 
 export interface SelectGameMessage {
   type: ClientMessageType.SELECT_GAME;
-  gameId: GameId;
+  gameId: string;
 }
 
 export interface StartGameMessage {
@@ -40,7 +38,7 @@ export interface StartGameMessage {
 
 export interface SubmitInputMessage {
   type: ClientMessageType.SUBMIT_INPUT;
-  inputType: InputType;
+  inputType: string;
   payload: Record<string, unknown>;
 }
 
@@ -109,13 +107,13 @@ export interface PlayerKickedMessage {
 
 export interface GameSelectedMessage {
   type: ServerMessageType.GAME_SELECTED;
-  gameId: GameId;
+  gameId: string;
   gameName: string;
 }
 
 export interface GameStartedMessage {
   type: ServerMessageType.GAME_STARTED;
-  gameId: GameId;
+  gameId: string;
   phase: PhaseState;
   gamePublicState: Record<string, unknown>;
 }
@@ -138,12 +136,12 @@ export interface TimerExpiredMessage {
 
 export interface InputAcceptedMessage {
   type: ServerMessageType.INPUT_ACCEPTED;
-  inputType: InputType;
+  inputType: string;
 }
 
 export interface InputRejectedMessage {
   type: ServerMessageType.INPUT_REJECTED;
-  inputType: InputType;
+  inputType: string;
   reason: string;
 }
 
@@ -213,5 +211,3 @@ export type ServerMessage =
   | PongMessage
   | JoinedMessage
   | GameEventMessage;
-
-

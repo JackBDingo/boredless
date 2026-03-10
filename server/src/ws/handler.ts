@@ -173,6 +173,7 @@ function handleJoinDisplay(ws: WebSocket, msg: Extract<ClientMessage, { type: 'j
 }
 
 function handleSelectGame(ws: WebSocket, msg: Extract<ClientMessage, { type: 'select_game' }>): void {
+  console.log("[DEBUG] handleSelectGame called, gameId:", msg.gameId);
   const sessionId = sessionRegistry.getSessionId(ws);
   if (!sessionId) return;
 
@@ -241,6 +242,7 @@ function handleStartGame(ws: WebSocket): void {
 
   // Start game
   const ctx = createGameContext(session.roomId);
+  console.log("[DEBUG] Starting game", room.selectedGameId, "players:", activePlayers.map(p => p.id), "sessions:", ctx.getAllSessionIds());
   gameModule.setup(activePlayers, ctx);
 }
 

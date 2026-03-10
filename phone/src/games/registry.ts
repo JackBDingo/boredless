@@ -3,30 +3,16 @@ import type { PhoneProps } from './types.js';
 
 export type { PhoneProps } from './types.js';
 
-// Auto-import ONLY phone components to avoid pulling in @display/* imports at build time.
-// Glob the phone folder directly instead of the barrel index.ts.
-const phoneModules = import.meta.glob<{ default?: ComponentType<PhoneProps> }>(
-  '/games/*/phone/*.tsx',
-  { eager: true },
-);
+// Explicit imports — globs don't reliably resolve across monorepo boundaries
+import BBPhone from '@game-types/bluff-battle/phone/BBPhone';
+import VillagePhone from '@game-types/village-of-shadows/phone/VillagePhone';
 
-export const phoneRegistry = new Map<string, ComponentType<PhoneProps>>();
-
-for (const [path, mod] of Object.entries(phoneModules)) {
-  // Extract game directory name: /games/bluff-battle/phone/BBPhone.tsx → bluff-battle
-  const match = path.match(/^\/games\/([^/]+)\/phone\/[^/]+\.tsx$/);
-  if (!match) continue;
-
-  const gameDirName = match[1]; // e.g. "bluff-battle"
-
-  // Each phone file's default export is the component
-  const Component = mod.default;
-  if (Component) {
-    // Register by directory name (hyphen) and underscore variant
-    phoneRegistry.set(gameDirName, Component);
-    phoneRegistry.set(gameDirName.replace(/-/g, '_'), Component);
-  }
-}
+export const phoneRegistry = new Map<string, ComponentType<PhoneProps>>([
+  ['bluff-battle', BBPhone],
+  ['bluff_battle', BBPhone],
+  ['village-of-shadows', VillagePhone],
+  ['village_of_shadows', VillagePhone],
+]);
 
 export function getPhoneComponent(gameId: string): ComponentType<PhoneProps> | undefined {
   return phoneRegistry.get(gameId) ?? phoneRegistry.get(gameId.replace(/_/g, '-'));

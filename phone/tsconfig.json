@@ -3,15 +3,35 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "moduleResolution": "bundler",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "noEmit": true,
-    "types": ["vite/client"],
+    "types": [
+      "vite/client"
+    ],
     "paths": {
-      "@phone/*": ["./src/*"],
-      "@display/*": ["../display/src/*"],
-      "@game-platform/*": ["../server/src/games/*"],
-      "@boredless/shared": ["../packages/shared/src/index.ts"]
+      "@phone/*": [
+        "./src/*"
+      ],
+      "@display/*": [
+        "../display/src/*"
+      ],
+      "@game-platform/*": [
+        "../server/src/games/*"
+      ],
+      "@boredless/shared": [
+        "../packages/shared/src/index.ts"
+      ],
+      "@game-types/*": [
+        "../games/*"
+      ]
     }
   },
-  "include": ["src", "../games"]
+  "include": [
+    "src",
+    "../games"
+  ]
 }

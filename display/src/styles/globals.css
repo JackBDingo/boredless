@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../../games";
 
 :root {
   --color-primary: #6366f1;

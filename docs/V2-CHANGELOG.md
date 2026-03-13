@@ -86,3 +86,46 @@ Updated `DeclarativeGameModule`:
 - Fields without visibility declarations default to public (fail-open)
 - Team scope stubs to private pending Phase 2.4 (team tracking)
 - `meta.redactedFields` in output for debugging visibility behavior
+
+---
+
+## Phase 2.2 — Event System (Declarative)
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/event-system/` subsystem:
+
+- **`types.ts`** — Core type definitions: `EventTrigger`, `EventEffect`, `EventRule`, `FiredEvent`, `EffectContext`, `EventEngineOptions`
+- **`event-engine.ts`** — `EventEngine` class: trigger matching, priority-ordered execution, guard conditions, once-only rules, enable/disable, history tracking
+- **`schema-integration.ts`** — Zod schemas (`EventRuleSchema`, `EventTriggerSchema`, `EventEffectSchema`, `EventRulesArraySchema`) and `parseEventRules()` / `safeParseEventRules()`
+- **`index.ts`** — Public API
+- **`__tests__/event-system.test.ts`** — 59 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — Design decisions and rationale
+
+### Schema Extension (Non-Breaking)
+
+- Updated `schema-engine/schema.ts`: `EventsSchema` now uses `EventRulesArraySchema` from event-system (was `z.array(z.any())`)
+- Updated `games/_test-v2/game.yaml` to include example `events:` section
+- Fixed `schema-engine/__tests__/schema-engine.test.ts`: updated test fixture to use valid event structure (triggers/effects plural)
+
+### Trigger Types Supported
+`phase_enter`, `phase_exit`, `state_change`, `input_received`, `timer_expire`, `game_start`, `game_end`
+
+### Effect Types Supported
+- **Native (handled by engine):** `set_state`, `increment`, `decrement`
+- **Delegated (via onEffect callback):** `add_points`, `broadcast`, `play_sound`, `announce`, `advance_phase`, `custom`
+
+### Test Count
+
+**59 new tests** (event-system subsystem)  
+**426 total passing tests** (all subsystems combined)
+
+### Notable Decisions
+
+- **Standalone engine**: EventEngine has no direct dependencies on PhaseMachine, Interpreter, or WS layer. Callers wire it via emit() calls and the onEffect callback — eliminates circular dependencies.
+- **Callback-driven condition evaluation**: `evaluateCondition` is injected optionally, allowing tests to use real or custom evaluators without coupling to phase-machine internals.
+- **Trigger OR semantics**: A rule fires if ANY trigger matches. Effects within a rule all execute in order (AND semantics).
+- **Native vs delegated effects**: Only state mutations (set_state/increment/decrement) are handled natively. All display/audio/scoring effects delegate to the onEffect callback.
+- **Schema-first**: `EventRulesArraySchema` is now the canonical Zod schema for events in game packages, replacing the `z.array(z.any())` stub.

@@ -118,3 +118,33 @@ victory:
   type: highest_score
   after: all_rounds
   tiebreak: most_correct_guesses
+
+events:
+  - id: increment_round
+    name: "Increment round on play entry"
+    triggers:
+      - type: phase_enter
+        phase: play
+    effects:
+      - type: increment
+        target: globals.round
+        amount: 1
+
+  - id: final_round_alert
+    name: "Alert on final round"
+    triggers:
+      - type: state_change
+        field: globals.round
+        condition: "globals.round == globals.total_rounds"
+    effects:
+      - type: announce
+        message: "Final round!"
+
+  - id: game_start_sound
+    name: "Play sound on game start"
+    once: true
+    triggers:
+      - type: game_start
+    effects:
+      - type: play_sound
+        sound: "game_start_chime"

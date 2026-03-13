@@ -194,7 +194,7 @@ describe('validateGamePackage', () => {
       content: {
         prompts: { type: 'prompt_pool', source: './prompts.json' },
       },
-      events: [{ id: 'test_event', trigger: { type: 'phase_start' }, effect: { type: 'state_mutation' } }],
+      events: [{ id: 'test_event', triggers: [{ type: 'phase_enter', phase: 'play' }], effects: [{ type: 'announce', message: 'Play started!' }] }],
       authoring: { notes: 'Test game' },
     };
     const result = validateGamePackage(pkg);

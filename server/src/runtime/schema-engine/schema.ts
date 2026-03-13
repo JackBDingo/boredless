@@ -7,6 +7,7 @@
  */
 
 import { z } from 'zod';
+import { EventRulesArraySchema } from '../event-system/schema-integration.js';
 
 // ---------------------------------------------------------------------------
 // schema_version
@@ -218,7 +219,7 @@ export type Victory = z.infer<typeof VictorySchema>;
 // ---------------------------------------------------------------------------
 
 export const ContentSchema = z.record(z.any());
-export const EventsSchema = z.array(z.any());
+export const EventsSchema = EventRulesArraySchema;
 export const RolesSchema = z.record(z.any());
 export const TeamsSchema = z.record(z.any());
 export const ObjectsSchema = z.record(z.any());

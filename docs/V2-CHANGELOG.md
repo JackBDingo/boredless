@@ -207,3 +207,60 @@ Created `server/src/runtime/object-models/` subsystem:
 - **No imports from other V2 subsystems**: Fully standalone; faceUp visibility enforcement delegated to Visibility subsystem
 - **ObjectRegistry is per-room**: One registry per game room, never shared globally
 - **No integration with interpreter**: Wire-up to DeclarativeGameModule is a later phase per architecture plan
+
+---
+
+## Phase 3.1 — Content System
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/content-system/` subsystem:
+
+- **`types.ts`** — Core type definitions: `ContentItem`, `ContentSource`, `ContentSourceType`, `ContentPoolConfig`, `ContentFilter`, `ContentPack`, `SelectionStrategy`
+- **`content-pool.ts`** — `ContentPool` class: manages item drawing with 4 strategies, noRepeat/recyclable lifecycle, pre-filters at construction, runtime filter queries, peek/getState
+- **`content-loader.ts`** — `ContentLoader` class: loads items from `inline`/`file`/`bundled` sources, validates each item against `ContentItemSchema`, manages ContentPack registry; exports `defaultContentLoader` singleton
+- **`content-registry.ts`** — `ContentRegistry` class: per-game-room pool lifecycle (create, get, reset, destroy)
+- **`schema-integration.ts`** — Zod schemas: `ContentItemSchema`, `ContentSourceSchema` (discriminated union), `ContentPoolConfigSchema`, `ContentSectionSchema`, `ContentPackSchema`; parse helpers `parseContentSection` / `safeParseContentSection`
+- **`index.ts`** — Public API
+- **`__tests__/content-system.test.ts`** — 64 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — 10 design decisions with rationale
+
+### Schema Extension (Non-Breaking)
+
+- Updated `schema-engine/schema.ts`: `ContentSchema` now uses `ContentSectionSchema` from content-system (was `z.record(z.any())`)
+- `content:` section in `GamePackageSchema` is still optional — only the type of a present section changed
+- Updated `schema-engine/__tests__/schema-engine.test.ts`: one test updated to use the proper `{ pools: [...] }` content format
+
+### Selection Strategies
+
+| Strategy | Behavior |
+|----------|---------|
+| `random` | Uniform random selection (re-rolls each draw) |
+| `weighted` | Probability proportional to `item.weight`; weight 0 = never drawn |
+| `sequential` | Items drawn in insertion order |
+| `shuffle` | Pool shuffled once at init; drawn sequentially; recycle reshuffles |
+
+### Content Sources
+
+| Type | Description |
+|------|-------------|
+| `inline` | Items embedded in game schema |
+| `file` | JSON file relative to game directory (`fs.readFileSync`) |
+| `bundled` | Items from a registered `ContentPack` (expansion packs) |
+
+### Test Count
+
+**64 new tests** (content-system subsystem)  
+**592 total passing tests** (all subsystems combined)
+
+### Notable Decisions
+
+- **Pre-loaded items pattern**: `ContentPool(config, items[])` — constructor receives ready data; I/O is the loader's job
+- **Pre-filters at construction**: `ContentPoolConfig.filters` applied once; `getAll()` and total count reflect the filtered pool
+- **noRepeat=true / recyclable=true defaults**: Most games need both; opt-out is explicit
+- **Shuffle ≠ random**: Shuffle guarantees each item drawn once before any repeat; random re-rolls each draw
+- **Tag filter = any-match**: Item passes if it has at least one of the specified tag values
+- **ContentSection uses `pools` array**: Consistent with typed schema patterns; `id` field names the pool
+- **Fully standalone**: Zero imports from event-system, turn-system, object-models, or interpreter

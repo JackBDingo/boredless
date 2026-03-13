@@ -192,7 +192,13 @@ describe('validateGamePackage', () => {
     const pkg = {
       ...(VALID_PACKAGE as Record<string, unknown>),
       content: {
-        prompts: { type: 'prompt_pool', source: './prompts.json' },
+        pools: [
+          {
+            id: 'prompts',
+            sources: [{ type: 'inline', items: [{ id: 'p1', text: 'Question 1?' }] }],
+            selection: 'random',
+          },
+        ],
       },
       events: [{ id: 'test_event', triggers: [{ type: 'phase_enter', phase: 'play' }], effects: [{ type: 'announce', message: 'Play started!' }] }],
       authoring: { notes: 'Test game' },

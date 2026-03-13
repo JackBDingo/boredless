@@ -105,10 +105,35 @@ phases:
 
 presentation:
   theme:
-    accent: emerald
-    background: dark
-    typography: rounded
-    motion: smooth
+    colors:
+      primary: "#10b981"
+      secondary: "#059669"
+      accent: "#f59e0b"
+      background: "#0f1a17"
+      surface: "#1a2e27"
+      text: "#f8fafc"
+    darkMode: true
+    borderRadius: "8px"
+  screens:
+    - id: instructions
+      template: info
+      surface: both
+      title: "How to Play"
+      animations:
+        enter: fade
+        duration: 300
+    - id: play
+      template: prompt
+      surface: both
+      animations:
+        enter: slide-up
+        duration: 200
+    - id: results
+      template: reveal
+      surface: both
+    - id: final_results
+      template: results
+      surface: both
 
 scoring:
   correct_answer: 100

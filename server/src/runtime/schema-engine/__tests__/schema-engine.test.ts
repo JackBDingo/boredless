@@ -57,9 +57,9 @@ const VALID_PACKAGE: unknown = {
     type: 'simultaneous',
   },
   presentation: {
-    theme: {
-      accent: 'blue',
-    },
+    screens: [
+      { id: 'start', template: 'lobby', surface: 'both' },
+    ],
   },
   scoring: {
     correct_answer: 100,

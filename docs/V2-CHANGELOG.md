@@ -318,3 +318,58 @@ Created `server/src/runtime/asset-system/` subsystem:
 - **Polymorphic fallback field**: Accepts both asset IDs and external URLs — runtime disambiguates by checking asset index then URL prefix
 - **No file existence checking**: Keeps the resolver decoupled from filesystem; existence validation belongs in the Phase 5 CLI validator
 - **Zero imports from other V2 subsystems**: Fully standalone, no circular import risk
+
+---
+
+## Phase 3.2 — Presentation System
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/presentation-system/` subsystem:
+
+- **`types.ts`** — Core type definitions: `ScreenTemplateType`, `ScreenLayout`, `ScreenComponent`, `AnimationConfig`, `ScreenDeclaration`, `GameTheme`, `PresentationConfig`, `ResolvedScreen`
+- **`theme-engine.ts`** — `defaultTheme` (dark navy/indigo palette), `mergeTheme()` (deep-merge partial theme with defaults), `validateTheme()` (color format validation), `resolveThemeCSS()` (theme → CSS custom properties map); `DeepPartialGameTheme` for ergonomic partial theme input
+- **`screen-resolver.ts`** — `resolveScreen()` (bind state paths to components, attach theme), `getScreensForSurface()` (filter by display/phone/both), `getScreenForPhase()` (match screen to phase with surface-specific priority)
+- **`template-library.ts`** — `getDefaultTemplate()` for 10 template types (lobby, prompt, vote, reveal, scoreboard, results, timer, info, media, custom); returns deep-copied component arrays + layout defaults
+- **`schema-integration.ts`** — Zod schemas for all types; `PresentationConfigSchema` with partial theme support; `parsePresentationConfig()` / `safeParsePresentationConfig()` helpers
+- **`index.ts`** — Public API
+- **`__tests__/presentation-system.test.ts`** — 70 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — 10 design decisions with rationale
+
+### Schema Extension (Non-Breaking)
+
+- Updated `schema-engine/schema.ts`: `PresentationSchema` now uses `PresentationConfigSchema` from presentation-system (was a simple `{ theme: { accent, background, typography, motion } }` stub)
+- Made `presentation` optional in `GamePackageSchema` (was required) — games without custom presentation use template defaults
+- Updated `games/_test-v2/game.yaml` to use new presentation format with `screens` array and proper theme colors
+- Updated `schema-engine/__tests__/schema-engine.test.ts` inline fixture to use new `screens` format
+
+### Template Types
+
+| Template | Components | Default Layout |
+|----------|-----------|----------------|
+| `lobby` | player-list + text + button-group | centered |
+| `prompt` | text + text + timer + input | stack |
+| `vote` | text + button-group + timer | grid (2 cols) |
+| `reveal` | text + player-list | centered |
+| `scoreboard` | score-table + text | list |
+| `results` | text + text + score-table + button-group | centered |
+| `timer` | timer + text | fullscreen |
+| `info` | text + text | centered |
+| `media` | image | fullscreen |
+| `custom` | (empty — game declares all) | stack |
+
+### Test Count
+
+**70 new tests** (presentation-system subsystem)
+**725 total passing tests** (all subsystems combined)
+
+### Notable Decisions
+
+- **Partial theme at schema layer**: Schema accepts partial themes; `mergeTheme()` fills defaults at runtime — avoiding hostile validation for simple games declaring just their brand color
+- **`resolveScreen` never throws**: Missing state bindings resolve to `undefined` (graceful empty state for clients), never crash the render pipeline
+- **Screen matching priority**: surface-specific id wins (`play_display`), then exact phase id, then prefix fallback
+- **Template defaults are copied**: `getDefaultTemplate()` returns deep copies to prevent shared-reference mutation bugs
+- **CSS naming convention**: `--color-primary`, `--font-family`, `--spacing-unit`, `--border-radius` for client-side theme injection
+- **No imports from other V2 subsystems**: Fully standalone presentation layer; wire-up at interpreter level

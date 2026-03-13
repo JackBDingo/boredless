@@ -171,3 +171,39 @@ Created `server/src/runtime/turn-system/` subsystem:
 - **Five models, not three**: Added `free_form` and `elimination` beyond the architecture plan's three — both justified by existing V1 game patterns (Village of Shadows needs elimination, lobbies need free_form)
 - **Immutable snapshots**: `getState()` copies Sets to prevent accidental mutation by callers
 - **Multi-game validation**: Tests include Bluffalo-style (simultaneous), Village-style (elimination), and Blackjack-style (round_robin) scenarios per Anti-Drift Rule 5
+
+---
+
+## Phase 2.3 — Object Models
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/object-models/` subsystem:
+
+- **`types.ts`** — Core type definitions: `GameObject`, `GameItem`, `Deck`, `Hand`, `Board`, `Pool`, `ObjectEvent`, `GameObjectType`
+- **`deck.ts`** — `DeckManager`: shuffle (Fisher-Yates), draw/drawBottom, peek, addToTop/addToBottom, discard, reshuffleDiscard
+- **`hand.ts`** — `HandManager`: add (with maxSize enforcement), remove, play, has, sort, isFull
+- **`board.ts`** — `BoardManager`: place, remove, move, getCell, isOccupied/isEmpty, isValidPosition, getOccupiedCells, clear (2D grid, cells[y][x])
+- **`pool.ts`** — `PoolManager`: add, remove, drawRandom (partial Fisher-Yates), find, filter
+- **`object-registry.ts`** — `ObjectRegistry`: per-room registry, factory methods (createDeck/Hand/Board/Pool), typed getters, cross-object transfer(), getSnapshot(), destroy()
+- **`schema-integration.ts`** — Zod schemas for `objects:` section: `DeckDeclarationSchema`, `HandDeclarationSchema`, `BoardDeclarationSchema`, `PoolDeclarationSchema`, `ObjectDeclarationSchema`, `parseGameObjects()`, `safeParseGameObjects()`
+- **`index.ts`** — Public API
+- **`__tests__/object-models.test.ts`** — 102 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — Design decisions and rationale
+
+### Test Count
+
+**102 new tests** (object-models subsystem)  
+**528 total passing tests** (all subsystems combined)
+
+### Notable Decisions
+
+- **Manager classes over plain objects**: Clean call-site ergonomics for frequent deck.shuffle(), hand.play() usage
+- **getState() deep copies**: Prevents accidental internal state mutation through returned references
+- **No remove-by-ID on DeckManager**: Decks are ordered stacks; arbitrary middle-removal belongs in PoolManager or transfer()
+- **Board excluded from transfer()**: Board items have spatial meaning that blind transfer would silently destroy; place()/remove() are explicit
+- **No imports from other V2 subsystems**: Fully standalone; faceUp visibility enforcement delegated to Visibility subsystem
+- **ObjectRegistry is per-room**: One registry per game room, never shared globally
+- **No integration with interpreter**: Wire-up to DeclarativeGameModule is a later phase per architecture plan

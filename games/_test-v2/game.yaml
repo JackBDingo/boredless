@@ -1,0 +1,120 @@
+# _test-v2/game.yaml
+# Test fixture for the V2 Schema Engine.
+# This is NOT a real game — it exists solely to exercise the schema and loader.
+# It covers: state_model (globals + per_player), phases (timed + input_gate),
+# turn_model (simultaneous), scoring, victory.
+
+schema_version: "2.0"
+
+manifest:
+  id: test-v2-fixture
+  name: Test V2 Fixture
+  description: Minimal V2 game package used as a schema validation test fixture.
+  version: "1.0.0"
+  author: Boredless
+  tags: [test, fixture]
+  players:
+    min: 2
+    max: 6
+  estimated_minutes:
+    min: 5
+    max: 10
+  icon: flask
+  accent_color: emerald
+  categories: [test]
+
+state_model:
+  globals:
+    round:
+      type: integer
+      default: 0
+      visibility: public
+    total_rounds:
+      type: integer
+      default: 3
+      visibility: public
+    current_question:
+      type: string
+      default: null
+      visibility: public
+  per_player:
+    score:
+      type: integer
+      default: 0
+      visibility: public
+    answer:
+      type: string
+      default: null
+      visibility: private
+
+turn_model:
+  type: simultaneous
+
+phases:
+  instructions:
+    type: timed
+    duration: 8
+    screen:
+      display: template:instructions
+      phone: template:instructions
+    on_exit:
+      - action: advance
+        to: play
+
+  play:
+    type: input_gate
+    duration: 30
+    input:
+      primitive: text_submit
+      target: per_player.answer
+      required: all_players
+    screen:
+      display: template:waiting
+      phone: template:text_input
+    on_enter:
+      - action: increment
+        target: globals.round
+    on_complete:
+      - action: advance
+        to: results
+
+  results:
+    type: timed
+    duration: 10
+    screen:
+      display: template:results
+      phone: template:results
+    on_enter:
+      - action: score_round
+        formulas:
+          correct_answer: 100
+    on_exit:
+      - action: conditional
+        condition: "globals.round < globals.total_rounds"
+        then:
+          advance_to: play
+        else:
+          advance_to: final_results
+
+  final_results:
+    type: timed
+    duration: 15
+    screen:
+      display: template:final_results
+      phone: template:final_results
+
+presentation:
+  theme:
+    accent: emerald
+    background: dark
+    typography: rounded
+    motion: smooth
+
+scoring:
+  correct_answer: 100
+  first_correct: 50
+
+victory:
+  type: highest_score
+  after: all_rounds
+  tiebreak: most_correct_guesses

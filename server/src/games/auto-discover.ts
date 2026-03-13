@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
@@ -30,6 +30,26 @@ export function manifestToDefinition(manifest: GameManifest): GameDefinition {
   };
 }
 
+/**
+ * Check if a game directory contains a V2 game package (game.yaml with schema_version).
+ * Returns the schema_version string if detected, null otherwise.
+ */
+function detectV2Package(gameDir: string): string | null {
+  const gameYamlPath = join(gameDir, 'game.yaml');
+  if (!existsSync(gameYamlPath)) return null;
+
+  try {
+    const rawYaml = readFileSync(gameYamlPath, 'utf-8');
+    const parsed = parseYaml(rawYaml) as Record<string, unknown>;
+    if (parsed && typeof parsed['schema_version'] === 'string') {
+      return parsed['schema_version'];
+    }
+  } catch {
+    // Not a valid YAML file or doesn't have schema_version — treat as V1
+  }
+  return null;
+}
+
 export async function discoverGames(): Promise<GameRegistration[]> {
   // games/ lives at repo root, three levels up from server/src/games/
   const gamesDir = join(__dirname, '../../../games');
@@ -53,6 +73,17 @@ export async function discoverGames(): Promise<GameRegistration[]> {
     } catch {
       continue;
     }
+
+    // --- V2 detection: check for game.yaml with schema_version ---
+    const v2Version = detectV2Package(gameDir);
+    if (v2Version !== null) {
+      // V2 package detected — log and skip V1 loading path.
+      // The declarative interpreter (Phase 1) will handle these; for now we skip.
+      console.log(`[auto-discover] V2 package detected: ${dirName} (schema_version: ${v2Version})`);
+      continue;
+    }
+
+    // --- V1 path: load manifest.yaml + index module ---
 
     // Load and validate YAML manifest
     let manifest: GameManifest;

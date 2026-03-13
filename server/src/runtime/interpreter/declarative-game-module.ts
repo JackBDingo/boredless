@@ -24,6 +24,8 @@ import { StateManager } from '../state-manager/index.js';
 import { PhaseMachine } from '../phase-machine/index.js';
 import type { TimerImpl } from '../phase-machine/index.js';
 import { InputCollector, createPrimitive } from '../interaction-primitives/index.js';
+import { ProjectionEngine } from '../visibility/index.js';
+import type { Audience } from '../visibility/index.js';
 
 // ---------------------------------------------------------------------------
 // Internal per-room state
@@ -33,6 +35,7 @@ interface RoomState {
   ctx: GameContext;
   stateManager: StateManager;
   phaseMachine: PhaseMachine;
+  projectionEngine: ProjectionEngine;
   players: Player[];
   inputCollector: InputCollector | null;
   currentPhaseId: string;
@@ -85,6 +88,9 @@ export class DeclarativeGameModule implements GameModule {
     // Initialize state from schema
     const stateManager = new StateManager(pkg.state_model, playerIds);
 
+    // Build projection engine from the state model (created once per room)
+    const projectionEngine = new ProjectionEngine(pkg.state_model);
+
     // Determine initial phase
     const initialPhaseId = this.getInitialPhaseId();
 
@@ -93,6 +99,7 @@ export class DeclarativeGameModule implements GameModule {
       ctx,
       stateManager,
       phaseMachine: null as unknown as PhaseMachine, // filled in below
+      projectionEngine,
       players: [...players],
       inputCollector: null,
       currentPhaseId: initialPhaseId,
@@ -357,33 +364,50 @@ export class DeclarativeGameModule implements GameModule {
 
   /**
    * Build the public state for a room.
-   * Combines StateManager public projection with current phase info.
+   * Uses ProjectionEngine with a spectator audience (public + spectator fields).
+   * Equivalent to the previous getPublicState() but audience-aware.
    */
   private buildPublicState(roomId: string): Record<string, unknown> {
     const room = this.rooms.get(roomId);
     if (!room) return {};
 
-    const smState = room.stateManager.getPublicState();
+    const snapshot = room.stateManager.snapshot();
+    // Inject current phase into globals so ProjectionEngine can extract it
+    snapshot.globals['phase'] = room.currentPhaseId;
+
+    const spectatorAudience: Audience = { type: 'spectator' };
+    const projected = room.projectionEngine.project(snapshot, spectatorAudience);
+
     return {
-      ...smState,
+      globals: projected.globals,
+      players: projected.players,
+      teams: projected.teams,
       phase: room.currentPhaseId,
     };
   }
 
   /**
    * Build the private state for a specific player.
-   * Combines StateManager private projection with input status.
+   * Uses ProjectionEngine with a player audience — shows their own private fields,
+   * redacts other players's private fields per their declared strategy.
    */
   private buildPrivateState(roomId: string, playerId: string): Record<string, unknown> {
     const room = this.rooms.get(roomId);
     if (!room) return {};
 
-    const smState = room.stateManager.getPrivateState(playerId);
+    const snapshot = room.stateManager.snapshot();
+    snapshot.globals['phase'] = room.currentPhaseId;
+
+    const playerAudience: Audience = { type: 'player', playerId };
+    const projected = room.projectionEngine.project(snapshot, playerAudience);
+
     const hasSubmitted = room.inputCollector?.hasSubmitted(playerId) ?? false;
     const mySubmission = room.inputCollector?.getSubmission(playerId) ?? null;
 
     return {
-      ...smState,
+      globals: projected.globals,
+      players: projected.players,
+      teams: projected.teams,
       phase: room.currentPhaseId,
       input: {
         hasSubmitted,

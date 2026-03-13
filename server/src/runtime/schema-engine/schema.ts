@@ -60,14 +60,26 @@ export const StateFieldTypeSchema = z.enum([
 export const VisibilityScopeSchema = z.enum([
   'public',
   'private',
+  'team',
   'host',
   'spectator',
+]);
+
+export const RedactionStrategySchema = z.enum([
+  'omit',
+  'null',
+  'placeholder',
+  'count',
 ]);
 
 export const StateFieldSchema = z.object({
   type: StateFieldTypeSchema,
   default: z.unknown(),
   visibility: VisibilityScopeSchema.optional(),
+  /** How the field should appear when redacted (default: omit). */
+  redaction: RedactionStrategySchema.optional(),
+  /** Placeholder value shown when redaction === 'placeholder'. */
+  placeholder: z.unknown().optional(),
 });
 
 export type StateField = z.infer<typeof StateFieldSchema>;

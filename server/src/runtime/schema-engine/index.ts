@@ -6,7 +6,7 @@
  */
 
 // Schema
-export { GamePackageSchema } from './schema.js';
+export { GamePackageSchema, RedactionStrategySchema, VisibilityScopeSchema } from './schema.js';
 export type { GamePackage } from './schema.js';
 
 // Additional type exports for consumers that need them

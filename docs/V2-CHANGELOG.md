@@ -129,3 +129,45 @@ Created `server/src/runtime/event-system/` subsystem:
 - **Trigger OR semantics**: A rule fires if ANY trigger matches. Effects within a rule all execute in order (AND semantics).
 - **Native vs delegated effects**: Only state mutations (set_state/increment/decrement) are handled natively. All display/audio/scoring effects delegate to the onEffect callback.
 - **Schema-first**: `EventRulesArraySchema` is now the canonical Zod schema for events in game packages, replacing the `z.array(z.any())` stub.
+
+---
+
+## Phase 2.4 — Turn & Initiative System
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/turn-system/` subsystem:
+
+- **`types.ts`** — `TurnModelType`, `TurnModel`, `TurnState`, `TurnEvent`, `TurnManagerOptions` types
+- **`turn-manager.ts`** — `TurnManager` class: manages player ordering, active player tracking, turn progression for 5 turn models
+- **`schema-integration.ts`** — `FullTurnModelSchema` (Zod), `turnModelFromYaml()` helper for YAML → TurnModel conversion
+- **`index.ts`** — Public API
+- **`__tests__/turn-system.test.ts`** — 65 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — Design decisions and rationale
+
+### Turn Models Implemented
+
+| Model | Active Players | Use Case |
+|-------|---------------|----------|
+| `simultaneous` | All non-eliminated | Bluffalo, quiz games |
+| `round_robin` | One at a time | Blackjack, card games |
+| `free_form` | All non-eliminated | Lobbies, no turn ordering |
+| `priority_queue` | First in ordered queue | Speed-based games |
+| `elimination` | All remaining | Village of Shadows, Survivor-style |
+
+### Test Count
+
+**65 new tests** (turn-system subsystem)
+**426 total passing tests** (all subsystems combined)
+
+### Notable Decisions
+
+- **Standalone**: No imports from other runtime subsystems — pure in-memory, fully unit testable
+- **No timer ownership**: `timeoutMs` is stored in config but callers manage actual timers (same pattern as architecture plan specifies)
+- **Throws on invalid reversal**: `reverseDirection()` throws when `reverseAllowed: false` — loud failure beats silent no-op
+- **Stable array for eliminated**: Eliminated players stay in `_turnOrder` with a Set marking them; prevents index shifting bugs in round_robin wrap detection
+- **Five models, not three**: Added `free_form` and `elimination` beyond the architecture plan's three — both justified by existing V1 game patterns (Village of Shadows needs elimination, lobbies need free_form)
+- **Immutable snapshots**: `getState()` copies Sets to prevent accidental mutation by callers
+- **Multi-game validation**: Tests include Bluffalo-style (simultaneous), Village-style (elimination), and Blackjack-style (round_robin) scenarios per Anti-Drift Rule 5

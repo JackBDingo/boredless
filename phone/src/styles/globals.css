@@ -40,3 +40,43 @@ button {
 input, textarea {
   font-family: inherit;
 }
+
+/* Custom range slider thumb */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 3px solid #030712;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  cursor: pointer;
+  margin-top: -4px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 3px solid #030712;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+}

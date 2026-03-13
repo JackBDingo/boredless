@@ -1,0 +1,26 @@
+id: battleship
+name: Battleship
+tagline: You sunk my battleship!
+description: >
+  Place your fleet, call your shots, and sink the enemy.
+  Classic naval warfare — two captains, one ocean, no mercy.
+players:
+  min: 2
+  max: 2
+estimatedMinutes: 15
+icon: anchor
+accentColor: blue
+categories: [strategy, classic, two-player]
+phases:
+  setup:
+    duration: 120
+  battle:
+    duration: 30
+  result:
+    duration: 8
+  scores:
+    duration: 6
+scoring:
+  ship_sunk: 200
+  hit: 50
+  victory_bonus: 1000

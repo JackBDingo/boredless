@@ -1,0 +1,25 @@
+id: wordcraft
+name: WordCraft
+tagline: Build words, score big
+description: >
+  A Scrabble-style word game for 2-4 players. Draw tiles, build words
+  on a shared board, and rack up points with premium squares.
+players:
+  min: 2
+  max: 4
+estimatedMinutes: 30
+icon: spell-check
+accentColor: amber
+categories: [word, strategy, classic]
+phases:
+  wc_starting:
+    duration: 3
+  wc_playing:
+    duration: 90
+  wc_word_reveal:
+    duration: 5
+  wc_scores:
+    duration: 5
+scoring:
+  word_base: 1
+  all_tiles_bonus: 50

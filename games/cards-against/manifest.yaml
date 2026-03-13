@@ -1,0 +1,27 @@
+id: cards-against
+name: Cards Against Humanity
+tagline: A party game for horrible people
+description: >
+  One player draws a black prompt card. Everyone else plays their funniest
+  white response card. The Card Czar picks the winner. Repeat until
+  someone loses all their dignity.
+players:
+  min: 3
+  max: 8
+estimatedMinutes: 15
+icon: layers
+accentColor: neutral
+categories: [party, humor, cards]
+phases:
+  deal:
+    duration: 1
+  prompt:
+    duration: 60
+  reading:
+    duration: 60
+  reveal:
+    duration: 8
+  scores:
+    duration: 6
+scoring:
+  awesome_point: 1000

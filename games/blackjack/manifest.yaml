@@ -1,0 +1,32 @@
+id: blackjack
+name: Blackjack
+tagline: Beat the dealer without going bust
+description: >
+  Classic casino blackjack for 2-8 players. Everyone plays against
+  the house dealer simultaneously. Hit, stand, double down, or split —
+  natural blackjack pays 3:2. Dealer hits on 16 or less, stands on 17+.
+players:
+  min: 2
+  max: 8
+estimatedMinutes: 15
+icon: diamond
+accentColor: emerald
+categories: [cards, casino, classic, betting]
+phases:
+  bj_betting:
+    duration: 20
+  bj_dealing:
+    duration: 3
+  bj_playing:
+    duration: 30
+  bj_dealer:
+    duration: 5
+  bj_results:
+    duration: 8
+  bj_scores:
+    duration: 6
+scoring:
+  blackjack_win: 150
+  regular_win: 100
+  push: 0
+  loss: 0

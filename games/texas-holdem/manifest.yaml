@@ -1,0 +1,28 @@
+id: texas-holdem
+name: Texas Hold'em
+tagline: Read 'em and weep
+description: >
+  No-limit Texas Hold'em poker for 2-8 players.
+  Blinds, community cards, bluffs, and all-ins — the real deal.
+players:
+  min: 2
+  max: 8
+estimatedMinutes: 20
+icon: diamond
+accentColor: emerald
+categories: [cards, strategy, bluffing, classic]
+phases:
+  preflop:
+    duration: 30
+  flop:
+    duration: 30
+  turn:
+    duration: 30
+  river:
+    duration: 30
+  showdown:
+    duration: 8
+  scores:
+    duration: 6
+scoring:
+  pot_win: 0

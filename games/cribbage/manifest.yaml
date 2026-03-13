@@ -1,0 +1,40 @@
+id: cribbage
+name: Cribbage
+tagline: Fifteen two, fifteen four, and a pair makes six
+description: >
+  Classic cribbage adapted for 2-6 players. Score points through pegging,
+  hand scoring, and the crib. First to 121 wins. The crib rotates each round.
+players:
+  min: 2
+  max: 6
+estimatedMinutes: 25
+icon: diamond
+accentColor: emerald
+categories: [cards, strategy, classic, counting]
+phases:
+  cr_dealing:
+    duration: 3
+  cr_discard:
+    duration: 30
+  cr_cut:
+    duration: 4
+  cr_pegging:
+    duration: 45
+  cr_scoring:
+    duration: 8
+  cr_crib:
+    duration: 8
+  cr_results:
+    duration: 6
+  cr_scores:
+    duration: 6
+scoring:
+  pair: 2
+  run: 1
+  fifteen: 2
+  thirty_one: 2
+  go: 1
+  his_heels: 2
+  nobs: 1
+  flush_4: 4
+  flush_5: 5

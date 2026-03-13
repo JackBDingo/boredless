@@ -9,6 +9,8 @@
 import { z } from 'zod';
 import { EventRulesArraySchema } from '../event-system/schema-integration.js';
 import { ContentSectionSchema } from '../content-system/schema-integration.js';
+import { AssetManifestSchema } from '../asset-system/schema-integration.js';
+import { PresentationConfigSchema } from '../presentation-system/schema-integration.js';
 
 // ---------------------------------------------------------------------------
 // schema_version
@@ -169,17 +171,10 @@ export type TurnModel = z.infer<typeof TurnModelSchema>;
 // presentation
 // ---------------------------------------------------------------------------
 
-export const ThemeSchema = z.object({
-  accent: z.string().optional(),
-  background: z.string().optional(),
-  typography: z.string().optional(),
-  motion: z.string().optional(),
-  sound_profile: z.string().optional(),
-});
-
-export const PresentationSchema = z.object({
-  theme: ThemeSchema.optional(),
-});
+// PresentationSchema is now provided by the presentation-system subsystem.
+// It supports full screen declarations, per-game themes, and animations.
+// The old ThemeSchema stub is preserved as an alias for backward compatibility.
+export const PresentationSchema = PresentationConfigSchema;
 
 export type Presentation = z.infer<typeof PresentationSchema>;
 
@@ -234,6 +229,7 @@ export const ExtensionsSchema = z
   })
   .optional();
 export const AuthoringSchema = z.record(z.any());
+export const AssetsSchema = AssetManifestSchema;
 
 // ---------------------------------------------------------------------------
 // GamePackageSchema — top-level V2 game package
@@ -246,7 +242,7 @@ export const GamePackageSchema = z.object({
   state_model: StateModelSchema,
   phases: PhasesSchema,
   turn_model: TurnModelSchema,
-  presentation: PresentationSchema,
+  presentation: PresentationSchema.optional(),
   scoring: ScoringSchema,
   victory: VictorySchema,
 
@@ -258,6 +254,7 @@ export const GamePackageSchema = z.object({
   objects: ObjectsSchema.optional(),
   rules: RulesSchema.optional(),
   extensions: ExtensionsSchema.optional(),
+  assets: AssetsSchema.optional(),
   authoring: AuthoringSchema.optional(),
 });
 

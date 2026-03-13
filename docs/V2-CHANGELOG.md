@@ -264,3 +264,57 @@ Created `server/src/runtime/content-system/` subsystem:
 - **Tag filter = any-match**: Item passes if it has at least one of the specified tag values
 - **ContentSection uses `pools` array**: Consistent with typed schema patterns; `id` field names the pool
 - **Fully standalone**: Zero imports from event-system, turn-system, object-models, or interpreter
+
+---
+
+## Phase 3.3 — Asset System
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/asset-system/` subsystem:
+
+- **`types.ts`** — Core type definitions: `AssetType`, `AssetDeclaration`, `AssetVariant`, `ResolvedAsset`, `ResolvedAssetVariant`, `AssetManifest`, `PreloadManifest`
+- **`asset-resolver.ts`** — `AssetResolver` class: URL resolution (external vs relative), base URL priority chain, recursive fallback resolution (max depth 3, circular-safe), variant resolution, type filtering, preload manifest generation
+- **`schema-integration.ts`** — Zod schemas: `AssetVariantSchema`, `AssetDeclarationSchema`, `AssetManifestSchema`; parse helpers `parseAssetManifest` / `safeParseAssetManifest`
+- **`index.ts`** — Public API
+- **`__tests__/asset-system.test.ts`** — 45 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — 10 design decisions with rationale
+
+### Schema Extension (Non-Breaking)
+
+- Updated `schema-engine/schema.ts`: Added `AssetsSchema` (alias for `AssetManifestSchema`) and optional `assets:` field to `GamePackageSchema`
+- All existing V2 game packages without an `assets:` section continue to work unchanged
+
+### URL Resolution Priority
+
+| Priority | Source | Example |
+|---------|--------|---------|
+| 1 (highest) | External URL in `src` | `https://cdn.example.com/img.png` → used as-is |
+| 2 | `manifest.baseUrl` | `/games/trivia/assets` + `logo.png` |
+| 3 | `options.publicUrlBase` | Runtime-provided URL base |
+| 4 | `options.gameDir` | Disk path for local development |
+| 5 (lowest) | No base | Relative path left as-is |
+
+### Asset Types Supported
+
+`image`, `audio`, `video`, `font`, `json`
+
+### Variant Conditions Supported
+
+`dark`, `light`, `mobile`, `desktop`, `small`, `large`
+
+### Test Count
+
+**45 new tests** (asset-system subsystem)  
+**768 total tests** (all subsystems combined, 2 pre-existing failures in presentation-system unrelated to this work)
+
+### Notable Decisions
+
+- **Pure resolution**: `AssetResolver` is stateless after construction — index built once, resolution is deterministic
+- **Manifest baseUrl takes precedence**: Game authors can lock down their asset URL in the schema; runtime options are fallbacks
+- **Max fallback depth 3**: Prevents infinite loops from circular references without requiring explicit cycle detection
+- **Polymorphic fallback field**: Accepts both asset IDs and external URLs — runtime disambiguates by checking asset index then URL prefix
+- **No file existence checking**: Keeps the resolver decoupled from filesystem; existence validation belongs in the Phase 5 CLI validator
+- **Zero imports from other V2 subsystems**: Fully standalone, no circular import risk

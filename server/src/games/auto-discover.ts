@@ -5,6 +5,8 @@ import { parse as parseYaml } from 'yaml';
 import { ManifestSchema, type GameManifest } from './manifest-schema.js';
 import type { GameModule } from './game-module.js';
 import type { GameDefinition } from '@boredless/shared';
+import { loadGamePackage } from '../runtime/schema-engine/index.js';
+import { DeclarativeGameModule } from '../runtime/interpreter/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,6 +29,28 @@ export function manifestToDefinition(manifest: GameManifest): GameDefinition {
     maxPlayers: manifest.players.max,
     estimatedMinutes: manifest.estimatedMinutes,
     icon: manifest.icon,
+  };
+}
+
+/**
+ * Convert a V2 ManifestV2 into a V1-compatible GameManifest.
+ * Required because the rest of the kernel works with GameManifest objects.
+ */
+function v2ManifestToV1(v2Manifest: import('../runtime/schema-engine/index.js').ManifestV2): GameManifest {
+  return {
+    id: v2Manifest.id,
+    name: v2Manifest.name,
+    tagline: v2Manifest.description, // V2 has no tagline — use description
+    description: v2Manifest.description,
+    players: {
+      min: v2Manifest.players.min,
+      max: v2Manifest.players.max,
+    },
+    estimatedMinutes: v2Manifest.estimated_minutes?.min ?? 10,
+    icon: v2Manifest.icon ?? '🎮',
+    accentColor: v2Manifest.accent_color ?? '#6366f1',
+    categories: v2Manifest.categories,
+    phases: {}, // V2 phases are in the full game package, not manifest
   };
 }
 
@@ -77,9 +101,29 @@ export async function discoverGames(): Promise<GameRegistration[]> {
     // --- V2 detection: check for game.yaml with schema_version ---
     const v2Version = detectV2Package(gameDir);
     if (v2Version !== null) {
-      // V2 package detected — log and skip V1 loading path.
-      // The declarative interpreter (Phase 1) will handle these; for now we skip.
-      console.log(`[auto-discover] V2 package detected: ${dirName} (schema_version: ${v2Version})`);
+      // Skip test fixture directories (prefixed with _)
+      if (dirName.startsWith('_')) {
+        console.log(`[auto-discover] Skipping V2 test fixture: ${dirName}`);
+        continue;
+      }
+
+      console.log(`[auto-discover] Loading V2 package: ${dirName} (schema_version: ${v2Version})`);
+
+      try {
+        const gameYamlPath = join(gameDir, 'game.yaml');
+        const gamePackage = loadGamePackage(gameYamlPath);
+        const v1Manifest = v2ManifestToV1(gamePackage.manifest);
+
+        games.push({
+          manifest: v1Manifest,
+          createModule: (definition: GameDefinition) =>
+            new DeclarativeGameModule(definition, gamePackage),
+        });
+      } catch (err) {
+        console.error(`[auto-discover] Failed to load V2 package "${dirName}": ${String(err)}`);
+        // Don't throw — skip this game and continue
+      }
+
       continue;
     }
 

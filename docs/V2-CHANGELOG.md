@@ -373,3 +373,147 @@ Created `server/src/runtime/presentation-system/` subsystem:
 - **Template defaults are copied**: `getDefaultTemplate()` returns deep copies to prevent shared-reference mutation bugs
 - **CSS naming convention**: `--color-primary`, `--font-family`, `--spacing-unit`, `--border-radius` for client-side theme injection
 - **No imports from other V2 subsystems**: Fully standalone presentation layer; wire-up at interpreter level
+
+---
+
+## Phase 4.1 — Rule Engine
+
+**Date:** 2026-03-13  
+**Commit:** feat(v2): Phase 4.1 — Rule Engine  
+**Subsystem:** `server/src/runtime/rule-engine/`
+
+### What Was Built
+
+A declarative rule evaluation engine that lets game schemas define game logic as data (conditions, actions, and constraints) without writing TypeScript.
+
+### Files Created
+
+| File | Purpose |
+|------|---------|
+| `rule-engine/types.ts` | Type definitions: RuleDeclaration, RuleCondition, RuleAction, RuleContext, RuleResult, BuiltInRule |
+| `rule-engine/expression-evaluator.ts` | Safe recursive descent parser — no eval(), no new Function() |
+| `rule-engine/condition-evaluator.ts` | Evaluates RuleCondition trees (comparison, logical, expression, builtin) |
+| `rule-engine/builtin-rules.ts` | Registry of 10 common game rule patterns |
+| `rule-engine/rule-engine.ts` | Main RuleEngine class with evaluate/enable/disable/add/remove |
+| `rule-engine/schema-integration.ts` | Zod schemas for YAML validation, parseRules/safeParseRules |
+| `rule-engine/index.ts` | Public API |
+| `rule-engine/__tests__/rule-engine.test.ts` | Comprehensive test suite |
+| `rule-engine/README.md` | Subsystem documentation |
+| `rule-engine/DECISIONS.md` | Architecture decision records |
+
+### Capabilities
+
+**Expression Language** (safe recursive descent parser):
+- Field access: `globals.score`, `phase.name`, `$event.type`, `$players.count`
+- Comparisons: `==`, `!=`, `>`, `<`, `>=`, `<=`
+- Boolean operators: `&&`, `||`, `!`
+- Arithmetic: `+`, `-`, `*`, `/`, `%`
+- String methods: `.contains()`, `.startsWith()`, `.length`
+- Array methods: `.includes()`, `.length`
+- Ternary: `condition ? valueA : valueB`
+- Parentheses grouping: `(a + b) * 2`
+- Literals: numbers, strings (single/double quoted), booleans, null
+
+**Condition Types:**
+- `comparison` — compare field paths or literals with 8 operators including `contains` and `in`
+- `and` / `or` / `not` — arbitrary nesting and composition
+- `expression` — free-form expression string
+- `builtin` — named rule from the built-in registry
+
+**Built-in Rules:**
+- `all_players_submitted`, `timer_expired`, `min_players`, `max_players`
+- `score_reached`, `all_equal`, `majority_vote`, `last_standing`
+- `round_limit`, `items_remaining`
+- Custom built-ins via `registerBuiltIn(name, fn)`
+
+**Action Types:**
+- `set` — set state field to value
+- `increment` — increment numeric field
+- `emit` — emit named event
+- `transition` — trigger phase transition
+- `custom` — invoke registered handler
+
+**RuleEngine Class:**
+- `evaluate(context)` — evaluate all enabled rules sorted by priority
+- `evaluateRule(id, context)` — evaluate a single rule
+- `enable(id)` / `disable(id)` — toggle rules at runtime
+- `addRule(rule)` / `removeRule(id)` — dynamic rule management
+- `getRules()` — get all rules in priority order
+- `registerCustomAction(name, handler)` — register custom action handlers
+
+### Architecture Decisions
+
+- **No eval()**: Full recursive descent parser for security (game schemas are user-authored)
+- **Evaluate-not-execute**: Engine returns `RuleResult[]` — callers execute actions (no circular deps with StateManager/EventEngine/PhaseMachine)
+- **Module-level builtin registry**: Built-ins registered at module load; `registerBuiltIn()` for extensions
+- **Wildcard paths in built-ins**: `players.*.score` expands to array of values for any/all checks
+- **Zod recursive schemas**: `z.lazy()` for `LogicalCondition.conditions` to support arbitrary nesting
+
+See `DECISIONS.md` in the subsystem directory for full rationale.
+
+### Test Count
+
+**87 new tests** (rule-engine subsystem)  
+**855 total tests** (all subsystems combined, 2 pre-existing failures in presentation-system unrelated to this work)
+
+### Notable Design Patterns
+
+- Rules are pure data in game YAML — zero game-specific TypeScript required for common patterns
+- Priority system ensures deterministic evaluation order (higher number = evaluated first)
+- `else` actions optional — allows rules to declare consequences for both outcomes
+- `enabled` flag allows runtime toggling (e.g., disable winner check until minimum rounds played)
+
+---
+
+## Phase 4.2 — Extension System
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/extension-system/` subsystem:
+
+- **`types.ts`** — Core type definitions: `ExtensionDeclaration`, `ExtensionCapabilities`, `RendererExtension`, `RuleExtension`, `InteractionExtension`, `LifecycleHookExtension`, `RuleExtensionContext`, `LifecycleContext`, `LoadedExtension`
+- **`extension-registry.ts`** — `ExtensionRegistry` class: registration, unregister, clear, lookup by ID/componentType/ruleType/widgetType, lifecycle hook index (per-event array), full validation on registration
+- **`extension-sandbox.ts`** — Isolation utilities: `createSandboxedContext()` (deep-freeze via JSON round-trip), `validateExtensionImports()` (static regex analysis, 13 blocked subsystem paths), `wrapRuleHandler()` (sync error catching + 100ms timeout), `wrapLifecycleHandler()` (async Promise.race timeout + error catching)
+- **`schema-integration.ts`** — Zod schemas: `ExtensionTypeSchema`, `ExtensionDeclarationSchema`, `ExtensionsArraySchema`; `parseExtensions()` / `safeParseExtensions()` helpers
+- **`index.ts`** — Public API
+- **`__tests__/extension-system.test.ts`** — 81 comprehensive tests
+- **`README.md`** — Subsystem documentation
+- **`DECISIONS.md`** — 10 architecture decision records
+
+### Schema Extension (Non-Breaking)
+
+- Updated `schema-engine/schema.ts`: Replaced the old `ExtensionsSchema` stub (untyped object map) with `ExtensionsArraySchema` from extension-system — typed array of `ExtensionDeclaration` objects
+- Added import of `ExtensionsArraySchema` to schema-engine
+- `extensions:` field in `GamePackageSchema` is still optional — all existing V2 game packages continue to work unchanged
+
+### Extension Types
+
+| Type | Description | Registry Index |
+|------|-------------|---------------|
+| `renderer` | Custom React component type | By `componentType` |
+| `rule` | Custom rule evaluate function | By `ruleType` |
+| `interaction` | Custom player input widget | By `widgetType` |
+| `lifecycle` | Game lifecycle callbacks | By hook name (array) |
+| `composite` | Multiple capability types | All applicable indexes |
+
+### Isolation Guarantees
+
+1. State passed to extensions is deep-frozen via `JSON.parse(JSON.stringify())` + recursive `Object.freeze()`
+2. `wrapRuleHandler()` catches all errors → returns `false` + logs
+3. `wrapLifecycleHandler()` catches all errors + enforces 1000ms timeout via `Promise.race`
+4. `validateExtensionImports()` statically detects imports from 13 blocked engine subsystems
+5. One `ExtensionRegistry` per game room — extensions from different games never share a registry
+
+### Test Count
+
+**81 new tests** (extension-system subsystem)  
+**991 total passing tests** (all subsystems combined)
+
+### Notable Decisions
+
+- **No dynamic module loading**: `entryPoint` stored in schema but unused at runtime — safe dynamic loading (Worker threads) is Phase 5+ work
+- **Metadata-only renderers**: Server stores componentType + propsSchema; actual React components registered client-side
+- **Array schema**: `extensions:` is an array of declarations, not an object map — cleaner Zod validation, consistent with `rules:` section
+- **Global type name uniqueness**: Duplicate componentType/ruleType/widgetType rejected globally within a registry — loud failure over silent override
+- **Static import validation**: Regex-based, designed for CLI validator use; runtime enforcement requires Worker threads (future work)

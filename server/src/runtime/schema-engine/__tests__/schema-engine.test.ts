@@ -296,8 +296,9 @@ describe('loadGamePackage', () => {
 
   it('fixture has scoring formulas', () => {
     const pkg = loadGamePackage(TEST_FIXTURE_PATH);
-    expect(pkg.scoring['correct_answer']).toBe(100);
-    expect(pkg.scoring['first_correct']).toBe(50);
+    const scoring = pkg.scoring as Record<string, number>;
+    expect(scoring['correct_answer']).toBe(100);
+    expect(scoring['first_correct']).toBe(50);
   });
 
   it('fixture has highest_score victory condition', () => {

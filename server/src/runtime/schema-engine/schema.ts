@@ -11,6 +11,8 @@ import { EventRulesArraySchema } from '../event-system/schema-integration.js';
 import { ContentSectionSchema } from '../content-system/schema-integration.js';
 import { AssetManifestSchema } from '../asset-system/schema-integration.js';
 import { PresentationConfigSchema } from '../presentation-system/schema-integration.js';
+import { RulesArraySchema } from '../rule-engine/schema-integration.js';
+import { ExtensionsArraySchema } from '../extension-system/schema-integration.js';
 
 // ---------------------------------------------------------------------------
 // schema_version
@@ -182,9 +184,20 @@ export type Presentation = z.infer<typeof PresentationSchema>;
 // scoring
 // ---------------------------------------------------------------------------
 
+/**
+ * Legacy V1 scoring schema: simple key → points map.
+ * Kept for backward compat with existing V1 game packages.
+ */
 export const ScoringSchema = z.record(z.number());
 
 export type Scoring = z.infer<typeof ScoringSchema>;
+
+/**
+ * V2 declarative scoring schema — imported from scoring-system subsystem.
+ * Supports multiple score tracks, formula-based rules, and victory conditions.
+ * Game packages can use either the V1 legacy format or the V2 declarative format.
+ */
+export { ScoringConfigSchema } from '../scoring-system/schema-integration.js';
 
 // ---------------------------------------------------------------------------
 // victory
@@ -219,15 +232,12 @@ export const EventsSchema = EventRulesArraySchema;
 export const RolesSchema = z.record(z.any());
 export const TeamsSchema = z.record(z.any());
 export const ObjectsSchema = z.record(z.any());
-export const RulesSchema = z.array(z.any());
-export const ExtensionsSchema = z
-  .object({
-    renderers: z.record(z.any()).optional(),
-    rules: z.record(z.any()).optional(),
-    interactions: z.record(z.any()).optional(),
-    scoring: z.record(z.any()).optional(),
-  })
-  .optional();
+export const RulesSchema = RulesArraySchema;
+/**
+ * V2 extensions schema — array of extension declarations.
+ * Replaces the old stub with the typed ExtensionsArraySchema from extension-system.
+ */
+export const ExtensionsSchema = ExtensionsArraySchema.optional();
 export const AuthoringSchema = z.record(z.any());
 export const AssetsSchema = AssetManifestSchema;
 
@@ -243,7 +253,9 @@ export const GamePackageSchema = z.object({
   phases: PhasesSchema,
   turn_model: TurnModelSchema,
   presentation: PresentationSchema.optional(),
-  scoring: ScoringSchema,
+  // Legacy V1 format: { correct_answer: 100 } OR V2 format: { tracks: [...], rules: [...], ... }
+  // Using z.unknown() here to accept both formats; consumers should validate with ScoringConfigSchema
+  scoring: z.unknown().optional(),
   victory: VictorySchema,
 
   // --- Optional (stubs) ---

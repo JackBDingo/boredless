@@ -71,6 +71,42 @@ interface RoomState {
 }
 
 // ---------------------------------------------------------------------------
+// Extension action handler type
+// ---------------------------------------------------------------------------
+
+/**
+ * Context passed to extension action handlers.
+ * Provides read/write access to game state for custom game logic.
+ */
+export interface ExtensionActionContext {
+  /** Room ID */
+  roomId: string;
+  /** Current global state (read-only snapshot — use setGlobal to mutate) */
+  globals: Record<string, unknown>;
+  /** Per-player state (read-only snapshot) */
+  players: Record<string, Record<string, unknown>>;
+  /** Player info (id + name) */
+  playerInfo: Array<{ id: string; name: string }>;
+  /** Set a global state field */
+  setGlobal: (field: string, value: unknown) => void;
+  /** Get a player's current score */
+  getScore: (playerId: string) => number;
+  /** Award points to a player */
+  addPoints: (playerId: string, amount: number) => void;
+  /** Log a message */
+  log: (msg: string, data?: Record<string, unknown>) => void;
+}
+
+/**
+ * Handler for custom extension actions declared in game.yaml.
+ * Return true if the action was handled, false to fall through to default handling.
+ */
+export type ExtensionActionHandler = (
+  actionName: string,
+  ctx: ExtensionActionContext,
+) => boolean;
+
+// ---------------------------------------------------------------------------
 // Utility: parse duration string to ms
 // ---------------------------------------------------------------------------
 
@@ -99,10 +135,19 @@ export class DeclarativeGameModule implements GameModule {
    * @param gamePackage - The fully validated V2 game package
    * @param timerImpl   - Optional timer override for testing
    */
-  constructor(definition: GameDefinition, gamePackage: GamePackage, timerImpl?: TimerImpl) {
+  /** Optional handler for custom extension actions. */
+  private readonly extensionActionHandler: ExtensionActionHandler | undefined;
+
+  constructor(
+    definition: GameDefinition,
+    gamePackage: GamePackage,
+    timerImpl?: TimerImpl,
+    extensionActionHandler?: ExtensionActionHandler,
+  ) {
     this.definition = definition;
     this.gamePackage = gamePackage;
     this.timerImpl = timerImpl;
+    this.extensionActionHandler = extensionActionHandler;
   }
 
   // ---------------------------------------------------------------------------
@@ -941,9 +986,16 @@ export class DeclarativeGameModule implements GameModule {
         ctx.log.info('[interpreter] shuffle_and_merge skipped (Phase 3 feature)', { action: action.action });
         break;
       }
-      default:
+      default: {
+        // Try extension action handler if one is registered
+        if (this.extensionActionHandler) {
+          const extCtx = this.buildExtensionContext(roomId, ctx);
+          const handled = this.extensionActionHandler(action.action, extCtx);
+          if (handled) break;
+        }
         ctx.log.warn('[interpreter] Unknown action from PhaseMachine', { action: action.action });
         break;
+      }
     }
   }
 
@@ -1059,5 +1111,47 @@ export class DeclarativeGameModule implements GameModule {
     } catch (err) {
       ctx.log.warn('[interpreter] content_draw failed', { poolId, err });
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Extension action context builder
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Build an ExtensionActionContext for custom action handlers.
+   * Provides typed access to state for extension functions.
+   */
+  private buildExtensionContext(roomId: string, ctx: GameContext): ExtensionActionContext {
+    const room = this.rooms.get(roomId);
+    if (!room) {
+      throw new Error('[declarative-game-module] Room not found: ' + roomId);
+    }
+
+    // Read globals from StateManager (includes private fields for extensions)
+    const snapshot = room.stateManager.snapshot();
+    const globals: Record<string, unknown> = { ...snapshot.globals };
+
+    // Read per-player state
+    const players: Record<string, Record<string, unknown>> = {};
+    for (const [playerId, fields] of Object.entries(snapshot.players)) {
+      players[playerId] = { ...fields };
+    }
+
+    return {
+      roomId,
+      globals,
+      players,
+      playerInfo: room.players.map(p => ({ id: p.id, name: p.name })),
+      setGlobal: (field: string, value: unknown) => {
+        room.stateManager.setGlobal(field, value);
+      },
+      getScore: (playerId: string) => ctx.getScore(playerId),
+      addPoints: (playerId: string, amount: number) => {
+        ctx.addPoints(playerId, amount);
+      },
+      log: (msg: string, data?: Record<string, unknown>) => {
+        ctx.log.info(msg, data);
+      },
+    };
   }
 }

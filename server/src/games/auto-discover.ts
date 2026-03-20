@@ -74,6 +74,19 @@ function detectV2Package(gameDir: string): string | null {
   return null;
 }
 
+/**
+ * V2 extension module interface.
+ * A game package can optionally export a game-module.ts factory from its
+ * extensions/ directory to handle custom game actions that exceed the
+ * declarative system's capabilities.
+ *
+ * The factory function must be named createV2Module and receives:
+ *   (definition: GameDefinition, gamePackage: GamePackage, gameDir: string) => GameModule
+ */
+interface V2ExtensionsModule {
+  [key: string]: unknown;
+}
+
 export async function discoverGames(): Promise<GameRegistration[]> {
   // games/ lives at repo root, three levels up from server/src/games/
   const gamesDir = join(__dirname, '../../../games');
@@ -114,11 +127,51 @@ export async function discoverGames(): Promise<GameRegistration[]> {
         const gamePackage = loadGamePackage(gameYamlPath);
         const v1Manifest = v2ManifestToV1(gamePackage.manifest);
 
-        games.push({
-          manifest: v1Manifest,
-          createModule: (definition: GameDefinition) =>
-            new DeclarativeGameModule(definition, gamePackage),
-        });
+        // Check for extensions/game-module.ts — custom factory for games with extension actions
+        const gameModuleTs = join(gameDir, 'extensions', 'game-module.ts');
+        const gameModuleJs = join(gameDir, 'extensions', 'game-module.js');
+        const hasGameModule = existsSync(gameModuleTs) || existsSync(gameModuleJs);
+
+        let extensionFactory: ((def: GameDefinition) => GameModule) | null = null;
+
+        if (hasGameModule) {
+          try {
+            const modPath = existsSync(gameModuleTs) ? gameModuleTs : gameModuleJs;
+            const extMod = await import(modPath) as V2ExtensionsModule;
+
+            // Find the first exported function matching create*Module pattern
+            const factoryKey = Object.keys(extMod).find(
+              k => k.startsWith('create') && k.endsWith('Module') && typeof extMod[k] === 'function',
+            );
+
+            if (factoryKey) {
+              const factory = extMod[factoryKey] as (
+                def: GameDefinition,
+                pkg: typeof gamePackage,
+                dir: string,
+              ) => GameModule;
+              const capturedPackage = gamePackage;
+              const capturedDir = gameDir;
+              extensionFactory = (def: GameDefinition) => factory(def, capturedPackage, capturedDir);
+              console.log(`[auto-discover] Loaded V2 extension module for: ${dirName} (factory: ${factoryKey})`);
+            }
+          } catch (extErr) {
+            console.warn(
+              `[auto-discover] Failed to load extension module for "${dirName}": ${String(extErr)}. ` +
+              `Falling back to DeclarativeGameModule.`
+            );
+          }
+        }
+
+        if (extensionFactory) {
+          games.push({ manifest: v1Manifest, createModule: extensionFactory });
+        } else {
+          games.push({
+            manifest: v1Manifest,
+            createModule: (definition: GameDefinition) =>
+              new DeclarativeGameModule(definition, gamePackage),
+          });
+        }
       } catch (err) {
         console.error(`[auto-discover] Failed to load V2 package "${dirName}": ${String(err)}`);
         // Don't throw — skip this game and continue

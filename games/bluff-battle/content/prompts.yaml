@@ -1,0 +1,224 @@
+# Bluffalo prompt bank — migrated from server/prompts.ts
+# Each entry: question + correct_answer
+# Players submit fake answers; everyone votes for the real one.
+
+prompts:
+  - id: 1
+    question: "What is the world's smallest country by area?"
+    correct_answer: "Vatican City"
+
+  - id: 2
+    question: "What does the 'D' in D-Day stand for?"
+    correct_answer: "Day (it literally means Day-Day)"
+
+  - id: 3
+    question: "What animal can hold its breath the longest?"
+    correct_answer: "Cuvier's beaked whale (3+ hours)"
+
+  - id: 4
+    question: "What is the fear of long words called?"
+    correct_answer: "Hippopotomonstrosesquippedaliophobia"
+
+  - id: 5
+    question: "What color is a hippo's sweat?"
+    correct_answer: "Red/orange"
+
+  - id: 6
+    question: "How many hearts does an octopus have?"
+    correct_answer: "Three"
+
+  - id: 7
+    question: "What was the first toy advertised on television?"
+    correct_answer: "Mr. Potato Head"
+
+  - id: 8
+    question: "What is the longest word in English with no repeated letters?"
+    correct_answer: "Uncopyrightable"
+
+  - id: 9
+    question: "What fruit was originally called a 'Chinese gooseberry'?"
+    correct_answer: "Kiwi"
+
+  - id: 10
+    question: "How long is New Zealand's longest place name?"
+    correct_answer: "85 letters"
+
+  - id: 11
+    question: "What is the only planet that spins clockwise?"
+    correct_answer: "Venus"
+
+  - id: 12
+    question: "What was Google's original name?"
+    correct_answer: "BackRub"
+
+  - id: 13
+    question: "What is the national animal of Scotland?"
+    correct_answer: "Unicorn"
+
+  - id: 14
+    question: "How many noses does a slug have?"
+    correct_answer: "Four"
+
+  - id: 15
+    question: "What was the first item sold on eBay?"
+    correct_answer: "A broken laser pointer"
+
+  - id: 16
+    question: "What is a group of flamingos called?"
+    correct_answer: "A flamboyance"
+
+  - id: 17
+    question: "What percentage of the Earth's water is fresh water?"
+    correct_answer: "About 3%"
+
+  - id: 18
+    question: "What is the longest hiccuping spree recorded?"
+    correct_answer: "68 years (Charles Osborne)"
+
+  - id: 19
+    question: "What animal's fingerprints are virtually indistinguishable from humans?"
+    correct_answer: "Koala"
+
+  - id: 20
+    question: "What country has the most vending machines per capita?"
+    correct_answer: "Japan"
+
+  - id: 21
+    question: "What is the loudest animal on Earth?"
+    correct_answer: "Sperm whale (230 decibels)"
+
+  - id: 22
+    question: "How many bones does a shark have?"
+    correct_answer: "Zero (cartilage only)"
+
+  - id: 23
+    question: "What is the oldest known board game?"
+    correct_answer: "Senet (ancient Egypt, ~3100 BC)"
+
+  - id: 24
+    question: "What does 'OK' originally stand for?"
+    correct_answer: "Oll Korrect (a misspelling joke from 1839)"
+
+  - id: 25
+    question: "What is the most stolen food in the world?"
+    correct_answer: "Cheese"
+
+  - id: 26
+    question: "How long would it take to walk to the Moon?"
+    correct_answer: "About 9 years"
+
+  - id: 27
+    question: "What is the only letter that doesn't appear in any US state name?"
+    correct_answer: "Q"
+
+  - id: 28
+    question: "What was the first video uploaded to YouTube?"
+    correct_answer: "Me at the zoo"
+
+  - id: 29
+    question: "How many dimples does an average golf ball have?"
+    correct_answer: "336"
+
+  - id: 30
+    question: "What animal can sleep for three years straight?"
+    correct_answer: "Snail"
+
+  - id: 31
+    question: "What is the most common letter in the English language?"
+    correct_answer: "E"
+
+  - id: 32
+    question: "What body part never stops growing?"
+    correct_answer: "Nose and ears"
+
+  - id: 33
+    question: "What country eats the most chocolate per capita?"
+    correct_answer: "Switzerland"
+
+  - id: 34
+    question: "How fast does a sneeze travel?"
+    correct_answer: "About 100 mph"
+
+  - id: 35
+    question: "What is the smallest bone in the human body?"
+    correct_answer: "Stapes (in the ear)"
+
+  - id: 36
+    question: "What color are airplane black boxes actually?"
+    correct_answer: "Bright orange"
+
+  - id: 37
+    question: "How many taste buds does the average human have?"
+    correct_answer: "About 10,000"
+
+  - id: 38
+    question: "What animal has the longest pregnancy?"
+    correct_answer: "Elephant (22 months)"
+
+  - id: 39
+    question: "What is the rarest blood type?"
+    correct_answer: "AB negative"
+
+  - id: 40
+    question: "What was the shortest war in history?"
+    correct_answer: "Anglo-Zanzibar War (38-45 minutes)"
+
+  - id: 41
+    question: "What percentage of the ocean has been explored?"
+    correct_answer: "About 5%"
+
+  - id: 42
+    question: "What was the first message sent over the Internet?"
+    correct_answer: "LO (tried to send LOGIN but crashed after 2 letters)"
+
+  - id: 43
+    question: "What fruit floats in water because it is 25% air?"
+    correct_answer: "Apple"
+
+  - id: 44
+    question: "How many languages are written from right to left?"
+    correct_answer: "About 12"
+
+  - id: 45
+    question: "What is the most visited website in the world?"
+    correct_answer: "Google"
+
+  - id: 46
+    question: "What animal's eye is bigger than its brain?"
+    correct_answer: "Ostrich"
+
+  - id: 47
+    question: "What is the hottest planet in our solar system?"
+    correct_answer: "Venus (not Mercury)"
+
+  - id: 48
+    question: "How many muscles does a cat have in each ear?"
+    correct_answer: "32"
+
+  - id: 49
+    question: "What is the world record for most T-shirts worn at once?"
+    correct_answer: "260"
+
+  - id: 50
+    question: "What animal can see behind itself without turning its head?"
+    correct_answer: "Rabbit"
+
+  - id: 51
+    question: "What does the 'ZIP' in ZIP code stand for?"
+    correct_answer: "Zone Improvement Plan"
+
+  - id: 52
+    question: "How many possible combinations are there on a Rubik's Cube?"
+    correct_answer: "43 quintillion"
+
+  - id: 53
+    question: "What country has more pyramids than Egypt?"
+    correct_answer: "Sudan"
+
+  - id: 54
+    question: "What is the most expensive spice in the world by weight?"
+    correct_answer: "Saffron"
+
+  - id: 55
+    question: "What percentage of your body weight is bacteria?"
+    correct_answer: "About 1-3%"

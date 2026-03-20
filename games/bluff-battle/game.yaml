@@ -1,0 +1,397 @@
+# game.yaml — Bluffalo (Bluff Battle) V2 Declarative Game Package
+#
+# Migrated from V1 BluffBattleModule (~500 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   instructions (10s)
+#   → submit (60s, all players submit fake answers)
+#   → voting (30s, all players vote — can't vote for own)
+#   → reveal (10s, show who fooled whom + scores)
+#   → scores (8s, show cumulative scores)
+#   → [loop back to submit for N rounds]
+#   → game_over
+#
+# Complex Logic (handled by extensions in extensions/):
+#   bluffalo_draw_prompt   — draw a random unused prompt, store in state
+#   bluffalo_build_answers — combine fakes + correct answer, shuffle, assign IDs
+#   bluffalo_score_round   — award 1000 pts for correct vote, 500 pts per fool
+#   bluffalo_build_reveal  — build reveal data structure showing who voted for what
+
+schema_version: "2.0"
+
+manifest:
+  id: bluff-battle
+  name: Bluffalo
+  description: >
+    Players write convincing fake answers to trivia questions.
+    Everyone votes — fool the crowd, spot the truth, score big.
+  version: "2.0.0"
+  author: Boredless
+  tags: [bluffing, party, trivia, writing]
+  players:
+    min: 3
+    max: 8
+  estimated_minutes:
+    min: 10
+    max: 25
+  icon: swords
+  accent_color: indigo
+  categories: [bluffing, party, trivia]
+
+# ---------------------------------------------------------------------------
+# State Model
+# ---------------------------------------------------------------------------
+# Visibility: public = display + all players; private = owner only
+# ---------------------------------------------------------------------------
+
+state_model:
+  globals:
+    round:
+      type: integer
+      default: 0
+      visibility: public
+
+    total_rounds:
+      type: integer
+      default: 3
+      visibility: public
+
+    current_question:
+      type: string
+      default: null
+      visibility: public
+
+    # Hidden from players — only the extension knows the correct answer
+    correct_answer:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Used IDs to prevent repeat prompts this game
+    used_prompt_ids:
+      type: array
+      default: []
+      visibility: private
+      redaction: omit
+
+    # Built answer list for voting (shuffled fakes + correct)
+    # Serialized as JSON string for state compatibility
+    answers_json:
+      type: string
+      default: null
+      visibility: public
+
+    # Submitted count — shown during submission phase
+    submitted_count:
+      type: integer
+      default: 0
+      visibility: public
+
+    # Vote count — shown during voting phase
+    voted_count:
+      type: integer
+      default: 0
+      visibility: public
+
+    # Reveal data — serialized JSON
+    reveal_json:
+      type: string
+      default: null
+      visibility: public
+
+  per_player:
+    # Player's fake answer text
+    submission:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Whether this player has submitted a fake answer
+    has_submitted:
+      type: boolean
+      default: false
+      visibility: public
+
+    # The answer ID this player voted for
+    vote_answer_id:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Whether this player has voted
+    has_voted:
+      type: boolean
+      default: false
+      visibility: public
+
+# ---------------------------------------------------------------------------
+# Turn Model
+# ---------------------------------------------------------------------------
+
+turn_model:
+  type: simultaneous
+
+# ---------------------------------------------------------------------------
+# Phases
+# ---------------------------------------------------------------------------
+#
+# Phase graph:
+#
+#   instructions
+#       ↓ (timer)
+#   submit           ← loop starts here
+#       ↓ (all submitted OR timer)
+#   voting
+#       ↓ (all voted OR timer)
+#   reveal
+#       ↓ (timer)
+#   scores
+#       ↓ round < total_rounds → submit
+#       ↓ round >= total_rounds → game_over
+#   game_over         ← terminal (no duration → onGameEnd fires)
+#
+# ---------------------------------------------------------------------------
+
+phases:
+  instructions:
+    type: timed
+    duration: 10
+    screen:
+      display: template:instructions
+      phone: template:instructions
+    on_exit:
+      - action: advance
+        to: submit
+
+  submit:
+    # Extension bluffalo_draw_prompt runs on_enter to pick a prompt.
+    # It stores question in globals.current_question and correct_answer in
+    # globals.correct_answer (private). It also resets per-round state.
+    type: input_gate
+    duration: 60
+    on_enter:
+      - action: increment
+        target: globals.round
+      - action: set
+        target: globals.submitted_count
+        value: 0
+      - action: set
+        target: globals.voted_count
+        value: 0
+      - action: set
+        target: globals.answers_json
+        value: null
+      - action: set
+        target: globals.reveal_json
+        value: null
+      - action: reset_players
+        field: submission
+      - action: reset_players
+        field: has_submitted
+      - action: reset_players
+        field: vote_answer_id
+      - action: reset_players
+        field: has_voted
+      # Extension: draw a random unused prompt and store in state
+      - action: bluffalo_draw_prompt
+    input:
+      primitive: text_submit
+      target: per_player.submission
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: voting
+
+  voting:
+    # Extension bluffalo_build_answers runs on_enter to combine fakes + correct
+    # answer, shuffle, assign IDs, and store in globals.answers_json.
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: bluffalo_build_answers
+    input:
+      primitive: vote
+      target: per_player.vote_answer_id
+      required: all_players
+    screen:
+      display: template:vote
+      phone: template:vote
+    on_complete:
+      - action: advance
+        to: reveal
+
+  reveal:
+    # Extension bluffalo_score_round calculates scores on on_enter.
+    # Extension bluffalo_build_reveal builds the reveal data structure.
+    type: timed
+    duration: 10
+    on_enter:
+      - action: bluffalo_score_round
+      - action: bluffalo_build_reveal
+    screen:
+      display: template:reveal
+      phone: template:reveal
+    on_exit:
+      - action: advance
+        to: scores
+
+  scores:
+    type: timed
+    duration: 8
+    screen:
+      display: template:scoreboard
+      phone: template:scoreboard
+    on_exit:
+      - action: conditional
+        condition: "globals.round < globals.total_rounds"
+        then:
+          advance_to: submit
+        else:
+          advance_to: game_over
+
+  game_over:
+    # No duration — onGameEnd fires immediately (terminal phase)
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+# ---------------------------------------------------------------------------
+# Content
+# ---------------------------------------------------------------------------
+# The prompt pool is loaded via the extension (bluffalo_draw_prompt).
+# Declared here for content-system integration. The extension uses its own
+# YAML-to-TypeScript loader for now (Phase 5.2a).
+# ---------------------------------------------------------------------------
+
+content:
+  pools:
+    - id: prompts
+      name: "Bluffalo Trivia Prompts"
+      sources:
+        - type: file
+          path: ./content/prompts.yaml
+      selection: random
+      noRepeat: true
+
+# ---------------------------------------------------------------------------
+# Presentation
+# ---------------------------------------------------------------------------
+
+presentation:
+  theme:
+    colors:
+      primary: "#6366f1"
+      secondary: "#4f46e5"
+      accent: "#f59e0b"
+      background: "#0f0f1a"
+      surface: "#1a1a2e"
+      text: "#f8fafc"
+    darkMode: true
+    borderRadius: "12px"
+  screens:
+    - id: instructions
+      template: info
+      surface: both
+      title: "How to Play Bluffalo"
+      animations:
+        enter: fade
+        duration: 300
+    - id: submit
+      template: prompt
+      surface: both
+      animations:
+        enter: slide-up
+        duration: 200
+    - id: voting
+      template: vote
+      surface: both
+      animations:
+        enter: slide-up
+        duration: 200
+    - id: reveal
+      template: reveal
+      surface: both
+      animations:
+        enter: fade
+        duration: 400
+    - id: scores
+      template: scoreboard
+      surface: both
+    - id: game_over
+      template: results
+      surface: both
+
+# ---------------------------------------------------------------------------
+# Scoring
+# ---------------------------------------------------------------------------
+# Scoring rules are complex (based on who fooled whom) — handled by
+# the bluffalo_score_round extension function.
+# These constants are declared here for documentation.
+# ---------------------------------------------------------------------------
+
+scoring:
+  correct_answer: 1000
+  fooled_player: 500
+
+# ---------------------------------------------------------------------------
+# Victory
+# ---------------------------------------------------------------------------
+
+victory:
+  type: highest_score
+  after: all_rounds
+  tiebreak: most_correct_guesses
+
+# ---------------------------------------------------------------------------
+# Events
+# ---------------------------------------------------------------------------
+
+events:
+  - id: game_start_sound
+    name: "Play fanfare on game start"
+    once: true
+    triggers:
+      - type: game_start
+    effects:
+      - type: play_sound
+        sound: "bluffalo_start"
+
+  - id: final_round_alert
+    name: "Announce final round"
+    triggers:
+      - type: phase_enter
+        phase: submit
+        condition: "globals.round == globals.total_rounds"
+    effects:
+      - type: announce
+        message: "Final round — make it count!"
+
+# ---------------------------------------------------------------------------
+# Extensions
+# ---------------------------------------------------------------------------
+# These extensions are implemented in games/bluff-battle/extensions/
+# and wired in by auto-discover.ts via the game-module.ts factory.
+#
+# Extension types:
+#   bluffalo_draw_prompt   — lifecycle hook (phase_enter: submit)
+#   bluffalo_build_answers — lifecycle hook (phase_enter: voting)
+#   bluffalo_score_round   — lifecycle hook (phase_enter: reveal)
+#   bluffalo_build_reveal  — lifecycle hook (phase_enter: reveal)
+# ---------------------------------------------------------------------------
+
+extensions:
+  - id: bluffalo-core
+    name: "Bluffalo Core Logic"
+    type: lifecycle
+    description: >
+      Implements the four core Bluffalo operations: prompt drawing,
+      answer building, round scoring, and reveal data assembly.
+    entryPoint: ./extensions/index.ts

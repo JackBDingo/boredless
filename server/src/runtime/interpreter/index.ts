@@ -6,3 +6,4 @@
  */
 
 export { DeclarativeGameModule } from './declarative-game-module.js';
+export type { ExtensionActionContext, ExtensionActionHandler } from './declarative-game-module.js';

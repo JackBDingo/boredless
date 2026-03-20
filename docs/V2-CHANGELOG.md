@@ -517,3 +517,57 @@ Created `server/src/runtime/extension-system/` subsystem:
 - **Array schema**: `extensions:` is an array of declarations, not an object map — cleaner Zod validation, consistent with `rules:` section
 - **Global type name uniqueness**: Duplicate componentType/ruleType/widgetType rejected globally within a registry — loud failure over silent override
 - **Static import validation**: Regex-based, designed for CLI validator use; runtime enforcement requires Worker threads (future work)
+
+---
+
+## Phase 4.4 — AI Authoring Foundation
+*Date: 2026-03-13*
+
+### What Was Built
+
+Created `server/src/runtime/authoring-system/` — the data layer for AI-assisted game creation.
+
+**New files:**
+- `types.ts` — All type definitions (GameIntrospection, ComplexityScore, GameTemplate, CapabilityDoc, ValidationResult, etc.)
+- `introspector.ts` — `introspect()` + `calculateComplexity()`: analyze parsed game.yaml and return structured metadata
+- `validator.ts` — `validateGamePackage()`: deep semantic validation beyond Zod structural checks
+- `template-library.ts` — `getTemplate()` + `getAvailableTemplates()`: 8 complete game scaffolds
+- `capability-docs.ts` — `getCapabilityDocs()` + `generateSchemaReference()`: LLM-ready runtime documentation
+- `index.ts` — Public API
+- `__tests__/authoring-system.test.ts` — 46 tests
+- `README.md`, `DECISIONS.md`
+
+### Game Templates Included
+
+| Type | Description | Complexity |
+|------|-------------|------------|
+| `minimal` | Bare minimum: lobby → play → end | simple |
+| `party` | Quiplash-style submit + vote | moderate |
+| `trivia` | Multiple choice, timed | moderate |
+| `hidden-role` | Werewolf-style social deduction | moderate |
+| `drawing` | Pictionary-style draw + guess | moderate |
+| `word` | Letter-set word game | moderate |
+| `card` | Deck/deal/play skeleton | moderate |
+| `board` | Grid board game skeleton | moderate |
+
+### Validation Checks
+
+- Phase transitions reference existing phases
+- No orphaned phases (unreachable via BFS from initial)
+- At least one phase has player interaction
+- Content pool references are valid
+- Score track references in rules are valid
+- Victory condition references valid track
+- Extension types are built-in or declared
+
+### Architecture Compliance
+
+- Zero imports from runtime subsystems (pure data layer)
+- No game-specific code
+- No circular imports
+- All functions are pure (no side effects)
+
+### Test Count
+
+**46 new tests** (authoring-system subsystem)
+**1,037 total tests** (all subsystems combined, 0 failures)

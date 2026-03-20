@@ -71,9 +71,7 @@ phases:
     screen:
       display: template:waiting
       phone: template:text_input
-    on_enter:
-      - action: increment
-        target: globals.round
+    # Round increment handled by event system (increment_round event)
     on_complete:
       - action: advance
         to: results

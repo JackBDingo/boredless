@@ -831,7 +831,7 @@ describe('PhaseMachine — integration with game.yaml fixture', () => {
     expect(machine.getCurrentPhase()?.node.type).toBe('input_gate');
   });
 
-  it('play phase increments round on_enter', () => {
+  it('play phase does not increment round (event system handles it)', () => {
     const pkg = loadGamePackage(FIXTURE_PATH);
     const stateManager = new StateManager(pkg.state_model, ['p1', 'p2']);
     const timer = new TestTimerImpl();
@@ -853,7 +853,8 @@ describe('PhaseMachine — integration with game.yaml fixture', () => {
     expect(stateManager.getGlobal('round')).toBe(0);
 
     timer.trigger('integration-room'); // → play
-    expect(stateManager.getGlobal('round')).toBe(1); // on_enter: increment globals.round
+    // Round increment is now handled by the event system, not on_enter
+    expect(stateManager.getGlobal('round')).toBe(0);
   });
 
   it('play → results when all players submit', () => {
@@ -971,6 +972,9 @@ describe('PhaseMachine — integration with game.yaml fixture', () => {
     // play (input_gate) — both players submit → advance to results
     machine.submitInput('p1', 'text_submit', 'answer1');
     machine.submitInput('p2', 'text_submit', 'answer2');
+
+    // Simulate event system incrementing round (PhaseMachine alone doesn't do it)
+    stateManager.setGlobal('round', 1);
 
     // results (timed) → conditional: round(1) < total_rounds(1) → false → final_results
     timer.trigger('integration-room');

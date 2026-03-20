@@ -1,0 +1,218 @@
+# game.yaml — Battleship V2 Declarative Game Package
+#
+# Migrated from V1 BattleshipModule (~550 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   setup (120s) — players place their ships; auto-place on timeout
+#       down when both ready (or timeout)
+#   battle (30s/turn) — alternating turns; active player fires a shot
+#       down when all opponent's ships are sunk
+#   result (8s) — show winner + final board
+#       down (timer)
+#   scores (6s) — show final scores
+#       down (timer)
+#   game_over (terminal)
+#
+# Complex Logic (handled by extensions in extensions/):
+#   bs_init_boards   — initialize per-player board state on setup entry
+#   bs_start_battle  — set active player on battle entry
+#   bs_broadcast_scores — broadcast scores on scores entry
+#
+# Input Routing:
+#   Battleship uses a custom BattleshipGameModule wrapper (extensions/game-module.ts)
+#   that intercepts handleInput before forwarding to DeclarativeGameModule.
+#   This is necessary because the battle phase has per-turn active-player logic
+#   that cannot be expressed purely via the declarative input_gate primitive.
+
+schema_version: "2.0"
+
+manifest:
+  id: battleship
+  name: Battleship
+  description: >
+    Place your fleet, call your shots, and sink the enemy.
+    Classic naval warfare — two captains, one ocean, no mercy.
+  version: "2.0.0"
+  author: Boredless
+  tags: [strategy, classic, two-player]
+  players:
+    min: 2
+    max: 2
+  estimated_minutes:
+    min: 10
+    max: 20
+  icon: anchor
+  accent_color: blue
+  categories: [strategy, classic, two-player]
+
+# State Model
+# Visibility: public = display + all players; private = owner only
+#
+# Ship/board data is stored as JSON strings in per_player state.
+# The extension handles all serialisation/deserialisation.
+
+state_model:
+  globals:
+    turn_number:
+      type: integer
+      default: 0
+      visibility: public
+
+    active_player_id:
+      type: string
+      default: null
+      visibility: public
+
+    winner_id:
+      type: string
+      default: null
+      visibility: public
+
+    last_shot_json:
+      type: string
+      default: null
+      visibility: public
+
+    ready_status_json:
+      type: string
+      default: null
+      visibility: public
+
+    player_order_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+  per_player:
+    ships_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    incoming_shots_json:
+      type: string
+      default: "[]"
+      visibility: public
+
+    is_ready:
+      type: boolean
+      default: false
+      visibility: public
+
+# Turn Model
+# Battleship is turn-based. Turn management is handled by the extension wrapper.
+turn_model:
+  type: simultaneous
+
+# Phases
+phases:
+  setup:
+    type: input_gate
+    duration: 120
+    on_enter:
+      - action: bs_init_boards
+    input:
+      primitive: confirm
+      required: all_players
+    screen:
+      display: template:waiting
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: battle
+
+  battle:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: bs_start_battle
+    input:
+      primitive: vote
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:vote
+    on_complete:
+      - action: advance
+        to: result
+
+  result:
+    type: timed
+    duration: 8
+    screen:
+      display: template:reveal
+      phone: template:reveal
+    on_exit:
+      - action: advance
+        to: scores
+
+  scores:
+    type: timed
+    duration: 6
+    on_enter:
+      - action: bs_broadcast_scores
+    screen:
+      display: template:scoreboard
+      phone: template:scoreboard
+    on_exit:
+      - action: advance
+        to: game_over
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+# Presentation
+presentation:
+  theme:
+    colors:
+      primary: "#3b82f6"
+      secondary: "#1d4ed8"
+      accent: "#06b6d4"
+      background: "#0a1628"
+      surface: "#0f2440"
+      text: "#f0f9ff"
+    darkMode: true
+    borderRadius: "8px"
+  screens:
+    - id: setup
+      template: prompt
+      surface: both
+    - id: battle
+      template: vote
+      surface: both
+    - id: result
+      template: reveal
+      surface: both
+    - id: scores
+      template: scoreboard
+      surface: both
+    - id: game_over
+      template: results
+      surface: both
+
+# Scoring
+scoring:
+  hit: 50
+  ship_sunk: 200
+  victory_bonus: 1000
+
+# Victory
+victory:
+  type: highest_score
+  after: all_rounds
+
+# Extensions
+extensions:
+  - id: battleship-core
+    name: "Battleship Core Logic"
+    type: lifecycle
+    description: >
+      Implements ship placement validation, shot processing, sunk detection,
+      turn management, and auto-play fallback.
+    entryPoint: ./extensions/index.ts

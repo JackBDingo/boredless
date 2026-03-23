@@ -78,13 +78,19 @@ function extractBBState(raw: Record<string, unknown>): BBPublicState {
     : playerList.filter(p => p['has_voted']).length;
 
   let answers: BBPublicState['answers'] = [];
-  if (typeof g['answers_json'] === 'string') {
-    try { answers = JSON.parse(g['answers_json']); } catch { /* ignore */ }
+  const rawAnswers = g['answers_json'];
+  if (Array.isArray(rawAnswers)) {
+    answers = rawAnswers;
+  } else if (typeof rawAnswers === 'string') {
+    try { answers = JSON.parse(rawAnswers); } catch { /* ignore */ }
   }
 
   let revealData: BBPublicState['revealData'] = null;
-  if (typeof g['reveal_json'] === 'string') {
-    try { revealData = JSON.parse(g['reveal_json']); } catch { /* ignore */ }
+  const rawReveal = g['reveal_json'];
+  if (rawReveal && typeof rawReveal === 'object' && !Array.isArray(rawReveal)) {
+    revealData = rawReveal as BBPublicState['revealData'];
+  } else if (typeof rawReveal === 'string') {
+    try { revealData = JSON.parse(rawReveal); } catch { /* ignore */ }
   }
 
   return {
@@ -177,7 +183,7 @@ export function BBDisplay({ phase, publicState, scores, timerMs, useGameEvent: _
               <h2 className="text-4xl font-bold text-white leading-tight tracking-tight">{state.currentPrompt}</h2>
             </div>
             <div className="w-full flex flex-wrap justify-center gap-4">
-              {state.answers.map((answer, i) => (
+              {(state.answers ?? []).map((answer, i) => (
                 <div key={answer.answerId} className="flex items-start gap-4 px-6 py-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] w-full max-w-lg">
                   <span className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold text-white/40 bg-white/[0.06] border border-white/[0.08]">
                     {ANSWER_LETTERS[i]}

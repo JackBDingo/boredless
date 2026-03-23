@@ -40,18 +40,20 @@ function extractBBPrivate(raw: Record<string, unknown>, myPlayerId: string): BBP
   const ownAnswer = (me['submission'] as string) ?? null;
 
   let voteOptions: BBPrivateState['voteOptions'] = null;
-  if (typeof g['answers_json'] === 'string') {
-    try {
-      const allAnswers = JSON.parse(g['answers_json']) as { answers: Array<{ answerId: string; text: string; submittedByPlayerId: string | null; isCorrect: boolean }> };
-      // Filter out the player's own answer — they can't vote for their own bluff
-      voteOptions = (allAnswers.answers ?? allAnswers).filter(
-        (a: { submittedByPlayerId: string | null }) => a.submittedByPlayerId !== myPlayerId
-      ).map((a: { answerId: string; text: string }) => ({
-        answerId: a.answerId,
-        text: a.text,
-      }));
-    } catch { /* ignore */ }
-  }
+  const rawAnswers = g['answers_json'];
+  try {
+    let parsed: unknown = rawAnswers;
+    if (typeof rawAnswers === 'string') parsed = JSON.parse(rawAnswers);
+    const allAnswers = parsed as { answers?: Array<{ answerId: string; text: string; submittedByPlayerId: string | null; isCorrect: boolean }> } | Array<{ answerId: string; text: string; submittedByPlayerId: string | null; isCorrect: boolean }>;
+    const answerList = Array.isArray(allAnswers) ? allAnswers : (allAnswers?.answers ?? []);
+    // Filter out the player's own answer — they can't vote for their own bluff
+    voteOptions = answerList.filter(
+      (a) => a.submittedByPlayerId !== myPlayerId
+    ).map((a) => ({
+      answerId: a.answerId,
+      text: a.text,
+    }));
+  } catch { /* ignore */ }
 
   return {
     gameId: 'bluff_battle',

@@ -181,68 +181,77 @@ export function BJPhone({ phase, privateState, publicState, timerMs, submitInput
 
         {/* ── BETTING PHASE ── */}
         {phase.phaseType === BJPhase.BETTING && (
-          <div className="flex flex-col flex-1 gap-5 pt-4">
-            <div className="text-center">
-              <p className="text-white/25 text-xs font-medium tracking-widest uppercase mb-1">Round {pub?.roundNumber ?? 1}</p>
-              <h2 className="text-2xl font-bold text-white">Place Your Bet</h2>
+          <div className="flex flex-col flex-1 justify-between pt-6 pb-2">
+            {/* Top: Round + Title */}
+            <div className="text-center mb-6">
+              <p className="text-white/25 text-[10px] font-semibold tracking-[0.2em] uppercase mb-1">Round {pub?.roundNumber ?? 1}</p>
+              <h2 className="text-xl font-bold text-white">Place Your Bet</h2>
             </div>
 
-            {/* Bet slider */}
-            <div className="flex flex-col gap-3 px-1">
-              <div className="flex items-center justify-between">
-                <span className="text-white/40 text-xs font-medium uppercase tracking-wider">Bet Amount</span>
-                <span className="text-white font-bold text-2xl tabular-nums">{effectiveBet}</span>
+            {/* Center: Chip stack visualization + amount */}
+            <div className="flex flex-col items-center gap-6 flex-1 justify-center">
+              {/* Big bet display */}
+              <div className="relative">
+                <div className="w-28 h-28 rounded-full border-4 border-emerald-500/30 bg-emerald-500/[0.08] flex items-center justify-center">
+                  <div className="text-center">
+                    <span className="text-3xl font-bold text-white tabular-nums">{effectiveBet}</span>
+                    <p className="text-[10px] text-white/30 -mt-0.5">chips</p>
+                  </div>
+                </div>
               </div>
-              <input
-                type="range"
-                min={BJ_MIN_BET}
-                max={Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET)}
-                step={BJ_MIN_BET}
-                value={betAmount}
-                onChange={(e) => setBetAmount(Number(e.target.value))}
-                className="w-full h-2 rounded-full appearance-none cursor-pointer"
-                style={{
-                  background: `linear-gradient(to right, #059669 0%, #059669 ${
-                    ((betAmount - BJ_MIN_BET) / (Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET) - BJ_MIN_BET)) * 100
-                  }%, rgba(255,255,255,0.06) ${
-                    ((betAmount - BJ_MIN_BET) / (Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET) - BJ_MIN_BET)) * 100
-                  }%, rgba(255,255,255,0.06) 100%)`,
-                }}
-              />
-              <div className="flex items-center justify-between text-[10px] text-white/20 tabular-nums">
-                <span>{BJ_MIN_BET}</span>
-                <span>{Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET)}</span>
+
+              {/* Chip preset buttons - casino style */}
+              <div className="grid grid-cols-5 gap-2 w-full max-w-xs">
+                {[20, 50, 100, 200, 500].filter(v => v <= Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET)).map(v => (
+                  <button
+                    key={v}
+                    onClick={() => setBetAmount(v)}
+                    className={`aspect-square rounded-full text-sm font-bold transition-all active:scale-90 ${
+                      betAmount === v
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-400/50'
+                        : 'bg-white/[0.06] text-white/50 border border-white/[0.08]'
+                    }`}
+                  >
+                    {v}
+                  </button>
+                ))}
+              </div>
+
+              {/* Slider for fine-tuning */}
+              <div className="w-full max-w-xs px-2">
+                <input
+                  type="range"
+                  min={BJ_MIN_BET}
+                  max={Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET)}
+                  step={BJ_MIN_BET}
+                  value={betAmount}
+                  onChange={(e) => setBetAmount(Number(e.target.value))}
+                  className="w-full h-1.5 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-emerald-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:shadow-lg"
+                  style={{
+                    background: `linear-gradient(to right, #059669 0%, #059669 ${
+                      ((betAmount - BJ_MIN_BET) / (Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET) - BJ_MIN_BET)) * 100
+                    }%, rgba(255,255,255,0.06) ${
+                      ((betAmount - BJ_MIN_BET) / (Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET) - BJ_MIN_BET)) * 100
+                    }%, rgba(255,255,255,0.06) 100%)`,
+                  }}
+                />
               </div>
             </div>
 
-            {/* Quick bet buttons */}
-            <div className="flex gap-2">
-              {[20, 50, 100, 200, 500].filter(v => v <= Math.min(BJ_MAX_BET, myChips > 0 ? myChips : BJ_MAX_BET)).map(v => (
+            {/* Bottom: Confirm button */}
+            <div className="mt-6">
+              {myChips <= 0 ? (
+                <p className="text-center text-white/30 text-sm py-4">You're out of chips — watching this round</p>
+              ) : (
                 <button
-                  key={v}
-                  onClick={() => setBetAmount(v)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                    betAmount === v
-                      ? 'bg-emerald-600 text-white'
-                      : 'bg-white/[0.06] text-white/40 hover:bg-white/[0.08]'
-                  }`}
+                  onClick={handleBet}
+                  disabled={state?.betPlaced ?? false}
+                  className="w-full py-4 rounded-2xl font-bold text-base shadow-lg transition-all active:scale-[0.97] disabled:opacity-50 disabled:bg-white/[0.06] disabled:text-white/30 bg-emerald-600 text-white"
                 >
-                  {v}
+                  {state?.betPlaced ? '✓ Bet Placed' : 'Confirm Bet'}
                 </button>
-              ))}
+              )}
             </div>
-
-            <button
-              onClick={handleBet}
-              disabled={state?.betPlaced ?? false}
-              className="w-full py-4 rounded-2xl bg-emerald-600 text-white font-bold text-base shadow-lg transition-all active:scale-[0.97] disabled:opacity-50"
-            >
-              {state?.betPlaced ? '✓ Bet Placed' : 'Confirm Bet'}
-            </button>
-
-            {myChips <= 0 && (
-              <p className="text-center text-white/30 text-sm">You're out of chips — watching this round</p>
-            )}
           </div>
         )}
 

@@ -24,8 +24,47 @@ function TimerBar({ seconds, totalSeconds }: { seconds: number; totalSeconds: nu
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+/**
+ * Map declarative engine privateState to BBPrivateState.
+ * The declarative module sends { globals, players, phase, input } — we need to
+ * extract typed fields and parse serialized JSON.
+ */
+function extractBBPrivate(raw: Record<string, unknown>, myPlayerId: string): BBPrivateState {
+  const g = (raw.globals ?? raw) as Record<string, unknown>;
+  const players = (raw.players ?? {}) as Record<string, Record<string, unknown>>;
+  const me = players[myPlayerId] ?? {};
+  const input = (raw.input ?? {}) as Record<string, unknown>;
+
+  const hasSubmitted = Boolean(me['has_submitted'] ?? input['hasSubmitted']);
+  const hasVoted = Boolean(me['has_voted']);
+  const ownAnswer = (me['submission'] as string) ?? null;
+
+  let voteOptions: BBPrivateState['voteOptions'] = null;
+  if (typeof g['answers_json'] === 'string') {
+    try {
+      const allAnswers = JSON.parse(g['answers_json']) as { answers: Array<{ answerId: string; text: string; submittedByPlayerId: string | null; isCorrect: boolean }> };
+      // Filter out the player's own answer — they can't vote for their own bluff
+      voteOptions = (allAnswers.answers ?? allAnswers).filter(
+        (a: { submittedByPlayerId: string | null }) => a.submittedByPlayerId !== myPlayerId
+      ).map((a: { answerId: string; text: string }) => ({
+        answerId: a.answerId,
+        text: a.text,
+      }));
+    } catch { /* ignore */ }
+  }
+
+  return {
+    gameId: 'bluff_battle',
+    prompt: (g['current_question'] as string) ?? null,
+    hasSubmitted,
+    hasVoted,
+    ownAnswer,
+    voteOptions,
+  };
+}
+
 export function BBPhone({ phase, privateState, timerMs, submitInput, myPlayer, useGameEvent: _useGameEvent }: PhoneProps) {
-  const state = privateState as unknown as BBPrivateState;
+  const state = extractBBPrivate(privateState, myPlayer?.playerId ?? '');
   const [answer, setAnswer] = useState('');
   const [selectedVote, setSelectedVote] = useState<string | null>(null);
 

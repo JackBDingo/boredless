@@ -59,8 +59,43 @@ function ScoreList({ scores, showRoundScore }: { scores: ScoreEntry[]; showRound
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+/**
+ * Map declarative engine publicState (globals/players shape) to BBPublicState.
+ * The declarative module sends { globals, players, phase } — we need to
+ * extract typed fields and parse serialized JSON.
+ */
+function extractBBState(raw: Record<string, unknown>): BBPublicState {
+  const g = (raw.globals ?? raw) as Record<string, unknown>;
+  const players = (raw.players ?? {}) as Record<string, Record<string, unknown>>;
+  const totalPlayers = Object.keys(players).length;
+  const submittedCount = typeof g['submitted_count'] === 'number' ? g['submitted_count'] : 0;
+  const votedCount = typeof g['voted_count'] === 'number' ? g['voted_count'] : 0;
+
+  let answers: BBPublicState['answers'] = [];
+  if (typeof g['answers_json'] === 'string') {
+    try { answers = JSON.parse(g['answers_json']); } catch { /* ignore */ }
+  }
+
+  let revealData: BBPublicState['revealData'] = null;
+  if (typeof g['reveal_json'] === 'string') {
+    try { revealData = JSON.parse(g['reveal_json']); } catch { /* ignore */ }
+  }
+
+  return {
+    gameId: 'bluff_battle',
+    currentPrompt: (g['current_question'] as string) ?? null,
+    roundNumber: typeof g['round'] === 'number' ? g['round'] : 0,
+    totalRounds: typeof g['total_rounds'] === 'number' ? g['total_rounds'] : 3,
+    answers,
+    submittedCount,
+    totalPlayers,
+    votedCount,
+    revealData,
+  };
+}
+
 export function BBDisplay({ phase, publicState, scores, timerMs, useGameEvent: _useGameEvent }: DisplayProps) {
-  const state = publicState as unknown as BBPublicState;
+  const state = extractBBState(publicState);
   const seconds = timerMs !== null ? Math.ceil(timerMs / 1000) : null;
   const totalSeconds = phase.timerTotalMs !== null ? Math.ceil(phase.timerTotalMs / 1000) : 60;
   const isUrgent = seconds !== null && seconds <= 5;

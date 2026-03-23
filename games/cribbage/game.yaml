@@ -1,0 +1,328 @@
+# game.yaml — Cribbage V2 Declarative Game Package
+#
+# Migrated from V1 CribbageModule (~785 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   dealing  (3s)   — brief animation phase, extension deals cards
+#   → discard (30s) — all players discard cards to the crib
+#   → cut     (4s)  — extension cuts starter card (his heels check)
+#   → pegging (45s) — sequential card play; extension manages turns
+#   → scoring (8s)  — extension reveals hand scores
+#   → crib    (8s)  — extension reveals crib score
+#   → results (6s)  — round summary
+#   → scores  (6s)  — cumulative scores, then rotate dealer
+#   → game_over when any player reaches 121 pts
+#
+# NOTE: All complex game logic lives in extensions/index.ts.
+# Pegging is sequential (turn-based) but the phase is declared as
+# input_gate. The CribbageGameModule wrapper manages active-player routing
+# and signals phase completion when all hands are empty.
+
+schema_version: "2.0"
+
+manifest:
+  id: cribbage
+  name: Cribbage
+  description: >
+    Classic cribbage for 2-6 players. Score through pegging, hand scoring,
+    and the crib. First to 121 wins. Dealer rotates each round.
+  version: "2.0.0"
+  author: Boredless
+  tags: [cards, strategy, classic, counting, pegging]
+  players:
+    min: 2
+    max: 6
+  estimated_minutes:
+    min: 20
+    max: 40
+  icon: diamond
+  accent_color: emerald
+  categories: [cards, strategy, classic, counting]
+
+state_model:
+  globals:
+    round:
+      type: integer
+      default: 0
+      visibility: public
+
+    dealer_index:
+      type: integer
+      default: 0
+      visibility: public
+
+    starter_card_json:
+      type: string
+      default: null
+      visibility: public
+
+    active_player_id:
+      type: string
+      default: null
+      visibility: public
+
+    peg_count:
+      type: integer
+      default: 0
+      visibility: public
+
+    played_sequence_json:
+      type: string
+      default: null
+      visibility: public
+
+    all_played_cards_json:
+      type: string
+      default: null
+      visibility: public
+
+    go_players_json:
+      type: string
+      default: null
+      visibility: public
+
+    last_peg_points_json:
+      type: string
+      default: null
+      visibility: public
+
+    hand_scores_json:
+      type: string
+      default: null
+      visibility: public
+
+    crib_score_json:
+      type: string
+      default: null
+      visibility: public
+
+    winner_json:
+      type: string
+      default: null
+      visibility: public
+
+    player_order_json:
+      type: string
+      default: null
+      visibility: public
+
+    player_names_json:
+      type: string
+      default: null
+      visibility: public
+
+    discards_done_json:
+      type: string
+      default: null
+      visibility: public
+
+    _hands_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    _deck_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    _crib_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+  per_player:
+    hand_size:
+      type: integer
+      default: 0
+      visibility: public
+
+    has_discarded:
+      type: boolean
+      default: false
+      visibility: public
+
+    hand_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    crib_cards_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    selected_discard_ids_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    is_my_turn:
+      type: boolean
+      default: false
+      visibility: private
+      redaction: "null"
+
+    can_play:
+      type: boolean
+      default: false
+      visibility: private
+      redaction: "null"
+
+    playable_card_ids_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    hand_score_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+turn_model:
+  type: simultaneous
+
+phases:
+  dealing:
+    type: timed
+    duration: 3
+    on_enter:
+      - action: cribbage_deal_round
+    screen:
+      display: template:game
+      phone: template:game
+    on_exit:
+      - action: advance
+        to: discard
+
+  discard:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: cribbage_reset_discard_state
+    input:
+      primitive: vote
+      required: all_players
+    screen:
+      display: template:game
+      phone: template:game
+    on_complete:
+      - action: cribbage_finalize_discards
+      - action: advance
+        to: cut
+
+  cut:
+    type: timed
+    duration: 4
+    on_enter:
+      - action: cribbage_cut_starter
+    screen:
+      display: template:game
+      phone: template:game
+    on_exit:
+      - action: advance
+        to: pegging
+
+  pegging:
+    type: input_gate
+    duration: 45
+    on_enter:
+      - action: cribbage_start_pegging
+    input:
+      primitive: vote
+      required: all_players
+    screen:
+      display: template:game
+      phone: template:game
+    on_complete:
+      - action: advance
+        to: scoring
+
+  scoring:
+    type: timed
+    duration: 8
+    on_enter:
+      - action: cribbage_score_hands
+    screen:
+      display: template:game
+      phone: template:game
+    on_exit:
+      - action: advance
+        to: crib
+
+  crib:
+    type: timed
+    duration: 8
+    on_enter:
+      - action: cribbage_score_crib
+    screen:
+      display: template:game
+      phone: template:game
+    on_exit:
+      - action: advance
+        to: results
+
+  results:
+    type: timed
+    duration: 6
+    screen:
+      display: template:game
+      phone: template:game
+    on_exit:
+      - action: advance
+        to: scores
+
+  scores:
+    type: timed
+    duration: 6
+    on_enter:
+      - action: cribbage_rotate_dealer
+    screen:
+      display: template:game
+      phone: template:game
+    on_exit:
+      - action: conditional
+        condition: "globals.winner_json != null"
+        then:
+          advance_to: game_over
+        else:
+          advance_to: dealing
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+scoring:
+  fifteen: 2
+  pair: 2
+  run: 1
+  thirty_one: 2
+  go: 1
+  his_heels: 2
+  nobs: 1
+  flush_4: 4
+  flush_5: 5
+
+victory:
+  type: target_score
+  target: 121
+
+extensions:
+  - id: cribbage-core
+    name: "Cribbage Core Logic"
+    type: lifecycle
+    description: >
+      Implements all cribbage game logic: dealing, discarding, cutting the
+      starter card, pegging, hand scoring, crib scoring, and dealer rotation.
+    entryPoint: ./extensions/index.ts

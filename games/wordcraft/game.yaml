@@ -1,0 +1,223 @@
+# game.yaml — WordCraft V2 Declarative Game Package
+#
+# Migrated from V1 WordCraftModule (~903 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   starting (3s)     — show instructions / prepare
+#   → playing (90s)   — current player places/swaps/passes (repeats per turn)
+#   → word_reveal (5s)— show the last word played (or pass/swap)
+#   → scores (5s)     — show cumulative scores, check game-over
+#   → [loop back to playing for next player's turn]
+#   → game_over
+#
+# Complex Logic (handled by extensions in extensions/):
+#   wc_init_game        — initialise bag, board, racks, turn order
+#   wc_on_playing_enter — prepare for the current player's turn
+#   wc_sync_scores      — push internal scores to the platform ScoreEngine
+
+schema_version: "2.0"
+
+manifest:
+  id: wordcraft
+  name: WordCraft
+  description: >
+    A Scrabble-style word game for 2-4 players. Draw tiles, build words
+    on a shared board, and rack up points with premium squares.
+  version: "2.0.0"
+  author: Boredless
+  tags: [word, strategy, classic, board]
+  players:
+    min: 2
+    max: 4
+  estimated_minutes:
+    min: 20
+    max: 45
+  icon: spell-check
+  accent_color: amber
+  categories: [word, strategy, classic]
+
+state_model:
+  globals:
+    board_json:
+      type: string
+      default: null
+      visibility: public
+
+    bag_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    turn_order:
+      type: array
+      default: []
+      visibility: public
+
+    current_player_index:
+      type: integer
+      default: 0
+      visibility: public
+
+    round_number:
+      type: integer
+      default: 1
+      visibility: public
+
+    consecutive_passes:
+      type: integer
+      default: 0
+      visibility: public
+
+    last_word_json:
+      type: string
+      default: null
+      visibility: public
+
+    tiles_in_bag:
+      type: integer
+      default: 0
+      visibility: public
+
+    game_over_flag:
+      type: boolean
+      default: false
+      visibility: private
+      redaction: omit
+
+  per_player:
+    score:
+      type: integer
+      default: 0
+      visibility: public
+
+    rack_json:
+      type: string
+      default: null
+      visibility: player
+      redaction: omit
+
+    tiles_in_rack:
+      type: integer
+      default: 0
+      visibility: public
+
+turn_model:
+  type: round_robin
+
+phases:
+  starting:
+    type: timed
+    duration: 3
+    screen:
+      display: template:instructions
+      phone: template:instructions
+    on_enter:
+      - action: wc_init_game
+    on_exit:
+      - action: advance
+        to: playing
+
+  playing:
+    type: input_gate
+    duration: 90
+    on_enter:
+      - action: wc_on_playing_enter
+    input:
+      primitive: structured_message
+      required: []
+    screen:
+      display: template:board
+      phone: template:rack
+    on_complete:
+      - action: advance
+        to: word_reveal
+
+  word_reveal:
+    type: timed
+    duration: 5
+    screen:
+      display: template:word_reveal
+      phone: template:word_reveal
+    on_exit:
+      - action: advance
+        to: scores
+
+  scores:
+    type: timed
+    duration: 5
+    on_enter:
+      - action: wc_sync_scores
+    screen:
+      display: template:scoreboard
+      phone: template:scoreboard
+    on_exit:
+      - action: conditional
+        condition: "globals.game_over_flag == true"
+        then:
+          advance_to: game_over
+        else:
+          advance_to: playing
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+presentation:
+  theme:
+    colors:
+      primary: "#f59e0b"
+      secondary: "#d97706"
+      accent: "#10b981"
+      background: "#1c1917"
+      surface: "#292524"
+      text: "#fafaf9"
+    darkMode: true
+    borderRadius: "8px"
+  screens:
+    - id: starting
+      template: info
+      surface: both
+      title: "WordCraft"
+      animations:
+        enter: fade
+        duration: 300
+    - id: playing
+      template: custom
+      surface: both
+      animations:
+        enter: slide-up
+        duration: 200
+    - id: word_reveal
+      template: reveal
+      surface: both
+      animations:
+        enter: fade
+        duration: 400
+    - id: scores
+      template: scoreboard
+      surface: both
+    - id: game_over
+      template: results
+      surface: both
+
+scoring:
+  all_tiles_bonus: 50
+  word_base: 1
+
+victory:
+  type: highest_score
+  after: all_rounds
+  tiebreak: most_tiles_placed
+
+extensions:
+  - id: wordcraft-core
+    name: "WordCraft Core Logic"
+    type: lifecycle
+    description: >
+      Implements board initialisation, tile placement validation, word scoring
+      with premium squares, tile rack management, and game-over detection.
+    entryPoint: ./extensions/index.ts

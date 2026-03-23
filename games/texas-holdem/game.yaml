@@ -1,0 +1,280 @@
+# game.yaml — Texas Hold'em V2 Declarative Game Package
+#
+# Migrated from V1 TexasHoldemModule (~821 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   instructions (10s)
+#   -> th_preflop  (30s per action, input_gate)
+#   -> th_flop     (3 community cards dealt, betting round)
+#   -> th_turn     (1 community card, betting round)
+#   -> th_river    (1 community card, final betting round)
+#   -> th_showdown (8s — evaluate hands, award pot)
+#   -> th_scores   (6s — show chip counts / scores)
+#   -> [loop back to th_preflop, or game_over when <=1 player has chips]
+
+schema_version: "2.0"
+
+manifest:
+  id: texas-holdem
+  name: Texas Hold'em
+  description: >
+    No-limit Texas Hold'em poker for 2-8 players.
+    Blinds, community cards, bluffs, and all-ins — the real deal.
+  version: "2.0.0"
+  author: Boredless
+  tags: [cards, strategy, bluffing, classic]
+  players:
+    min: 2
+    max: 8
+  estimated_minutes:
+    min: 15
+    max: 60
+  icon: diamond
+  accent_color: emerald
+  categories: [cards, strategy, bluffing, classic]
+
+state_model:
+  globals:
+    hand_number:
+      type: integer
+      default: 0
+      visibility: public
+    dealer_index:
+      type: integer
+      default: 0
+      visibility: public
+    small_blind:
+      type: integer
+      default: 10
+      visibility: public
+    big_blind:
+      type: integer
+      default: 20
+      visibility: public
+    community_cards_json:
+      type: string
+      default: null
+      visibility: public
+    pot:
+      type: integer
+      default: 0
+      visibility: public
+    side_pots_json:
+      type: string
+      default: null
+      visibility: public
+    active_player_id:
+      type: string
+      default: null
+      visibility: public
+    active_player_index:
+      type: integer
+      default: 0
+      visibility: private
+      redaction: omit
+    last_raise_amount:
+      type: integer
+      default: 20
+      visibility: public
+    last_action_json:
+      type: string
+      default: null
+      visibility: public
+    winners_json:
+      type: string
+      default: null
+      visibility: public
+    deck_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+    phase_advancing:
+      type: boolean
+      default: false
+      visibility: private
+      redaction: omit
+    game_over_flag:
+      type: boolean
+      default: false
+      visibility: private
+      redaction: omit
+
+  per_player:
+    seat_index:
+      type: integer
+      default: 0
+      visibility: public
+    chips:
+      type: integer
+      default: 1000
+      visibility: public
+    hole_cards_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+    current_bet:
+      type: integer
+      default: 0
+      visibility: public
+    total_bet_this_hand:
+      type: integer
+      default: 0
+      visibility: public
+    folded:
+      type: boolean
+      default: false
+      visibility: public
+    all_in:
+      type: boolean
+      default: false
+      visibility: public
+    has_acted:
+      type: boolean
+      default: false
+      visibility: public
+    available_actions_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+    hand_result_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+turn_model:
+  type: simultaneous
+
+phases:
+  instructions:
+    type: timed
+    duration: 10
+    screen:
+      display: template:instructions
+      phone: template:instructions
+    on_exit:
+      - action: advance
+        to: th_preflop
+
+  th_preflop:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: th_deal_hand
+    input:
+      primitive: confirm
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: th_flop
+
+  th_flop:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: th_deal_flop
+    input:
+      primitive: confirm
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: th_turn
+
+  th_turn:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: th_deal_turn
+    input:
+      primitive: confirm
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: th_river
+
+  th_river:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: th_deal_river
+    input:
+      primitive: confirm
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: th_showdown
+
+  th_showdown:
+    type: timed
+    duration: 8
+    on_enter:
+      - action: th_showdown_evaluate
+    screen:
+      display: template:reveal
+      phone: template:reveal
+    on_exit:
+      - action: advance
+        to: th_scores
+
+  th_scores:
+    type: timed
+    duration: 6
+    screen:
+      display: template:scoreboard
+      phone: template:scoreboard
+    on_exit:
+      - action: conditional
+        condition: "globals.game_over_flag == true"
+        then:
+          advance_to: game_over
+        else:
+          advance_to: th_preflop
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+scoring:
+  pot_win: 0
+
+victory:
+  type: highest_score
+  after: all_rounds
+  tiebreak: highest_score
+
+events:
+  - id: game_start_sound
+    name: "Play fanfare on game start"
+    once: true
+    triggers:
+      - type: game_start
+    effects:
+      - type: play_sound
+        sound: "texas_holdem_start"
+
+extensions:
+  - id: texas-holdem-core
+    name: "Texas Hold'em Core Logic"
+    type: lifecycle
+    description: >
+      Implements deal, betting, hand evaluation, side pots,
+      blind escalation, and showdown logic.
+    entryPoint: ./extensions/index.ts

@@ -136,9 +136,6 @@ export function BBDisplay({ phase, publicState, scores, timerMs, useGameEvent: _
       {/* Main — centered with generous side margins */}
       <main className="relative z-10 flex flex-col flex-1 items-center justify-center px-16 lg:px-24 xl:px-32 pb-12 overflow-hidden">
 
-        {/* DEBUG — remove after fixing */}
-        <div className="absolute top-2 right-2 z-50 bg-red-900/80 text-white text-xs px-2 py-1 rounded font-mono">
-          phase: {phase.phaseType} | prompt: {state.currentPrompt ? 'yes' : 'null'} | answers: {state.answers?.length ?? 0}
         </div>
 
         {/* INSTRUCTIONS */}

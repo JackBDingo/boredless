@@ -3,12 +3,16 @@ import { Loader2 } from 'lucide-react';
 
 interface HomeScreenProps {
   onRoomCreated: (roomId: string, code: string, qrDataUrl: string) => void;
+  reconnecting?: boolean;
 }
 
-export function HomeScreen({ onRoomCreated }: HomeScreenProps) {
+export function HomeScreen({ onRoomCreated, reconnecting }: HomeScreenProps) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Don't auto-create a room while we're trying to reconnect to an existing one
+    if (reconnecting) return;
+
     let cancelled = false;
 
     const createRoom = async () => {
@@ -35,7 +39,7 @@ export function HomeScreen({ onRoomCreated }: HomeScreenProps) {
 
     createRoom();
     return () => { cancelled = true; };
-  }, [onRoomCreated]);
+  }, [onRoomCreated, reconnecting]);
 
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-950 relative overflow-hidden">
@@ -45,7 +49,12 @@ export function HomeScreen({ onRoomCreated }: HomeScreenProps) {
       <div className="relative z-10 flex flex-col items-center gap-6">
         <img src="/boredless-logo.png" alt="Boredless" className="w-80" />
 
-        {error ? (
+        {reconnecting ? (
+          <div className="flex items-center gap-3 text-indigo-400/80 text-lg">
+            <Loader2 size={20} className="animate-spin" />
+            <span>Reconnecting to room...</span>
+          </div>
+        ) : error ? (
           <p className="text-red-400/80 text-lg">{error}</p>
         ) : (
           <div className="flex items-center gap-3 text-gray-500 text-lg">

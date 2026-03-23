@@ -164,11 +164,28 @@ function handleJoinDisplay(ws: WebSocket, msg: Extract<ClientMessage, { type: 'j
   sessionRegistry.register(session.id, ws);
 
   const room = roomManager.getRoom(msg.roomId)!;
+
+  // If a game is active, send current phase + public state so
+  // the display catches up after a reconnect / browser refresh.
+  let phase = null;
+  let gamePublicState = null;
+  if (room.selectedGameId) {
+    const gameModule = gameRegistry.get(room.selectedGameId);
+    if (gameModule) {
+      try {
+        phase = gameModule.getPhaseState(room.id);
+        gamePublicState = gameModule.getPublicState(room.id);
+      } catch {
+        // Game may not be started yet (just selected) — that's fine
+      }
+    }
+  }
+
   sendToSocket(ws, {
     type: ServerMessageType.ROOM_STATE,
     room: roomManager.getPublicRoomState(room),
-    phase: null,
-    gamePublicState: null,
+    phase,
+    gamePublicState,
   });
 }
 

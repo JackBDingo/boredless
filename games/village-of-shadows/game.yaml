@@ -1,0 +1,390 @@
+# game.yaml — Village of Shadows V2 Declarative Game Package
+#
+# Migrated from V1 VillageModule (~637 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   role_reveal (10s)
+#   → night (30s, input_gate — werewolves pick target, seer inspects, doctor protects)
+#   → night_result (8s — show who was eliminated or saved)
+#   → day (120s — discussion phase)
+#   → vote (30s, input_gate — village votes to eliminate)
+#   → vote_result (8s — show who was voted out + their role)
+#   → [loop back to night if game continues]
+#   → game_over (terminal — villagers or werewolves win)
+#
+# Complex Logic (handled by extensions in extensions/):
+#   vos_assign_roles  — randomly assign roles based on player count
+#   vos_setup_night   — set up night targeting info for each player
+#   vos_setup_vote    — set up vote targeting info for each player
+#   vos_resolve_night — process werewolf kill, seer inspect, doctor save
+#   vos_resolve_vote  — process village vote, eliminate player
+#   vos_check_victory — check win conditions after elimination
+
+schema_version: "2.0"
+
+manifest:
+  id: village-of-shadows
+  name: Village of Shadows
+  description: >
+    Players are secretly assigned roles — villagers, werewolves, seer, doctor.
+    Each night the wolves hunt; each day the village votes. Who do you trust?
+  version: "2.0.0"
+  author: Boredless
+  tags: [hidden-roles, party, strategy, social-deduction]
+  players:
+    min: 5
+    max: 10
+  estimated_minutes:
+    min: 10
+    max: 20
+  icon: moon
+  accent_color: violet
+  categories: [hidden-roles, party, strategy]
+
+state_model:
+  globals:
+    day_number:
+      type: integer
+      default: 0
+      visibility: public
+
+    roles_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    alive_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    night_result_message:
+      type: string
+      default: null
+      visibility: public
+
+    vote_result_message:
+      type: string
+      default: null
+      visibility: public
+
+    eliminated_player_id:
+      type: string
+      default: null
+      visibility: public
+
+    eliminated_player_name:
+      type: string
+      default: null
+      visibility: public
+
+    eliminated_player_role:
+      type: string
+      default: null
+      visibility: public
+
+    public_players_json:
+      type: string
+      default: null
+      visibility: public
+
+    vote_tally_json:
+      type: string
+      default: null
+      visibility: public
+
+    night_actions_submitted:
+      type: integer
+      default: 0
+      visibility: public
+
+    night_actions_expected:
+      type: integer
+      default: 0
+      visibility: public
+
+    winning_team:
+      type: string
+      default: null
+      visibility: public
+
+    game_over:
+      type: boolean
+      default: false
+      visibility: public
+
+    seer_results_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    night_actions_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    night_acted_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    day_votes_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+  per_player:
+    role:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    is_alive:
+      type: boolean
+      default: true
+      visibility: public
+
+    has_acted:
+      type: boolean
+      default: false
+      visibility: public
+
+    has_voted:
+      type: boolean
+      default: false
+      visibility: public
+
+    player_color:
+      type: string
+      default: "#888888"
+      visibility: public
+
+    night_target:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    vote_target:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    seer_result_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    werewolf_teammates_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    night_targets_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    vote_targets_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+turn_model:
+  type: simultaneous
+
+phases:
+  role_reveal:
+    type: timed
+    duration: 10
+    on_enter:
+      - action: vos_assign_roles
+    screen:
+      display: template:info
+      phone: template:info
+    on_exit:
+      - action: advance
+        to: night
+
+  night:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: increment
+        target: globals.day_number
+      - action: set
+        target: globals.night_actions_submitted
+        value: 0
+      - action: set
+        target: globals.night_actions_json
+        value: null
+      - action: set
+        target: globals.night_acted_json
+        value: null
+      - action: set
+        target: globals.night_result_message
+        value: null
+      - action: set
+        target: globals.eliminated_player_id
+        value: null
+      - action: set
+        target: globals.eliminated_player_name
+        value: null
+      - action: set
+        target: globals.eliminated_player_role
+        value: null
+      - action: reset_players
+        field: has_acted
+      - action: reset_players
+        field: night_target
+      - action: vos_setup_night
+    input:
+      primitive: vote
+      target: per_player.night_target
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: advance
+        to: night_result
+
+  night_result:
+    type: timed
+    duration: 8
+    on_enter:
+      - action: vos_resolve_night
+      - action: vos_check_victory
+    screen:
+      display: template:reveal
+      phone: template:reveal
+    on_exit:
+      - action: conditional
+        condition: "globals.game_over == true"
+        then:
+          advance_to: game_over
+        else:
+          advance_to: day
+
+  day:
+    type: timed
+    duration: 120
+    on_enter:
+      - action: set
+        target: globals.vote_tally_json
+        value: null
+      - action: set
+        target: globals.vote_result_message
+        value: null
+      - action: reset_players
+        field: has_voted
+      - action: reset_players
+        field: vote_target
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_exit:
+      - action: advance
+        to: vote
+
+  vote:
+    type: input_gate
+    duration: 30
+    on_enter:
+      - action: set
+        target: globals.day_votes_json
+        value: null
+      - action: vos_setup_vote
+    input:
+      primitive: vote
+      target: per_player.vote_target
+      required: all_players
+    screen:
+      display: template:vote
+      phone: template:vote
+    on_complete:
+      - action: advance
+        to: vote_result
+
+  vote_result:
+    type: timed
+    duration: 8
+    on_enter:
+      - action: vos_resolve_vote
+      - action: vos_check_victory
+    screen:
+      display: template:reveal
+      phone: template:reveal
+    on_exit:
+      - action: conditional
+        condition: "globals.game_over == true"
+        then:
+          advance_to: game_over
+        else:
+          advance_to: night
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+presentation:
+  theme:
+    colors:
+      primary: "#7c3aed"
+      secondary: "#5b21b6"
+      accent: "#c4b5fd"
+      background: "#0a0a0f"
+      surface: "#13111c"
+      text: "#f8fafc"
+    darkMode: true
+    borderRadius: "12px"
+  screens:
+    - id: role_reveal
+      template: info
+      surface: both
+    - id: night
+      template: prompt
+      surface: both
+    - id: night_result
+      template: reveal
+      surface: both
+    - id: day
+      template: prompt
+      surface: both
+    - id: vote
+      template: vote
+      surface: both
+    - id: vote_result
+      template: reveal
+      surface: both
+    - id: game_over
+      template: results
+      surface: both
+
+victory:
+  type: last_standing
+  faction: villagers_vs_werewolves
+
+extensions:
+  - id: vos-core
+    name: "Village of Shadows Core Logic"
+    type: lifecycle
+    description: >
+      Implements role assignment, night resolution, vote resolution,
+      victory checking, and per-player private state updates.
+    entryPoint: ./extensions/index.ts

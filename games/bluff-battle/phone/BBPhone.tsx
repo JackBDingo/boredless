@@ -75,7 +75,7 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, myPlayer, u
 
   const handleSubmit = () => {
     if (!answer.trim()) return;
-    submitInput('text', { answer: answer.trim() });
+    submitInput('text_submit', { answer: answer.trim() });
     setAnswer('');
   };
 
@@ -116,6 +116,11 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, myPlayer, u
           <span className="text-white/15 text-xs">Round {phase.roundNumber}/{phase.totalRounds}</span>
         </div>
       </header>
+
+      {/* DEBUG — remove after fixing */}
+      <div className="relative z-50 bg-red-900/80 text-white text-[10px] px-2 py-1 font-mono text-center">
+        phase: {phase.phaseType} | sub: {String(state.hasSubmitted)} | voted: {String(state.hasVoted)} | prompt: {state.prompt ? 'yes' : 'null'}
+      </div>
 
       {/* Main content — good side margins, flex-1 to fill */}
       <div className="relative z-10 flex flex-col flex-1 px-6 pb-20">

@@ -95,7 +95,7 @@ state_model:
     rack_json:
       type: string
       default: null
-      visibility: player
+      visibility: private
       redaction: omit
 
     tiles_in_rack:
@@ -126,7 +126,6 @@ phases:
       - action: wc_on_playing_enter
     input:
       primitive: structured_message
-      required: []
     screen:
       display: template:board
       phone: template:rack

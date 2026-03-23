@@ -1,0 +1,360 @@
+# game.yaml — Cards Against Humanity V2 Declarative Game Package
+#
+# Migrated from V1 CAHModule (~550 lines of imperative code)
+# to a declarative schema + extension functions.
+#
+# Game Flow:
+#   deal       (3s timed)  — Initialize deck, deal starting hands
+#   prompt     (60s input_gate) — Czar's black card drawn; non-czars submit
+#   reading    (60s input_gate) — Czar picks the winning submission
+#   reveal     (8s timed)  — Show winner
+#   scores     (6s timed)  — Scoreboard
+#   deal_next  (3s timed)  — Rotate czar, replenish hands
+#   game_over  — terminal
+#
+# State architecture:
+#   - Per-player hand state is stored in globals.hands_map_json as a
+#     JSON map { [playerId]: CAHWhiteCard[] }. This lets extension actions
+#     (which only get setGlobal) write hand state.
+#   - Similarly, player selections and submission status are in global maps.
+#   - Public/anonymous submissions go in globals.submissions_json.
+#
+# Extension actions:
+#   cah_deal_cards         — Initialize deck, deal starting hands
+#   cah_select_black_card  — Draw black card for the round
+#   cah_build_submissions  — Anonymize + shuffle player submissions
+#   cah_czar_pick_winner   — Award points to winner
+#   cah_rotate_czar        — Advance czar, replenish hands
+
+schema_version: "2.0"
+
+manifest:
+  id: cards-against
+  name: Cards Against Humanity
+  description: >
+    One player draws a black prompt card. Everyone else plays their funniest
+    white response card. The Card Czar picks the winner. Repeat until someone
+    loses all their dignity.
+  version: "2.0.0"
+  author: Boredless
+  tags: [party, humor, cards, adult]
+  players:
+    min: 3
+    max: 8
+  estimated_minutes:
+    min: 15
+    max: 45
+  icon: layers
+  accent_color: neutral
+  categories: [party, humor, cards]
+
+# ---------------------------------------------------------------------------
+# State Model
+# ---------------------------------------------------------------------------
+
+state_model:
+  globals:
+    round:
+      type: integer
+      default: 0
+      visibility: public
+
+    total_rounds:
+      type: integer
+      default: 10
+      visibility: public
+
+    # JSON: { id, text, pick }
+    current_black_card:
+      type: string
+      default: null
+      visibility: public
+
+    czar_index:
+      type: integer
+      default: 0
+      visibility: public
+
+    czar_player_id:
+      type: string
+      default: null
+      visibility: public
+
+    submitted_count:
+      type: integer
+      default: 0
+      visibility: public
+
+    total_non_czar:
+      type: integer
+      default: 0
+      visibility: public
+
+    # JSON: CAHAnonymousSubmission[] — shown during reading + reveal
+    submissions_json:
+      type: string
+      default: null
+      visibility: public
+
+    # JSON: CAHWinner — shown during reveal
+    winner_json:
+      type: string
+      default: null
+      visibility: public
+
+    # Internal: JSON Record<submissionId, playerId>
+    submission_map_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Internal: JSON DeckState { whiteDeck, blackDeck, whiteDiscard }
+    deck_state_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Internal: JSON Record<playerId, CAHWhiteCard[]>
+    # Each player's hand — private to extension, surfaced to clients via private state
+    hands_map_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Internal: JSON Record<playerId, string[]>
+    # Card IDs each player has submitted this round
+    selections_map_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    # Public: JSON Record<playerId, boolean>
+    # Whether each player has submitted (shown as submitted count indicator)
+    submitted_map_json:
+      type: string
+      default: null
+      visibility: public
+
+  per_player:
+    # Whether this player has submitted this round (shortcut for UI)
+    has_submitted:
+      type: boolean
+      default: false
+      visibility: public
+
+# ---------------------------------------------------------------------------
+# Turn Model
+# ---------------------------------------------------------------------------
+
+turn_model:
+  type: simultaneous
+
+# ---------------------------------------------------------------------------
+# Phases
+# ---------------------------------------------------------------------------
+
+phases:
+  deal:
+    type: timed
+    duration: 3
+    on_enter:
+      - action: cah_deal_cards
+    screen:
+      display: template:info
+      phone: template:info
+    on_exit:
+      - action: advance
+        to: prompt
+
+  prompt:
+    type: input_gate
+    duration: 60
+    on_enter:
+      - action: increment
+        target: globals.round
+      - action: set
+        target: globals.submitted_count
+        value: 0
+      - action: set
+        target: globals.submissions_json
+        value: null
+      - action: set
+        target: globals.winner_json
+        value: null
+      - action: set
+        target: globals.submission_map_json
+        value: null
+      - action: set
+        target: globals.selections_map_json
+        value: null
+      - action: set
+        target: globals.submitted_map_json
+        value: null
+      - action: reset_players
+        field: has_submitted
+      - action: cah_select_black_card
+    # Note: prompt phase uses vote primitive as a placeholder.
+    # The actual card submission is handled by the extension via handleInput override.
+    # The extension intercepts 'vote' input and validates card IDs against the player's hand.
+    input:
+      primitive: vote
+      target: per_player.has_submitted
+      required: all_players
+    screen:
+      display: template:prompt
+      phone: template:prompt
+    on_complete:
+      - action: cah_build_submissions
+      - action: advance
+        to: reading
+
+  reading:
+    type: input_gate
+    duration: 60
+    on_enter: []
+    input:
+      primitive: vote
+      target: globals.winner_json
+      # No 'required' means first submission (from czar) advances the phase
+    screen:
+      display: template:vote
+      phone: template:vote
+    on_complete:
+      - action: cah_czar_pick_winner
+      - action: advance
+        to: reveal
+
+  reveal:
+    type: timed
+    duration: 8
+    on_enter: []
+    screen:
+      display: template:reveal
+      phone: template:reveal
+    on_exit:
+      - action: advance
+        to: scores
+
+  scores:
+    type: timed
+    duration: 6
+    screen:
+      display: template:scoreboard
+      phone: template:scoreboard
+    on_exit:
+      - action: conditional
+        condition: "globals.round < globals.total_rounds"
+        then:
+          advance_to: deal_next
+        else:
+          advance_to: game_over
+
+  deal_next:
+    type: timed
+    duration: 3
+    on_enter:
+      - action: cah_rotate_czar
+    screen:
+      display: template:info
+      phone: template:info
+    on_exit:
+      - action: advance
+        to: prompt
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+# ---------------------------------------------------------------------------
+# Content
+# ---------------------------------------------------------------------------
+
+content:
+  pools:
+    - id: black_cards
+      name: "CAH Black Prompt Cards"
+      sources:
+        - type: file
+          path: ./content/black-cards.yaml
+      selection: shuffle
+      noRepeat: true
+    - id: white_cards
+      name: "CAH White Response Cards"
+      sources:
+        - type: file
+          path: ./content/white-cards.yaml
+      selection: shuffle
+      noRepeat: false
+
+# ---------------------------------------------------------------------------
+# Scoring
+# ---------------------------------------------------------------------------
+
+scoring:
+  awesome_point: 1000
+
+# ---------------------------------------------------------------------------
+# Victory
+# ---------------------------------------------------------------------------
+
+victory:
+  type: highest_score
+  after: all_rounds
+
+# ---------------------------------------------------------------------------
+# Presentation
+# ---------------------------------------------------------------------------
+
+presentation:
+  theme:
+    colors:
+      primary: "#ffffff"
+      secondary: "#cccccc"
+      accent: "#ff0000"
+      background: "#000000"
+      surface: "#111111"
+      text: "#ffffff"
+    darkMode: true
+    borderRadius: "4px"
+  screens:
+    - id: deal
+      template: info
+      surface: both
+    - id: deal_next
+      template: info
+      surface: both
+    - id: prompt
+      template: prompt
+      surface: both
+    - id: reading
+      template: vote
+      surface: both
+    - id: reveal
+      template: reveal
+      surface: both
+    - id: scores
+      template: scoreboard
+      surface: both
+    - id: game_over
+      template: results
+      surface: both
+
+# ---------------------------------------------------------------------------
+# Extensions
+# ---------------------------------------------------------------------------
+
+extensions:
+  - id: cah-core
+    name: "Cards Against Humanity Core Logic"
+    type: lifecycle
+    description: >
+      Implements deck management, hand dealing, black card selection,
+      submission building, winner selection, czar rotation, and
+      hand replenishment between rounds.
+    entryPoint: ./extensions/index.ts

@@ -1,0 +1,297 @@
+# game.yaml — Blackjack V2 Declarative Game Package
+#
+# Migrated from V1 BlackjackModule (~725 lines of imperative code)
+# to a declarative schema + typed extension functions.
+#
+# Game Flow:
+#   betting (20s, players place bets)
+#   → dealing (3s, cards dealt, auto-advance)
+#   → playing (30s, hit/stand/double/split per player)
+#   → dealer (5s, dealer reveals hole card and plays to 17+)
+#   → results (8s, resolve all hands, award chips)
+#   → scores (6s, show leaderboard)
+#   → [loop back to betting, up to 20 rounds]
+#   → game_over (terminal)
+#
+# Complex Logic (handled by extensions in extensions/):
+#   bj_start_betting   — reset round state, set bet defaults
+#   bj_deal_cards      — deal 2 cards to each player + dealer, check BJ
+#   bj_dealer_play     — dealer hits until 17+, stands on soft 17
+#   bj_resolve_results — compare hands, award chips, determine winners
+#
+# Player Actions (handled via handleInput override in game-module.ts):
+#   bet, hit, stand, double, split
+
+schema_version: "2.0"
+
+manifest:
+  id: blackjack
+  name: Blackjack
+  description: >
+    Classic casino blackjack for 2-8 players. Everyone plays against
+    the house dealer simultaneously. Hit, stand, double down, or split —
+    natural blackjack pays 3:2. Dealer hits on 16 or less, stands on 17+.
+  version: "2.0.0"
+  author: Boredless
+  tags: [cards, casino, classic, betting]
+  players:
+    min: 2
+    max: 8
+  estimated_minutes:
+    min: 10
+    max: 20
+  icon: diamond
+  accent_color: "#10b981"
+  categories: [cards, casino, classic, betting]
+
+state_model:
+  globals:
+    round_number:
+      type: integer
+      default: 0
+      visibility: public
+
+    max_rounds:
+      type: integer
+      default: 20
+      visibility: public
+
+    shoe_json:
+      type: string
+      default: null
+      visibility: private
+      redaction: omit
+
+    dealer_cards_json:
+      type: string
+      default: null
+      visibility: public
+
+    dealer_hole_hidden:
+      type: boolean
+      default: false
+      visibility: public
+
+    dealer_score:
+      type: integer
+      default: 0
+      visibility: public
+
+    last_action_json:
+      type: string
+      default: null
+      visibility: public
+
+    seats_json:
+      type: string
+      default: null
+      visibility: public
+
+    all_bets_placed:
+      type: boolean
+      default: false
+      visibility: public
+
+    all_hands_settled:
+      type: boolean
+      default: false
+      visibility: public
+
+    is_final_round:
+      type: boolean
+      default: false
+      visibility: public
+
+  per_player:
+    chips:
+      type: integer
+      default: 1000
+      visibility: public
+
+    bet:
+      type: integer
+      default: 20
+      visibility: public
+
+    bet_placed:
+      type: boolean
+      default: false
+      visibility: public
+
+    hands_json:
+      type: string
+      default: null
+      visibility: public
+
+    active_hand_index:
+      type: integer
+      default: 0
+      visibility: public
+
+    all_settled:
+      type: boolean
+      default: false
+      visibility: public
+
+    result:
+      type: string
+      default: null
+      visibility: public
+
+    result_amount:
+      type: integer
+      default: 0
+      visibility: public
+
+    can_double:
+      type: boolean
+      default: false
+      visibility: private
+
+    can_split:
+      type: boolean
+      default: false
+      visibility: private
+
+turn_model:
+  type: simultaneous
+
+phases:
+  bj_betting:
+    type: input_gate
+    duration: 20
+    on_enter:
+      - action: bj_start_betting
+    input:
+      primitive: confirm
+      target: per_player.bet_placed
+      required: all_players
+    screen:
+      display: template:betting
+      phone: template:betting
+    on_complete:
+      - action: advance
+        to: bj_dealing
+
+  bj_dealing:
+    type: timed
+    duration: 3
+    on_enter:
+      - action: bj_deal_cards
+    screen:
+      display: template:dealing
+      phone: template:dealing
+    on_exit:
+      - action: advance
+        to: bj_playing
+
+  bj_playing:
+    type: input_gate
+    duration: 30
+    input:
+      primitive: confirm
+      target: per_player.all_settled
+      required: all_players
+    screen:
+      display: template:playing
+      phone: template:playing
+    on_complete:
+      - action: advance
+        to: bj_dealer
+
+  bj_dealer:
+    type: timed
+    duration: 5
+    on_enter:
+      - action: bj_dealer_play
+    screen:
+      display: template:dealer
+      phone: template:dealer
+    on_exit:
+      - action: advance
+        to: bj_results
+
+  bj_results:
+    type: timed
+    duration: 8
+    on_enter:
+      - action: bj_resolve_results
+    screen:
+      display: template:results
+      phone: template:results
+    on_exit:
+      - action: advance
+        to: bj_scores
+
+  bj_scores:
+    type: timed
+    duration: 6
+    screen:
+      display: template:scoreboard
+      phone: template:scoreboard
+    on_exit:
+      - action: conditional
+        condition: "globals.round_number < globals.max_rounds"
+        then:
+          advance_to: bj_betting
+        else:
+          advance_to: game_over
+
+  game_over:
+    type: timed
+    screen:
+      display: template:results
+      phone: template:results
+
+presentation:
+  theme:
+    colors:
+      primary: "#10b981"
+      secondary: "#059669"
+      accent: "#f59e0b"
+      background: "#064e3b"
+      surface: "#065f46"
+      text: "#f8fafc"
+    darkMode: true
+    borderRadius: "8px"
+  screens:
+    - id: bj_betting
+      template: custom
+      surface: both
+    - id: bj_dealing
+      template: custom
+      surface: both
+    - id: bj_playing
+      template: custom
+      surface: both
+    - id: bj_dealer
+      template: custom
+      surface: both
+    - id: bj_results
+      template: results
+      surface: both
+    - id: bj_scores
+      template: scoreboard
+      surface: both
+    - id: game_over
+      template: results
+      surface: both
+
+scoring:
+  blackjack_win: 150
+  regular_win: 100
+  push: 0
+  loss: 0
+
+victory:
+  type: highest_score
+  tiebreak: most_chips_remaining
+
+extensions:
+  - id: blackjack-core
+    name: "Blackjack Core Logic"
+    type: lifecycle
+    description: >
+      Implements dealer AI, card dealing, hand resolution,
+      betting management, and player action handling (hit/stand/double/split).
+    entryPoint: ./extensions/index.ts

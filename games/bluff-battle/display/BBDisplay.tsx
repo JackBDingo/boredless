@@ -67,9 +67,15 @@ function ScoreList({ scores, showRoundScore }: { scores: ScoreEntry[]; showRound
 function extractBBState(raw: Record<string, unknown>): BBPublicState {
   const g = (raw.globals ?? raw) as Record<string, unknown>;
   const players = (raw.players ?? {}) as Record<string, Record<string, unknown>>;
-  const totalPlayers = Object.keys(players).length;
-  const submittedCount = typeof g['submitted_count'] === 'number' ? g['submitted_count'] : 0;
-  const votedCount = typeof g['voted_count'] === 'number' ? g['voted_count'] : 0;
+  const playerList = Object.values(players);
+  const totalPlayers = playerList.length;
+  // Compute counts from per-player state (more reliable than globals counter)
+  const submittedCount = typeof g['submitted_count'] === 'number' && g['submitted_count'] > 0
+    ? g['submitted_count']
+    : playerList.filter(p => p['has_submitted'] || p['submission']).length;
+  const votedCount = typeof g['voted_count'] === 'number' && g['voted_count'] > 0
+    ? g['voted_count']
+    : playerList.filter(p => p['has_voted']).length;
 
   let answers: BBPublicState['answers'] = [];
   if (typeof g['answers_json'] === 'string') {
@@ -130,6 +136,11 @@ export function BBDisplay({ phase, publicState, scores, timerMs, useGameEvent: _
       {/* Main — centered with generous side margins */}
       <main className="relative z-10 flex flex-col flex-1 items-center justify-center px-16 lg:px-24 xl:px-32 pb-12 overflow-hidden">
 
+        {/* DEBUG — remove after fixing */}
+        <div className="absolute top-2 right-2 z-50 bg-red-900/80 text-white text-xs px-2 py-1 rounded font-mono">
+          phase: {phase.phaseType} | prompt: {state.currentPrompt ? 'yes' : 'null'} | answers: {state.answers?.length ?? 0}
+        </div>
+
         {/* INSTRUCTIONS */}
         {phase.phaseType === PhaseType.INSTRUCTIONS && (
           <div className="flex flex-col items-center gap-10 text-center max-w-4xl w-full">
@@ -150,15 +161,6 @@ export function BBDisplay({ phase, publicState, scores, timerMs, useGameEvent: _
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* PROMPT */}
-        {phase.phaseType === BBPhase.PROMPT && (
-          <div className="flex flex-col items-center gap-8 text-center max-w-4xl w-full">
-            <p className="text-white/20 text-sm font-medium tracking-widest uppercase">The Question</p>
-            <h2 className="text-6xl font-bold text-white leading-tight tracking-tight">{state.currentPrompt}</h2>
-            <p className="text-white/25 text-base">Check your phones</p>
           </div>
         )}
 

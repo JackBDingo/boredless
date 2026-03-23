@@ -1,0 +1,2554 @@
+# White response cards for Cards Against Humanity
+# Source: cards.json (V1 data)
+
+cards:
+  - id: w0001
+    text: "\"Tweeting.\""
+  - id: w0002
+    text: "(I am doing Kegels right now.)"
+  - id: w0003
+    text: "10,000 Syrian refugees."
+  - id: w0004
+    text: "100% Pure New Zealand."
+  - id: w0005
+    text: "2 Girls 1 Cup."
+  - id: w0006
+    text: "400 years of colonial atrocities."
+  - id: w0007
+    text: "50 mg of Zoloft daily."
+  - id: w0008
+    text: "50,000 volts straight to the nipples."
+  - id: w0009
+    text: "72 virgins."
+  - id: w0010
+    text: "8 oz. of sweet Mexican black-tar heroin."
+  - id: w0011
+    text: "A bag of magic beans."
+  - id: w0012
+    text: "A balanced breakfast."
+  - id: w0013
+    text: "A ball of earwax, semen, and toenail clippings."
+  - id: w0014
+    text: "A big black dick."
+  - id: w0015
+    text: "A big hoopla about nothing."
+  - id: w0016
+    text: "A bird that shits human turds."
+  - id: w0017
+    text: "A bit of slap and tickle."
+  - id: w0018
+    text: "A bitch slap."
+  - id: w0019
+    text: "A bleached arsehole."
+  - id: w0020
+    text: "A bleached asshole."
+  - id: w0021
+    text: "A Bop It\u2122."
+  - id: w0022
+    text: "A bowl of mayonnaise and human teeth."
+  - id: w0023
+    text: "A brain tumor."
+  - id: w0024
+    text: "A brain tumour."
+  - id: w0025
+    text: "A bucket of fish heads."
+  - id: w0026
+    text: "A can of whoop-ass."
+  - id: w0027
+    text: "A caress of the inner thigh."
+  - id: w0028
+    text: "A cartoon camel enjoying the smooth, refreshing taste of a cigarette."
+  - id: w0029
+    text: "A cat with... hands."
+  - id: w0030
+    text: "A cherry-wood spanking bench."
+  - id: w0031
+    text: "A Chinese tourist who wants something very badly but cannot communicate it."
+  - id: w0032
+    text: "A clandestine butt scratch."
+  - id: w0033
+    text: "A cooler full of organs."
+  - id: w0034
+    text: "A copy of Bedside Hitler."
+  - id: w0035
+    text: "A crucifixion."
+  - id: w0036
+    text: "A cute, fuzzy koala, but it has chlamydia."
+  - id: w0037
+    text: "A death ray."
+  - id: w0038
+    text: "A decent fucking Internet connection."
+  - id: w0039
+    text: "A defective condom."
+  - id: w0040
+    text: "A despondent Maple Leafs fan sitting all alone."
+  - id: w0041
+    text: "A didgeridildo."
+  - id: w0042
+    text: "A disappointing birthday party."
+  - id: w0043
+    text: "A drive-by shooting."
+  - id: w0044
+    text: "A fair go."
+  - id: w0045
+    text: "A falcon with a cap on its head."
+  - id: w0046
+    text: "A fanny fart."
+  - id: w0047
+    text: "A fart so powerful that it wakes the giants from their thousand-year slumber."
+  - id: w0048
+    text: "A fat bald man from the internet."
+  - id: w0049
+    text: "A fetus."
+  - id: w0050
+    text: "A five-litre goon bag."
+  - id: w0051
+    text: "A Fleshlight."
+  - id: w0052
+    text: "A Fleshlight\u00ae."
+  - id: w0053
+    text: "A foetus."
+  - id: w0054
+    text: "A foul mouth."
+  - id: w0055
+    text: "A fuck-ton of almonds."
+  - id: w0056
+    text: "A fuck-tonne of almonds."
+  - id: w0057
+    text: "A gassy antelope."
+  - id: w0058
+    text: "A gentle caress of the inner thigh."
+  - id: w0059
+    text: "A ginger's freckled ballsack."
+  - id: w0060
+    text: "A good sniff."
+  - id: w0061
+    text: "A good, strong gorilla."
+  - id: w0062
+    text: "A gossamer stream of jizz that catches the light as it arcs through the morning air."
+  - id: w0063
+    text: "A grande sugar-free iced soy caramel macchiato."
+  - id: w0064
+    text: "A Gypsy curse."
+  - id: w0065
+    text: "A hairless little shitstain named Callou."
+  - id: w0066
+    text: "A Halal Snack Pack."
+  - id: w0067
+    text: "A hen night in Slough."
+  - id: w0068
+    text: "A homoerotic volleyball montage."
+  - id: w0069
+    text: "A horde of Vikings."
+  - id: w0070
+    text: "A hot mess."
+  - id: w0071
+    text: "A Japanese tourist who wants something very badly but cannot communicate it."
+  - id: w0072
+    text: "A Japanese whaling operation."
+  - id: w0073
+    text: "A LAN party."
+  - id: w0074
+    text: "A lifetime of sadness."
+  - id: w0075
+    text: "A literal tornado of fire."
+  - id: w0076
+    text: "A little boy who won't shut the fuck up about dinosaurs."
+  - id: w0077
+    text: "A live studio audience."
+  - id: w0078
+    text: "A look-see."
+  - id: w0079
+    text: "A low standard of living."
+  - id: w0080
+    text: "A mad cow."
+  - id: w0081
+    text: "A madman who lives in a police box and kidnaps women."
+  - id: w0082
+    text: "A man of means by no means."
+  - id: w0083
+    text: "A man on the brink of orgasm."
+  - id: w0084
+    text: "A mating display."
+  - id: w0085
+    text: "A Mexican."
+  - id: w0086
+    text: "A micropenis."
+  - id: w0087
+    text: "A micropig wearing a tiny raincoat and booties."
+  - id: w0088
+    text: "A middle-aged man on roller skates."
+  - id: w0089
+    text: "A mime having a stroke."
+  - id: w0090
+    text: "A moment of silence."
+  - id: w0091
+    text: "A monkey smoking a cigar."
+  - id: w0092
+    text: "A mopey zoo lion."
+  - id: w0093
+    text: "A much younger woman."
+  - id: w0094
+    text: "A murder most foul."
+  - id: w0095
+    text: "A neglected Tamagotchi\u2122."
+  - id: w0096
+    text: "A nice cup of tea."
+  - id: w0097
+    text: "A pangender octopus who roams the cosmos in search of love."
+  - id: w0098
+    text: "A pineapple with chlamydia."
+  - id: w0099
+    text: "A posh wank."
+  - id: w0100
+    text: "A prayer bouquet."
+  - id: w0101
+    text: "A pyramid of severed heads."
+  - id: w0102
+    text: "A really cool hat."
+  - id: w0103
+    text: "A robust mongoloid."
+  - id: w0104
+    text: "A sad god with a shit-covered pair of nipples."
+  - id: w0105
+    text: "A sad handjob."
+  - id: w0106
+    text: "A salad for men that's made of metal."
+  - id: w0107
+    text: "A salty surprise."
+  - id: w0108
+    text: "A sassy black woman."
+  - id: w0109
+    text: "A sausage festival."
+  - id: w0110
+    text: "A saxophone solo."
+  - id: w0111
+    text: "A sea of troubles."
+  - id: w0112
+    text: "A shark!"
+  - id: w0113
+    text: "A sick burnout."
+  - id: w0114
+    text: "A sick wombat."
+  - id: w0115
+    text: "A sickly child-king."
+  - id: w0116
+    text: "A six-point plan to stop the boats."
+  - id: w0117
+    text: "A slab of VB and a pack of durries."
+  - id: w0118
+    text: "a slightly used tampon"
+  - id: w0119
+    text: "A snapping turtle biting the tip of your penis."
+  - id: w0120
+    text: "A sober Irishman who doesn't care for potatoes."
+  - id: w0121
+    text: "A soggy Sao."
+  - id: w0122
+    text: "A spastic nerd."
+  - id: w0123
+    text: "A stingray barb through the chest."
+  - id: w0124
+    text: "A stray pube."
+  - id: w0125
+    text: "A subscription to Men's Fitness."
+  - id: w0126
+    text: "A Super Soaker\u2122 full of cat pee."
+  - id: w0127
+    text: "A surprisingly low amount of prison rape."
+  - id: w0128
+    text: "A swift hoog to the face."
+  - id: w0129
+    text: "A thermonuclear detonation."
+  - id: w0130
+    text: "A thousand Scottish warriors lifting their kilts in unison."
+  - id: w0131
+    text: "A three-way with my wife and Shaquille O'Neal."
+  - id: w0132
+    text: "A Tim Hortons franchise."
+  - id: w0133
+    text: "A time travel paradox."
+  - id: w0134
+    text: "A tiny horse."
+  - id: w0135
+    text: "A tiny, gay guitar called a ukulele."
+  - id: w0136
+    text: "A tribe of warrior women."
+  - id: w0137
+    text: "A vagina that tastes like the bathroom floors at Tom's Diner."
+  - id: w0138
+    text: "A vajazzled vagina."
+  - id: w0139
+    text: "A vastly superior healthcare system."
+  - id: w0140
+    text: "A vindaloo poo."
+  - id: w0141
+    text: "A web of lies."
+  - id: w0142
+    text: "A wheelchair death race."
+  - id: w0143
+    text: "A white ethnostate."
+  - id: w0144
+    text: "A white van man."
+  - id: w0145
+    text: "A whole thing of butter."
+  - id: w0146
+    text: "A windmill full of corpses."
+  - id: w0147
+    text: "A wisecracking terrorist."
+  - id: w0148
+    text: "A zesty breakfast burrito."
+  - id: w0149
+    text: "Aaron Burr."
+  - id: w0150
+    text: "Abstinence."
+  - id: w0151
+    text: "Academy Award winner Meryl Streep."
+  - id: w0152
+    text: "Accepting the way things are."
+  - id: w0153
+    text: "Accidentally slipping yourself a roofie."
+  - id: w0154
+    text: "Active listening."
+  - id: w0155
+    text: "Actually giving a shit"
+  - id: w0156
+    text: "Actually taking candy from a baby."
+  - id: w0157
+    text: "Adderall\u2122."
+  - id: w0158
+    text: "Adult Friendfinder."
+  - id: w0159
+    text: "Advice from a wise, old black man."
+  - id: w0160
+    text: "African children."
+  - id: w0161
+    text: "Agriculture."
+  - id: w0162
+    text: "AIDS."
+  - id: w0163
+    text: "Alcohol poisoning."
+  - id: w0164
+    text: "Alcoholism."
+  - id: w0165
+    text: "Alexandria Ocasio-Cortez."
+  - id: w0166
+    text: "All four prongs of an echidna's penis."
+  - id: w0167
+    text: "All my gentleman suitors."
+  - id: w0168
+    text: "all pants are half off today"
+  - id: w0169
+    text: "All the dudes I've fucked."
+  - id: w0170
+    text: "All-you-can-eat shrimp for $4.99."
+  - id: w0171
+    text: "All-you-can-eat shrimp for $8.99."
+  - id: w0172
+    text: "Altar boys."
+  - id: w0173
+    text: "America."
+  - id: w0174
+    text: "American Gladiators."
+  - id: w0175
+    text: "Americanization."
+  - id: w0176
+    text: "Amputees."
+  - id: w0177
+    text: "An AK-47 assault rifle."
+  - id: w0178
+    text: "An AK-47."
+  - id: w0179
+    text: "An AR-15 assault rifle."
+  - id: w0180
+    text: "An argument with Richard Dawkins."
+  - id: w0181
+    text: "An Army of smack heads with HIV infected needles."
+  - id: w0182
+    text: "An ass like two football helmets."
+  - id: w0183
+    text: "An asymmetric boob job."
+  - id: w0184
+    text: "An endless stream of diarrhea."
+  - id: w0185
+    text: "An endless stream of diarrhoea."
+  - id: w0186
+    text: "An entrenched class system."
+  - id: w0187
+    text: "An erection that lasts longer than four hours."
+  - id: w0188
+    text: "An Evening with Michael Buble."
+  - id: w0189
+    text: "An evil man in evil clothes."
+  - id: w0190
+    text: "An honest cop with nothing left to lose."
+  - id: w0191
+    text: "An icepick lobotomy."
+  - id: w0192
+    text: "An icy handjob from an Edmonton hooker."
+  - id: w0193
+    text: "An M. Night Shyamalan plot twist."
+  - id: w0194
+    text: "An M16 assault rifle."
+  - id: w0195
+    text: "An octopus giving seven handjobs and smoking a cigarette."
+  - id: w0196
+    text: "An Oedipus complex."
+  - id: w0197
+    text: "An old guy who's almost dead."
+  - id: w0198
+    text: "An older woman who knows her way around the penis."
+  - id: w0199
+    text: "An oversized lollipop."
+  - id: w0200
+    text: "An ugly face."
+  - id: w0201
+    text: "An unsurprising rash."
+  - id: w0202
+    text: "An unwanted pregnancy."
+  - id: w0203
+    text: "An uppercut."
+  - id: w0204
+    text: "Anal beads."
+  - id: w0205
+    text: "Announcing that I am about to cum."
+  - id: w0206
+    text: "Another goddamn vampire movie."
+  - id: w0207
+    text: "Another surprising Osprey crash."
+  - id: w0208
+    text: "Anything that comes out of Prince Philip's mouth."
+  - id: w0209
+    text: "Apologizing."
+  - id: w0210
+    text: "Arnold Vosloo."
+  - id: w0211
+    text: "Asians who aren't good at math."
+  - id: w0212
+    text: "Assless chaps."
+  - id: w0213
+    text: "Attitude."
+  - id: w0214
+    text: "Auschwitz."
+  - id: w0215
+    text: "Australia."
+  - id: w0216
+    text: "Authentic Mexican cuisine."
+  - id: w0217
+    text: "Autocannibalism."
+  - id: w0218
+    text: "AXE Body Spray."
+  - id: w0219
+    text: "Badger culling."
+  - id: w0220
+    text: "Ball-by-ball commentary from Richie Benaud."
+  - id: w0221
+    text: "Balls. Big balls. Really big balls."
+  - id: w0222
+    text: "Bananas in Pajamas."
+  - id: w0223
+    text: "Bananas."
+  - id: w0224
+    text: "Barack Obama."
+  - id: w0225
+    text: "Barely making $25,000 a year."
+  - id: w0226
+    text: "Basic trainees."
+  - id: w0227
+    text: "BATMAN!"
+  - id: w0228
+    text: "BATMAN!!!"
+  - id: w0229
+    text: "Battlefield amputations."
+  - id: w0230
+    text: "Becoming a blueberry."
+  - id: w0231
+    text: "Bees?"
+  - id: w0232
+    text: "Being a busy adult with many important things to do."
+  - id: w0233
+    text: "Being a dick to children."
+  - id: w0234
+    text: "Being a dinosaur."
+  - id: w0235
+    text: "Being a hideous beast that no one could love."
+  - id: w0236
+    text: "Being a motherfucking sorcerer."
+  - id: w0237
+    text: "Being a woman."
+  - id: w0238
+    text: "Being able to talk to elephants."
+  - id: w0239
+    text: "Being back-to-back World War Champions!"
+  - id: w0240
+    text: "Being black."
+  - id: w0241
+    text: "Being Canadian."
+  - id: w0242
+    text: "Being fabulous."
+  - id: w0243
+    text: "Being fat and stupid."
+  - id: w0244
+    text: "Being hunted like a fox."
+  - id: w0245
+    text: "Being marginalised."
+  - id: w0246
+    text: "Being marginalized."
+  - id: w0247
+    text: "Being on fire."
+  - id: w0248
+    text: "Being rich."
+  - id: w0249
+    text: "Being white."
+  - id: w0250
+    text: "Benedict Cumberbatch."
+  - id: w0251
+    text: "Bestiality."
+  - id: w0252
+    text: "Bill Nye the Science Guy."
+  - id: w0253
+    text: "Bingeing and purging."
+  - id: w0254
+    text: "Bio-engineered assault turtles with acid breath."
+  - id: w0255
+    text: "Bisexuality."
+  - id: w0256
+    text: "Bitches."
+  - id: w0257
+    text: "Black people."
+  - id: w0258
+    text: "Bling."
+  - id: w0259
+    text: "Blood fisting"
+  - id: w0260
+    text: "Blood, toil, tears, and sweat."
+  - id: w0261
+    text: "Blowing my boyfriend so hard he shits."
+  - id: w0262
+    text: "Blowing up Parliament."
+  - id: w0263
+    text: "Boat people; half boat, half human."
+  - id: w0264
+    text: "Bogies."
+  - id: w0265
+    text: "Bond, James Bond."
+  - id: w0266
+    text: "Bono."
+  - id: w0267
+    text: "Booby-trapping the house to foil burglars."
+  - id: w0268
+    text: "Boogers."
+  - id: w0269
+    text: "Bosnian chicken farmers."
+  - id: w0270
+    text: "Braiding three penises into a Curly Wurly."
+  - id: w0271
+    text: "Braiding three penises into a licorice twist."
+  - id: w0272
+    text: "Braiding three penises into a Twizzler."
+  - id: w0273
+    text: "Breaking out into song and dance."
+  - id: w0274
+    text: "Brexit."
+  - id: w0275
+    text: "Britney Spears at 55."
+  - id: w0276
+    text: "Brown people."
+  - id: w0277
+    text: "Bubble butt bottom boys."
+  - id: w0278
+    text: "Buckfast Tonic Wine."
+  - id: w0279
+    text: "Bullshitting my ass off."
+  - id: w0280
+    text: "Burning down the White House."
+  - id: w0281
+    text: "Buying the right toothbrush cup for my lifestyle."
+  - id: w0282
+    text: "Canada: America's Hat."
+  - id: w0283
+    text: "Canadian Netflix."
+  - id: w0284
+    text: "Canned tuna with extra dolphin."
+  - id: w0285
+    text: "Capturing Newt Gingrich and forcing him to dance in a monkey suit."
+  - id: w0286
+    text: "Cardi B."
+  - id: w0287
+    text: "Cards Against Humanity."
+  - id: w0288
+    text: "Cashed-up bogans."
+  - id: w0289
+    text: "Casually suggesting a threesome."
+  - id: w0290
+    text: "Catapults."
+  - id: w0291
+    text: "Centaurs."
+  - id: w0292
+    text: "Chainsaws for hands."
+  - id: w0293
+    text: "Charisma."
+  - id: w0294
+    text: "Cheating in the Paralympics."
+  - id: w0295
+    text: "Cheating in the Special Olympics."
+  - id: w0296
+    text: "Cheeky bum sex."
+  - id: w0297
+    text: "Chemical weapons."
+  - id: w0298
+    text: "Child abuse."
+  - id: w0299
+    text: "Child beauty pageants."
+  - id: w0300
+    text: "Children on leashes."
+  - id: w0301
+    text: "Chivalry."
+  - id: w0302
+    text: "Christopher Walken."
+  - id: w0303
+    text: "Chundering into a kangaroo's pouch."
+  - id: w0304
+    text: "Chunks of dead backpacker."
+  - id: w0305
+    text: "Chunks of dead hitchhiker."
+  - id: w0306
+    text: "Chunks of dead prostitute."
+  - id: w0307
+    text: "Chutzpah."
+  - id: w0308
+    text: "Civilian casualties."
+  - id: w0309
+    text: "Classist undertones."
+  - id: w0310
+    text: "Clive Palmer's soft, shitty body."
+  - id: w0311
+    text: "Clubbing baby seals."
+  - id: w0312
+    text: "Coat hanger abortions."
+  - id: w0313
+    text: "Cockasaurus rex: the horniest dinosaur of them all."
+  - id: w0314
+    text: "Cockfights."
+  - id: w0315
+    text: "College."
+  - id: w0316
+    text: "Committing suicide."
+  - id: w0317
+    text: "Completely unwarranted confidence."
+  - id: w0318
+    text: "Concealing a boner."
+  - id: w0319
+    text: "Concealing an erection."
+  - id: w0320
+    text: "Consensual sex."
+  - id: w0321
+    text: "Consultants."
+  - id: w0322
+    text: "Contagious face cancer."
+  - id: w0323
+    text: "Converting to Islam."
+  - id: w0324
+    text: "Cookie Monster devouring the Eucharist wafers."
+  - id: w0325
+    text: "Copping a feel."
+  - id: w0326
+    text: "Cottaging."
+  - id: w0327
+    text: "Count Chocula."
+  - id: w0328
+    text: "Court-ordered rehab."
+  - id: w0329
+    text: "Covering myself with Parmesan cheese and chili flakes because I am pizza."
+  - id: w0330
+    text: "Crazy hot cousin sex."
+  - id: w0331
+    text: "Creed."
+  - id: w0332
+    text: "Crippling debt."
+  - id: w0333
+    text: "Crucifixion."
+  - id: w0334
+    text: "Crumbs all over the bloody carpet."
+  - id: w0335
+    text: "Crumbs all over the god damn carpet."
+  - id: w0336
+    text: "Crumpets with the Queen."
+  - id: w0337
+    text: "Crystal meth."
+  - id: w0338
+    text: "Cuddling."
+  - id: w0339
+    text: "Cumming deep inside my best bro."
+  - id: w0340
+    text: "Customer service representatives."
+  - id: w0341
+    text: "Cybernetic enhancements."
+  - id: w0342
+    text: "Dad's funny balls."
+  - id: w0343
+    text: "Daddies Brown Sauce"
+  - id: w0344
+    text: "Daddies\u00ae Brown Sauce."
+  - id: w0345
+    text: "Daddy issues."
+  - id: w0346
+    text: "Daddy's credit card."
+  - id: w0347
+    text: "Daniel Radcliffe's delicious arsehole."
+  - id: w0348
+    text: "Daniel Radcliffe's delicious asshole."
+  - id: w0349
+    text: "Danny DeVito."
+  - id: w0350
+    text: "Dark and mysterious forces beyond our control."
+  - id: w0351
+    text: "Darth Vader."
+  - id: w0352
+    text: "Date rape."
+  - id: w0353
+    text: "Dave Matthews Band."
+  - id: w0354
+    text: "David Bowie flying in on a tiger made of lightning."
+  - id: w0355
+    text: "David Cameron."
+  - id: w0356
+    text: "Dead babies."
+  - id: w0357
+    text: "Dead birds everywhere."
+  - id: w0358
+    text: "Dead parents."
+  - id: w0359
+    text: "Deflowering the princess."
+  - id: w0360
+    text: "Dental dams."
+  - id: w0361
+    text: "Denying sex to play video games."
+  - id: w0362
+    text: "Destroying the evidence."
+  - id: w0363
+    text: "Dick Cheney."
+  - id: w0364
+    text: "Dick fingers."
+  - id: w0365
+    text: "Dick pics."
+  - id: w0366
+    text: "Dining with cardboard cutouts of the cast of Friends."
+  - id: w0367
+    text: "Dirty nappies."
+  - id: w0368
+    text: "Disco Inferno."
+  - id: w0369
+    text: "Diversity."
+  - id: w0370
+    text: "Dogging."
+  - id: w0371
+    text: "Doin' it in the butt."
+  - id: w0372
+    text: "Doin' it up the bum."
+  - id: w0373
+    text: "Doing a shit in Pudsey Bear's eyehole."
+  - id: w0374
+    text: "Doing crimes."
+  - id: w0375
+    text: "Doing it in the butt."
+  - id: w0376
+    text: "Doing the right thing."
+  - id: w0377
+    text: "Domino's\u2122 Oreo\u2122 Dessert Pizza."
+  - id: w0378
+    text: "Don Cherry's wardrobe."
+  - id: w0379
+    text: "Donald J. Trump."
+  - id: w0380
+    text: "Donald Trump's deleted tweets."
+  - id: w0381
+    text: "Double rainbows."
+  - id: w0382
+    text: "Douchebags on their iPhones."
+  - id: w0383
+    text: "Dr. Martin Luther King, Jr."
+  - id: w0384
+    text: "Drinking alone."
+  - id: w0385
+    text: "Drinking out of the toilet and eating garbage."
+  - id: w0386
+    text: "Drinking out of the toilet and eating rubbish."
+  - id: w0387
+    text: "Dropping a baby down the dunny."
+  - id: w0388
+    text: "Dropping a chandelier on your enemies and riding the rope up."
+  - id: w0389
+    text: "Drowning the kids in the bathtub."
+  - id: w0390
+    text: "Druids."
+  - id: w0391
+    text: "Drum circles."
+  - id: w0392
+    text: "Dry heaving."
+  - id: w0393
+    text: "Dwarf tossing."
+  - id: w0394
+    text: "Dwayne \"The Rock\" Johnson."
+  - id: w0395
+    text: "Dying but miraculously getting brought back to life."
+  - id: w0396
+    text: "Dying of dysentery."
+  - id: w0397
+    text: "Dying."
+  - id: w0398
+    text: "Eastern European Turbo-Folk music."
+  - id: w0399
+    text: "Eating a hard boiled egg out of my husband's arsehole."
+  - id: w0400
+    text: "Eating a hard boiled egg out of my husband's asshole."
+  - id: w0401
+    text: "Eating all of the cookies before the AIDS bake-sale."
+  - id: w0402
+    text: "Eating an albino."
+  - id: w0403
+    text: "Eating the last known bison."
+  - id: w0404
+    text: "Eating too much of a lamp."
+  - id: w0405
+    text: "Ecstasy."
+  - id: w0406
+    text: "Ed Balls."
+  - id: w0407
+    text: "Edible underpants."
+  - id: w0408
+    text: "Edible underwear."
+  - id: w0409
+    text: "Egging an MP."
+  - id: w0410
+    text: "Elderly Japanese men."
+  - id: w0411
+    text: "Electricity."
+  - id: w0412
+    text: "Embryonic stem cells."
+  - id: w0413
+    text: "Emerging from the sea and rampaging through Tokyo."
+  - id: w0414
+    text: "Emma Watson."
+  - id: w0415
+    text: "Emotions."
+  - id: w0416
+    text: "England."
+  - id: w0417
+    text: "Erectile dysfunction."
+  - id: w0418
+    text: "Establishing dominance."
+  - id: w0419
+    text: "Eternal awesomeness."
+  - id: w0420
+    text: "Ethnic cleansing."
+  - id: w0421
+    text: "Eugenics."
+  - id: w0422
+    text: "Euphoria\u2122 by Calvin Klein."
+  - id: w0423
+    text: "Exactly what you'd expect."
+  - id: w0424
+    text: "Excalibur."
+  - id: w0425
+    text: "Exchanging pleasantries."
+  - id: w0426
+    text: "Executing a hostage every hour."
+  - id: w0427
+    text: "Existentialists."
+  - id: w0428
+    text: "Exorcism."
+  - id: w0429
+    text: "Expecting a burp and vomiting on the floor."
+  - id: w0430
+    text: "Explaining how vaginas work."
+  - id: w0431
+    text: "Explosions."
+  - id: w0432
+    text: "Extremely tight jeans."
+  - id: w0433
+    text: "Extremely tight pants."
+  - id: w0434
+    text: "Extremely tight trousers."
+  - id: w0435
+    text: "Facebook."
+  - id: w0436
+    text: "Fading away into nothingness."
+  - id: w0437
+    text: "Faffing about."
+  - id: w0438
+    text: "Faith healing."
+  - id: w0439
+    text: "Fake tits."
+  - id: w0440
+    text: "FALCON PUNCH!!!"
+  - id: w0441
+    text: "Famine."
+  - id: w0442
+    text: "Fancy Feast\u00ae."
+  - id: w0443
+    text: "Farting and walking away."
+  - id: w0444
+    text: "Farting into your petticoats and wafting it at Lord Gregory."
+  - id: w0445
+    text: "Fear itself."
+  - id: w0446
+    text: "Feeding Rosie O'Donnell."
+  - id: w0447
+    text: "Fellowship in Christ."
+  - id: w0448
+    text: "Fiery poops."
+  - id: w0449
+    text: "Fiery poos."
+  - id: w0450
+    text: "Figgy pudding."
+  - id: w0451
+    text: "Filling my briefcase with business stuff."
+  - id: w0452
+    text: "Filling my son with spaghetti."
+  - id: w0453
+    text: "Filling Sean Hannity with helium and watching him float away."
+  - id: w0454
+    text: "Finger painting."
+  - id: w0455
+    text: "Fingering."
+  - id: w0456
+    text: "Firing a rifle into the air while balls deep in a squealing hog."
+  - id: w0457
+    text: "Fitting all your blongings into a seabag."
+  - id: w0458
+    text: "Five litres of Special Brew."
+  - id: w0459
+    text: "Five-Dollar Footlongs\u2122."
+  - id: w0460
+    text: "Flash flooding."
+  - id: w0461
+    text: "Flavored condoms."
+  - id: w0462
+    text: "Flesh-eating bacteria."
+  - id: w0463
+    text: "Flightless birds."
+  - id: w0464
+    text: "Flying saucers"
+  - id: w0465
+    text: "Flying sex snakes."
+  - id: w0466
+    text: "Forced sterilisation."
+  - id: w0467
+    text: "Forced sterilization."
+  - id: w0468
+    text: "Foreskin."
+  - id: w0469
+    text: "Forgetting the Alamo."
+  - id: w0470
+    text: "Former President George W. Bush."
+  - id: w0471
+    text: "Four Loko."
+  - id: w0472
+    text: "Fox News."
+  - id: w0473
+    text: "Fragile masculinity."
+  - id: w0474
+    text: "Free samples."
+  - id: w0475
+    text: "Friction."
+  - id: w0476
+    text: "Friendly fire."
+  - id: w0477
+    text: "Friends who eat all the snacks."
+  - id: w0478
+    text: "Friends who eat all your snacks."
+  - id: w0479
+    text: "Friends with benefits."
+  - id: w0480
+    text: "Frolicking."
+  - id: w0481
+    text: "Front butt."
+  - id: w0482
+    text: "Fucking my sister."
+  - id: w0483
+    text: "Fucking the weatherman on live television."
+  - id: w0484
+    text: "Full frontal nudity."
+  - id: w0485
+    text: "Funky fresh rhymes."
+  - id: w0486
+    text: "Gandalf."
+  - id: w0487
+    text: "Gandhi."
+  - id: w0488
+    text: "Garth Brooks."
+  - id: w0489
+    text: "Gary Coleman."
+  - id: w0490
+    text: "Gary Glitter."
+  - id: w0491
+    text: "Gay animals."
+  - id: w0492
+    text: "Gay conversion therapy."
+  - id: w0493
+    text: "Geese."
+  - id: w0494
+    text: "Genetically engineered super-soldiers."
+  - id: w0495
+    text: "Genghis Khan."
+  - id: w0496
+    text: "Genital piercings."
+  - id: w0497
+    text: "Gentleman's Relish\u00ae."
+  - id: w0498
+    text: "Genuine human connection."
+  - id: w0499
+    text: "German Chancellor Angela Merkel."
+  - id: w0500
+    text: "German dungeon porn."
+  - id: w0501
+    text: "Germans on holiday."
+  - id: w0502
+    text: "Getting a DUI on a Zamboni."
+  - id: w0503
+    text: "Getting crushed by a vending machine."
+  - id: w0504
+    text: "Getting cummed on."
+  - id: w0505
+    text: "Getting drugs off the street and into my body."
+  - id: w0506
+    text: "Getting drunk on mouthwash."
+  - id: w0507
+    text: "Getting fingered."
+  - id: w0508
+    text: "Getting into a pretty bad car accident."
+  - id: w0509
+    text: "Getting married, having a few kids, buying some stuff, retiring to Florida, and dying."
+  - id: w0510
+    text: "Getting married, having a few kids, buying some stuff, retiring to Queensland, and dying."
+  - id: w0511
+    text: "Getting married, having a few kids, buying some stuff, retiring to the south of France, and dying."
+  - id: w0512
+    text: "Getting naked and watching CBeebies."
+  - id: w0513
+    text: "Getting naked and watching Nickelodeon."
+  - id: w0514
+    text: "Getting naked and watching Play School."
+  - id: w0515
+    text: "Getting pregnant again."
+  - id: w0516
+    text: "Getting really high."
+  - id: w0517
+    text: "Getting so angry that you pop a boner."
+  - id: w0518
+    text: "Getting so angry that you pop a stiffy."
+  - id: w0519
+    text: "Getting wed, having a few kids, taking some pictures, retiring to the south of France, and dying."
+  - id: w0520
+    text: "Ghosts."
+  - id: w0521
+    text: "Girls who shouldn't go wild."
+  - id: w0522
+    text: "Girls."
+  - id: w0523
+    text: "Giving 110%."
+  - id: w0524
+    text: "Giving birth to the Antichrist."
+  - id: w0525
+    text: "Gladiatorial combat."
+  - id: w0526
+    text: "Glassing a wanker."
+  - id: w0527
+    text: "Glenn Beck being harried by a swarm of buzzards."
+  - id: w0528
+    text: "Glenn Beck catching his scrotum on a curtain hook."
+  - id: w0529
+    text: "Glenn Beck convulsively vomiting as a brood of crab spiders hatches in his brain and erupts from his tear ducts."
+  - id: w0530
+    text: "Glenn Beck."
+  - id: w0531
+    text: "Global warming."
+  - id: w0532
+    text: "Gloryholes."
+  - id: w0533
+    text: "Goats eating cans."
+  - id: w0534
+    text: "Goblins."
+  - id: w0535
+    text: "God."
+  - id: w0536
+    text: "GoGurt\u00ae."
+  - id: w0537
+    text: "Going an entire day without masturbating."
+  - id: w0538
+    text: "Going around sniffing people's armpits."
+  - id: w0539
+    text: "Golden showers."
+  - id: w0540
+    text: "Good-natured, fun-loving Aussie racism."
+  - id: w0541
+    text: "Grandma."
+  - id: w0542
+    text: "Grandpa's bald spot."
+  - id: w0543
+    text: "Grassroots support"
+  - id: w0544
+    text: "Grave robbing."
+  - id: w0545
+    text: "Growing a pair."
+  - id: w0546
+    text: "Guys who don't call."
+  - id: w0547
+    text: "Haggis."
+  - id: w0548
+    text: "Half a kilo of pure China White heroin."
+  - id: w0549
+    text: "Half-assed foreplay."
+  - id: w0550
+    text: "Harry Potter erotica."
+  - id: w0551
+    text: "Have some more kugel."
+  - id: w0552
+    text: "Having a Golden Gaytime."
+  - id: w0553
+    text: "Having a penis."
+  - id: w0554
+    text: "Having a shag in the back of a ute."
+  - id: w0555
+    text: "Having anuses for eyes."
+  - id: w0556
+    text: "Having big dreams but no realistic way to achieve them."
+  - id: w0557
+    text: "Having sex for the first time."
+  - id: w0558
+    text: "Having sex too soon after giving birth."
+  - id: w0559
+    text: "Having sex with every man in Winnipeg."
+  - id: w0560
+    text: "Having sloppy sex as your dog watches."
+  - id: w0561
+    text: "Heartwarming orphans."
+  - id: w0562
+    text: "Heath Ledger."
+  - id: w0563
+    text: "Helplessly giggling at the mention of Hutus and Tutsis."
+  - id: w0564
+    text: "Her Majesty, Queen Elizabeth II."
+  - id: w0565
+    text: "Her Royal Highness, Queen Elizabeth II."
+  - id: w0566
+    text: "Heritage minutes."
+  - id: w0567
+    text: "hermaphroditical Italian pictures"
+  - id: w0568
+    text: "Heroin."
+  - id: w0569
+    text: "Heteronormativity."
+  - id: w0570
+    text: "Hillary Clinton's favorite nipple clamps"
+  - id: w0571
+    text: "Hip hop jewels."
+  - id: w0572
+    text: "Hipsters."
+  - id: w0573
+    text: "Historically black colleges."
+  - id: w0574
+    text: "Hobos."
+  - id: w0575
+    text: "Holding down a child and farting all over him."
+  - id: w0576
+    text: "Home video of Oprah sobbing into a Lean Cuisine\u00ae."
+  - id: w0577
+    text: "Homeless people."
+  - id: w0578
+    text: "Homo milk."
+  - id: w0579
+    text: "Hooning."
+  - id: w0580
+    text: "Hope."
+  - id: w0581
+    text: "Hormone injections."
+  - id: w0582
+    text: "Horrifying laser hair removal accidents."
+  - id: w0583
+    text: "Horse meat."
+  - id: w0584
+    text: "Hospice care."
+  - id: w0585
+    text: "Hot cheese."
+  - id: w0586
+    text: "Hot people."
+  - id: w0587
+    text: "Hot Pockets\u00ae."
+  - id: w0588
+    text: "How amazing it is to be on mushrooms."
+  - id: w0589
+    text: "How awesome it is to be white."
+  - id: w0590
+    text: "How bad my daughter fucked up her dance recital."
+  - id: w0591
+    text: "How far I can get my own penis up my butt."
+  - id: w0592
+    text: "How wet my pussy is."
+  - id: w0593
+    text: "However much weed $20 can buy."
+  - id: w0594
+    text: "However much weed \u00a320 can buy."
+  - id: w0595
+    text: "Huffing spray paint."
+  - id: w0596
+    text: "Huge biceps."
+  - id: w0597
+    text: "Hulk Hogan."
+  - id: w0598
+    text: "Hunting \"accidents\"."
+  - id: w0599
+    text: "Hunting accidents."
+  - id: w0600
+    text: "Hurling one's body down a hill in pursuit of a wheel of cheese."
+  - id: w0601
+    text: "Hurricane Katrina."
+  - id: w0602
+    text: "Hurting those closest to me."
+  - id: w0603
+    text: "I'm friends with your dad on Facebook."
+  - id: w0604
+    text: "Ice."
+  - id: w0605
+    text: "Illegal immigrants."
+  - id: w0606
+    text: "Impotence."
+  - id: w0607
+    text: "Improvised explosive devices."
+  - id: w0608
+    text: "Inappropriate yodeling."
+  - id: w0609
+    text: "Incest."
+  - id: w0610
+    text: "Indian burns."
+  - id: w0611
+    text: "Inserting a jam jar into my anus."
+  - id: w0612
+    text: "Inserting a Mason jar into my anus."
+  - id: w0613
+    text: "Intelligent design."
+  - id: w0614
+    text: "intolerably vivid dreams"
+  - id: w0615
+    text: "Invading Poland."
+  - id: w0616
+    text: "Irritable Bowel Syndrome."
+  - id: w0617
+    text: "Italians."
+  - id: w0618
+    text: "Itchy pussy."
+  - id: w0619
+    text: "J.D. Power and his associates."
+  - id: w0620
+    text: "Jade Goody's cancerous remains."
+  - id: w0621
+    text: "Jedward."
+  - id: w0622
+    text: "Jehovah's Witnesses."
+  - id: w0623
+    text: "Jennifer Lawrence."
+  - id: w0624
+    text: "Jerking off into a pool of children's tears."
+  - id: w0625
+    text: "Jesus."
+  - id: w0626
+    text: "Jew-fros."
+  - id: w0627
+    text: "Jewish fraternities."
+  - id: w0628
+    text: "Jews, gypsies, and homosexuals."
+  - id: w0629
+    text: "Jibber-jabber."
+  - id: w0630
+    text: "Jimmy Savile."
+  - id: w0631
+    text: "Jobs."
+  - id: w0632
+    text: "Joe Biden."
+  - id: w0633
+    text: "John Howard's eyebrows."
+  - id: w0634
+    text: "John Wilkes Booth."
+  - id: w0635
+    text: "Judge Judy."
+  - id: w0636
+    text: "Judging everyone."
+  - id: w0637
+    text: "Just touching David Beckham's hair."
+  - id: w0638
+    text: "Justin Bieber's favorite burger joint."
+  - id: w0639
+    text: "Justin Trudeau."
+  - id: w0640
+    text: "Juuling."
+  - id: w0641
+    text: "Kamikaze pilots."
+  - id: w0642
+    text: "Kanye West."
+  - id: w0643
+    text: "Keanu Reeves."
+  - id: w0644
+    text: "Keeping Christ in Christmas."
+  - id: w0645
+    text: "Kegel Balls"
+  - id: w0646
+    text: "Kibbles 'n Bits\u2122."
+  - id: w0647
+    text: "Kibbles n' Bits."
+  - id: w0648
+    text: "Kids with ass cancer."
+  - id: w0649
+    text: "Kids with bum cancer."
+  - id: w0650
+    text: "Kim Jong-il."
+  - id: w0651
+    text: "Kim Jong-un."
+  - id: w0652
+    text: "Kissing grandma on the forehead and turning off her life support."
+  - id: w0653
+    text: "Kissing nan on the forehead and turning off her life support."
+  - id: w0654
+    text: "Knife crime."
+  - id: w0655
+    text: "Kourtney, Kim, Khloe, Kendall, and Kylie."
+  - id: w0656
+    text: "Ladies, gentlemen, and the undecided."
+  - id: w0657
+    text: "Lads."
+  - id: w0658
+    text: "Lady Gaga."
+  - id: w0659
+    text: "Lance Armstrong's missing testicle."
+  - id: w0660
+    text: "Land mines."
+  - id: w0661
+    text: "Laying an egg."
+  - id: w0662
+    text: "Leaked footage of Kate Middleton's colonoscopy."
+  - id: w0663
+    text: "Leaving an awkward voicemail."
+  - id: w0664
+    text: "Lena Dunham."
+  - id: w0665
+    text: "Leprosy."
+  - id: w0666
+    text: "Letting Gemma collins squirt on your face"
+  - id: w0667
+    text: "Letting yourself go."
+  - id: w0668
+    text: "Leveling up."
+  - id: w0669
+    text: "Liberals."
+  - id: w0670
+    text: "Licking things to claim them as your own."
+  - id: w0671
+    text: "Listening to her problems without trying to solve them."
+  - id: w0672
+    text: "Literally eating shit."
+  - id: w0673
+    text: "Little boy penises."
+  - id: w0674
+    text: "Living in a trash can."
+  - id: w0675
+    text: "Living in Yellowknife."
+  - id: w0676
+    text: "Lockjaw."
+  - id: w0677
+    text: "Lokking for your Dad's porn stash"
+  - id: w0678
+    text: "Looking in the mirror, applying lipstick, and whispering \"tonight, you will have sex with Tom Cruise.\""
+  - id: w0679
+    text: "Loose lips."
+  - id: w0680
+    text: "Lumberjack fantasies."
+  - id: w0681
+    text: "Lunchables\u2122."
+  - id: w0682
+    text: "LYNX\u00ae Body Spray."
+  - id: w0683
+    text: "Mad cow disease."
+  - id: w0684
+    text: "Madeleine McCann."
+  - id: w0685
+    text: "Magnets."
+  - id: w0686
+    text: "Making a list of people to kill."
+  - id: w0687
+    text: "Making a pouty face."
+  - id: w0688
+    text: "Making sex at her."
+  - id: w0689
+    text: "Making the penises kiss."
+  - id: w0690
+    text: "Making up for centuries of oppression with one day of apologising."
+  - id: w0691
+    text: "Man meat."
+  - id: w0692
+    text: "Mansplaining."
+  - id: w0693
+    text: "Many bats."
+  - id: w0694
+    text: "Marky Mark and the Funky Bunch."
+  - id: w0695
+    text: "Martha Stewart's gold plated vagina."
+  - id: w0696
+    text: "Massive, widespread drought."
+  - id: w0697
+    text: "Masturbating."
+  - id: w0698
+    text: "Masturbation."
+  - id: w0699
+    text: "Mathletes."
+  - id: w0700
+    text: "Maureen of Blackpool, Reader's Wife of the Year 1988."
+  - id: w0701
+    text: "Me time."
+  - id: w0702
+    text: "Mean people"
+  - id: w0703
+    text: "MechaHitler."
+  - id: w0704
+    text: "Memes."
+  - id: w0705
+    text: "Men discussing their feelings in an emotionally healthy way."
+  - id: w0706
+    text: "Men."
+  - id: w0707
+    text: "Menstrual rage."
+  - id: w0708
+    text: "Mensturation porn"
+  - id: w0709
+    text: "Meth."
+  - id: w0710
+    text: "Michael Jackson."
+  - id: w0711
+    text: "Michelle Obama's arms."
+  - id: w0712
+    text: "Mike Pence."
+  - id: w0713
+    text: "Mild racism and extreme homophobia"
+  - id: w0714
+    text: "Miley Cyrus at 55."
+  - id: w0715
+    text: "Miley Cyrus."
+  - id: w0716
+    text: "Millions of cane toads."
+  - id: w0717
+    text: "Millwall fans."
+  - id: w0718
+    text: "Mining accidents."
+  - id: w0719
+    text: "Mistaking a retarded person for someone who's merely deaf."
+  - id: w0720
+    text: "Mom."
+  - id: w0721
+    text: "Moon a Prime Minister."
+  - id: w0722
+    text: "Moral ambiguity."
+  - id: w0723
+    text: "More elephant cock than I bargained for."
+  - id: w0724
+    text: "Morgan Freeman's voice."
+  - id: w0725
+    text: "Mountain Dew Code Red."
+  - id: w0726
+    text: "Mouth herpes."
+  - id: w0727
+    text: "Mr. Clean, right behind you."
+  - id: w0728
+    text: "Mr. Dressup."
+  - id: w0729
+    text: "Mr. Froto's ring"
+  - id: w0730
+    text: "Mr. Snuffleupagus."
+  - id: w0731
+    text: "Mr. Squiggle, the Man from the Moon."
+  - id: w0732
+    text: "Muhammad (Peace Be Upon Him)."
+  - id: w0733
+    text: "Muhammad (Praise Be Unto Him)."
+  - id: w0734
+    text: "multiple personality disorder"
+  - id: w0735
+    text: "Multiple stab wounds."
+  - id: w0736
+    text: "Murdering our parents."
+  - id: w0737
+    text: "Mutually assured destruction."
+  - id: w0738
+    text: "Mutually-assured destruction."
+  - id: w0739
+    text: "Muzzy."
+  - id: w0740
+    text: "My abusive boyfriend who really isn't so bad once you get to know him."
+  - id: w0741
+    text: "My balls on your face."
+  - id: w0742
+    text: "My black ass."
+  - id: w0743
+    text: "My bright pink fuckhole."
+  - id: w0744
+    text: "My cheating prick of a husband."
+  - id: w0745
+    text: "My cheating son-of-a-bitch husband."
+  - id: w0746
+    text: "My collection of high-tech sex toys."
+  - id: w0747
+    text: "My collection of Japanese sex toys."
+  - id: w0748
+    text: "My ex-wife."
+  - id: w0749
+    text: "My fat daughter."
+  - id: w0750
+    text: "My father, who died when I was seven."
+  - id: w0751
+    text: "My first kiss."
+  - id: w0752
+    text: "My genitals."
+  - id: w0753
+    text: "My good bra."
+  - id: w0754
+    text: "My humps."
+  - id: w0755
+    text: "My inner demons."
+  - id: w0756
+    text: "My little boner."
+  - id: w0757
+    text: "My machete."
+  - id: w0758
+    text: "My mate Dave."
+  - id: w0759
+    text: "My neck, my back, my pussy, and my crack."
+  - id: w0760
+    text: "My relationship status."
+  - id: w0761
+    text: "My sex life."
+  - id: w0762
+    text: "My soul."
+  - id: w0763
+    text: "My Uber driver, Pavel."
+  - id: w0764
+    text: "My ugly face and bad personality."
+  - id: w0765
+    text: "my vintage trucker hat collection"
+  - id: w0766
+    text: "Nachos for the table."
+  - id: w0767
+    text: "Naked News."
+  - id: w0768
+    text: "Natalie Portman."
+  - id: w0769
+    text: "Natural male enhancement."
+  - id: w0770
+    text: "Natural selection."
+  - id: w0771
+    text: "Nazis."
+  - id: w0772
+    text: "NBA superstar LeBron James."
+  - id: w0773
+    text: "Necrophilia."
+  - id: w0774
+    text: "New Age music."
+  - id: w0775
+    text: "Newfies."
+  - id: w0776
+    text: "Newly incorporated kamikaze tactics."
+  - id: w0777
+    text: "Nickelback."
+  - id: w0778
+    text: "Nicolas Cage."
+  - id: w0779
+    text: "Nip slips."
+  - id: w0780
+    text: "Nippers."
+  - id: w0781
+    text: "Nipple blades."
+  - id: w0782
+    text: "Nocturnal emissions."
+  - id: w0783
+    text: "Not covering your mouth when you sneeze"
+  - id: w0784
+    text: "Not giving a shit about the Third World."
+  - id: w0785
+    text: "Not having silly talk."
+  - id: w0786
+    text: "Not reciprocating oral sex."
+  - id: w0787
+    text: "Not vaccinating my children because I am stupid."
+  - id: w0788
+    text: "Not wearing pants."
+  - id: w0789
+    text: "Not wearing trousers."
+  - id: w0790
+    text: "Nothing but sand."
+  - id: w0791
+    text: "Nothing. Absolutely nothing."
+  - id: w0792
+    text: "Nunchucks."
+  - id: w0793
+    text: "Obesity."
+  - id: w0794
+    text: "Object permanence."
+  - id: w0795
+    text: "Oestrogen."
+  - id: w0796
+    text: "Old-people smell."
+  - id: w0797
+    text: "Ominous background music."
+  - id: w0798
+    text: "One Direction's supple, hairless bodies."
+  - id: w0799
+    text: "One rude motherfucker"
+  - id: w0800
+    text: "One titty hanging out."
+  - id: w0801
+    text: "One trillion dollars."
+  - id: w0802
+    text: "Only dating Asian women."
+  - id: w0803
+    text: "Oompa-Loompas."
+  - id: w0804
+    text: "Opposable thumbs."
+  - id: w0805
+    text: "Optimus Prime having sex with a dishwasher."
+  - id: w0806
+    text: "Our first chimpanzee President."
+  - id: w0807
+    text: "Our first chimpanzee Prime Minister."
+  - id: w0808
+    text: "Overcompensation."
+  - id: w0809
+    text: "Overpowering your father."
+  - id: w0810
+    text: "Oversized lollipops."
+  - id: w0811
+    text: "Owning and operating a Chili's franchise."
+  - id: w0812
+    text: "Pabst Blue Ribbon."
+  - id: w0813
+    text: "Pac-Man uncontrollably guzzling cum."
+  - id: w0814
+    text: "Paedophiles."
+  - id: w0815
+    text: "Panda sex."
+  - id: w0816
+    text: "Paris Hilton."
+  - id: w0817
+    text: "Parting the Red Sea."
+  - id: w0818
+    text: "Party poopers."
+  - id: w0819
+    text: "Passable transvestites."
+  - id: w0820
+    text: "Passing a kidney stone."
+  - id: w0821
+    text: "Passive-aggression."
+  - id: w0822
+    text: "Passive-aggressive Post-it notes."
+  - id: w0823
+    text: "Pauline Hanson."
+  - id: w0824
+    text: "PCP."
+  - id: w0825
+    text: "Peanut Butter Jelly Time."
+  - id: w0826
+    text: "Pedophiles."
+  - id: w0827
+    text: "Peeing a little bit."
+  - id: w0828
+    text: "Penis breath."
+  - id: w0829
+    text: "Penis envy."
+  - id: w0830
+    text: "People who smell their own socks."
+  - id: w0831
+    text: "Perfunctory foreplay."
+  - id: w0832
+    text: "Permanent Orgasm-Face Disorder."
+  - id: w0833
+    text: "Picking up girls at the abortion clinic."
+  - id: w0834
+    text: "Pictures of boobs."
+  - id: w0835
+    text: "Pikies."
+  - id: w0836
+    text: "Pingers."
+  - id: w0837
+    text: "Pixelated bukkake."
+  - id: w0838
+    text: "Playing silly buggers."
+  - id: w0839
+    text: "Police brutality."
+  - id: w0840
+    text: "Polish People."
+  - id: w0841
+    text: "Pooping back and forth. Forever."
+  - id: w0842
+    text: "Pooping in a laptop and closing it."
+  - id: w0843
+    text: "Pooping in the soup."
+  - id: w0844
+    text: "Poopy diapers."
+  - id: w0845
+    text: "Poor life choices."
+  - id: w0846
+    text: "Poor personal hygiene"
+  - id: w0847
+    text: "Poorly-timed Holocaust jokes."
+  - id: w0848
+    text: "Popped collars."
+  - id: w0849
+    text: "Porn stars."
+  - id: w0850
+    text: "Poutine."
+  - id: w0851
+    text: "Poverty."
+  - id: w0852
+    text: "Powerful allergies"
+  - id: w0853
+    text: "Powerful thighs."
+  - id: w0854
+    text: "Prancing."
+  - id: w0855
+    text: "Praying the gay away."
+  - id: w0856
+    text: "Prescription pain killers."
+  - id: w0857
+    text: "Preteens."
+  - id: w0858
+    text: "Pretending to care."
+  - id: w0859
+    text: "Profound respect and appreciation for indigenous culture."
+  - id: w0860
+    text: "Pronouncing the names of northern Welsh towns."
+  - id: w0861
+    text: "Prosti-tots."
+  - id: w0862
+    text: "Pterodactyl eggs."
+  - id: w0863
+    text: "PTSD."
+  - id: w0864
+    text: "Puberty."
+  - id: w0865
+    text: "Public ridicule."
+  - id: w0866
+    text: "Pulling pits."
+  - id: w0867
+    text: "Pumpkin spice flavored condoms."
+  - id: w0868
+    text: "Punching a congressman in the face."
+  - id: w0869
+    text: "Punching an MP in the face."
+  - id: w0870
+    text: "Puppies!"
+  - id: w0871
+    text: "Pussy Galore."
+  - id: w0872
+    text: "Putting things where they go."
+  - id: w0873
+    text: "Queefing."
+  - id: w0874
+    text: "Queen Elizabeth's immaculate anus."
+  - id: w0875
+    text: "Queuing."
+  - id: w0876
+    text: "Racially-biased SAT questions."
+  - id: w0877
+    text: "Racist Christmas Present"
+  - id: w0878
+    text: "Radical Islamic terrorism."
+  - id: w0879
+    text: "Rap music."
+  - id: w0880
+    text: "Raping and pillaging."
+  - id: w0881
+    text: "Raptor attacks."
+  - id: w0882
+    text: "Re-gifting."
+  - id: w0883
+    text: "Rectangles."
+  - id: w0884
+    text: "Rehab."
+  - id: w0885
+    text: "Repression."
+  - id: w0886
+    text: "reputation,\nreputation,\nreputation"
+  - id: w0887
+    text: "Reverse gentrification."
+  - id: w0888
+    text: "Rich people."
+  - id: w0889
+    text: "Riding off into the sunset."
+  - id: w0890
+    text: "Ring Pops."
+  - id: w0891
+    text: "Ring Pops\u2122."
+  - id: w0892
+    text: "Rip Torn dropkicking anti-Semitic lesbians."
+  - id: w0893
+    text: "Ripping off the Beatles."
+  - id: w0894
+    text: "Ripping open a man's chest and pulling out his still-beating heart."
+  - id: w0895
+    text: "Rising sea levels consistent with scientific predictions."
+  - id: w0896
+    text: "Road head."
+  - id: w0897
+    text: "Rob Ford."
+  - id: w0898
+    text: "Robbing a sperm bank."
+  - id: w0899
+    text: "Robert Downey Jr."
+  - id: w0900
+    text: "Robert Downey, Jr."
+  - id: w0901
+    text: "RoboCop."
+  - id: w0902
+    text: "Rohypnol."
+  - id: w0903
+    text: "Roofied Punch"
+  - id: w0904
+    text: "Roofies."
+  - id: w0905
+    text: "Rubbing Boris Johnson's belly until he falls asleep."
+  - id: w0906
+    text: "Running naked through sprinklers."
+  - id: w0907
+    text: "Running out of semen."
+  - id: w0908
+    text: "Rupert Murdoch."
+  - id: w0909
+    text: "Rush Limbaugh's soft, shitty body."
+  - id: w0910
+    text: "Ruth Bader Ginsburg brutally gaveling your penis."
+  - id: w0911
+    text: "Ryan Gosling riding in on a white horse."
+  - id: w0912
+    text: "Same-sex ice dancing."
+  - id: w0913
+    text: "Sanctimommies"
+  - id: w0914
+    text: "Santa Claus."
+  - id: w0915
+    text: "Sarah Palin's crazy pills."
+  - id: w0916
+    text: "Saxophone solos."
+  - id: w0917
+    text: "Saying \"I love you.\""
+  - id: w0918
+    text: "Scalping the Milkybar Kid."
+  - id: w0919
+    text: "Scalping."
+  - id: w0920
+    text: "Schmirler the Curler."
+  - id: w0921
+    text: "Science."
+  - id: w0922
+    text: "Scientology."
+  - id: w0923
+    text: "Scousers."
+  - id: w0924
+    text: "Screaming Orgasm"
+  - id: w0925
+    text: "Scrotum tickling."
+  - id: w0926
+    text: "Scrubbing under the folds."
+  - id: w0927
+    text: "Sean Connery."
+  - id: w0928
+    text: "Sean Penn."
+  - id: w0929
+    text: "Seduction."
+  - id: w0930
+    text: "Seeing Grandma naked."
+  - id: w0931
+    text: "Seeing Granny naked."
+  - id: w0932
+    text: "Seeing my father cry."
+  - id: w0933
+    text: "Seeing what happens when you lock people in a room with hungry seagulls."
+  - id: w0934
+    text: "Seething with quiet resentment."
+  - id: w0935
+    text: "Self-folding lundry."
+  - id: w0936
+    text: "Self-loathing."
+  - id: w0937
+    text: "Selling crack to children."
+  - id: w0938
+    text: "Selling ice to children."
+  - id: w0939
+    text: "Seppuku."
+  - id: w0940
+    text: "Serfdom."
+  - id: w0941
+    text: "Seven dead and three in critical condition."
+  - id: w0942
+    text: "Sex with animals."
+  - id: w0943
+    text: "Sex with Patrick Stewart."
+  - id: w0944
+    text: "Sexting."
+  - id: w0945
+    text: "Sexual humiliation."
+  - id: w0946
+    text: "Sexual peeing."
+  - id: w0947
+    text: "Sexual tension."
+  - id: w0948
+    text: "Sexy pillow fights."
+  - id: w0949
+    text: "Shaking a baby until it stops crying."
+  - id: w0950
+    text: "Shapeshifters."
+  - id: w0951
+    text: "Shaquille O'Neal's acting career."
+  - id: w0952
+    text: "Sharing needles."
+  - id: w0953
+    text: "Shiny objects."
+  - id: w0954
+    text: "Shipping convicts to Australia."
+  - id: w0955
+    text: "Shitting out a perfect Cumberland sausage."
+  - id: w0956
+    text: "Shitting out a screaming face."
+  - id: w0957
+    text: "Shorties and blunts."
+  - id: w0958
+    text: "Showing up to an orgy for the food."
+  - id: w0959
+    text: "Shutting up so I can watch the game."
+  - id: w0960
+    text: "Shutting up so I can watch the game."
+  - id: w0961
+    text: "Shutting up so I can watch the match."
+  - id: w0962
+    text: "Sideboob."
+  - id: w0963
+    text: "Silence."
+  - id: w0964
+    text: "Sipping artificial popcorn butter."
+  - id: w0965
+    text: "Sitting on my face and telling me I'm garbage."
+  - id: w0966
+    text: "Sitting on my face."
+  - id: w0967
+    text: "Sitting on someone's face."
+  - id: w0968
+    text: "Skeletor."
+  - id: w0969
+    text: "Skippy the Bush Kangaroo."
+  - id: w0970
+    text: "Slapping a biscuit out of an orphan's mouth."
+  - id: w0971
+    text: "Slapping Nigel Farage over and over."
+  - id: w0972
+    text: "Slapping Nigel Farage over and over."
+  - id: w0973
+    text: "Slaughtering innocent civilians."
+  - id: w0974
+    text: "Slavs."
+  - id: w0975
+    text: "Smallpox blankets."
+  - id: w0976
+    text: "Smegma."
+  - id: w0977
+    text: "SNES cartridge cleaning fluid."
+  - id: w0978
+    text: "Sniffing and kissing my feet."
+  - id: w0979
+    text: "Sniffing glue."
+  - id: w0980
+    text: "Snotsicles."
+  - id: w0981
+    text: "Sobbing into a Hungry-Man\u2122 Frozen Dinner."
+  - id: w0982
+    text: "Soft, kissy missionary sex."
+  - id: w0983
+    text: "Soiling oneself."
+  - id: w0984
+    text: "Solving problems with violence."
+  - id: w0985
+    text: "Somali pirates."
+  - id: w0986
+    text: "Some bloody peace and quiet."
+  - id: w0987
+    text: "Some douchebag yelling \"More Cowbell.\""
+  - id: w0988
+    text: "Some foundation, mascara, and a touch of blush."
+  - id: w0989
+    text: "Some god damn peace and quiet."
+  - id: w0990
+    text: "Some guy."
+  - id: w0991
+    text: "Some kind of bird man."
+  - id: w0992
+    text: "Some of the best rappers in the game."
+  - id: w0993
+    text: "Some punk kid who stole my turkey sandwich."
+  - id: w0994
+    text: "Some really sticky Kentucky Durban."
+  - id: w0995
+    text: "Sorry, this content cannot be viewed in your region."
+  - id: w0996
+    text: "Soup that is too hot."
+  - id: w0997
+    text: "Spaghetti? Again?"
+  - id: w0998
+    text: "Spaniards."
+  - id: w0999
+    text: "Spectacular abs."
+  - id: w1000
+    text: "Spending my parent's hard-earned money."
+  - id: w1001
+    text: "Sperm whales."
+  - id: w1002
+    text: "Spirit Airlines."
+  - id: w1003
+    text: "Spontaneous human combustion."
+  - id: w1004
+    text: "Stalin."
+  - id: w1005
+    text: "Staring at a painting and going \"hmmmmmmm...\""
+  - id: w1006
+    text: "Stephen Harper."
+  - id: w1007
+    text: "Stephen Hawking"
+  - id: w1008
+    text: "Stephen Hawking talking dirty."
+  - id: w1009
+    text: "Steve Bannon."
+  - id: w1010
+    text: "Steve Irwin."
+  - id: w1011
+    text: "Stifling a giggle at the mention of Hutus and Tutsis."
+  - id: w1012
+    text: "Still being a virgin."
+  - id: w1013
+    text: "Stockholm Syndrome."
+  - id: w1014
+    text: "Stormtroopers."
+  - id: w1015
+    text: "Stranger Danger."
+  - id: w1016
+    text: "Strong female characters."
+  - id: w1017
+    text: "Stunt doubles."
+  - id: w1018
+    text: "Substitute teachers."
+  - id: w1019
+    text: "Sucking some dicks to not get drafted."
+  - id: w1020
+    text: "Sudden Poop Explosion Disease."
+  - id: w1021
+    text: "Suicidal thoughts."
+  - id: w1022
+    text: "Summoning Harold Holt from the sea in a time of great need."
+  - id: w1023
+    text: "Sunshine and rainbows."
+  - id: w1024
+    text: "Surprise sex!"
+  - id: w1025
+    text: "Swag."
+  - id: w1026
+    text: "Sweet, sweet vengeance."
+  - id: w1027
+    text: "Switching to Geico\u00ae."
+  - id: w1028
+    text: "Swooping."
+  - id: w1029
+    text: "Synergistic management solutions."
+  - id: w1030
+    text: "Syrupy sex with a maple tree."
+  - id: w1031
+    text: "Take-backsies."
+  - id: w1032
+    text: "Taking a minute to really unpack what Shakespeare is getting at in this scene."
+  - id: w1033
+    text: "Taking a sheep-wife."
+  - id: w1034
+    text: "Taking off your shirt."
+  - id: w1035
+    text: "Tangled Slinkys."
+  - id: w1036
+    text: "Tap dancing like there's no tomorrow."
+  - id: w1037
+    text: "Tasteful sideboob."
+  - id: w1038
+    text: "Teaching a robot to love."
+  - id: w1039
+    text: "Team building exercises."
+  - id: w1040
+    text: "Team-building exercises."
+  - id: w1041
+    text: "Tearing that ass up like wrapping paper on Christmas morning."
+  - id: w1042
+    text: "Teenage pregnancy."
+  - id: w1043
+    text: "Telling a shitty story that goes nowhere."
+  - id: w1044
+    text: "Tentacle porn."
+  - id: w1045
+    text: "Terrorists."
+  - id: w1046
+    text: "Terry Fox's prosthetic leg."
+  - id: w1047
+    text: "Testicular torsion."
+  - id: w1048
+    text: "That awkward family who thinks it's \"cybersex Monday.\""
+  - id: w1049
+    text: "That one gay Teletubby."
+  - id: w1050
+    text: "That thing that electrocutes your abs."
+  - id: w1051
+    text: "The American Dream."
+  - id: w1052
+    text: "The Amish."
+  - id: w1053
+    text: "The arrival of the pizza."
+  - id: w1054
+    text: "The art of seduction."
+  - id: w1055
+    text: "The baby that ruined my pussy."
+  - id: w1056
+    text: "The Bachelorette season finale."
+  - id: w1057
+    text: "The Big Bang."
+  - id: w1058
+    text: "The big fucking hole in the ozone layer."
+  - id: w1059
+    text: "The Black Death."
+  - id: w1060
+    text: "The Blood of Christ."
+  - id: w1061
+    text: "The bloody Welsh."
+  - id: w1062
+    text: "The BNP."
+  - id: w1063
+    text: "The bombing of Nagasaki."
+  - id: w1064
+    text: "The boners of the elderly."
+  - id: w1065
+    text: "The Boy Scouts of America."
+  - id: w1066
+    text: "The bush."
+  - id: w1067
+    text: "The Care Bear Stare."
+  - id: w1068
+    text: "The Chinese gymnastics team."
+  - id: w1069
+    text: "The chronic."
+  - id: w1070
+    text: "The clitoris."
+  - id: w1071
+    text: "The cool, refreshing taste of Coca-Cola\u00ae."
+  - id: w1072
+    text: "The cool, refreshing taste of Pepsi."
+  - id: w1073
+    text: "The cool, refreshing taste of Pepsi\u00ae."
+  - id: w1074
+    text: "The crazy, ball-slapping sex your parents are having right now."
+  - id: w1075
+    text: "The Daily Mail."
+  - id: w1076
+    text: "The Dalai Lama."
+  - id: w1077
+    text: "The Dance of the Sugar Plum Fairy."
+  - id: w1078
+    text: "The deformed."
+  - id: w1079
+    text: "The Devil Himself."
+  - id: w1080
+    text: "The Donald Trump Seal of Approval.\u2122"
+  - id: w1081
+    text: "The drama club."
+  - id: w1082
+    text: "The economy."
+  - id: w1083
+    text: "The EDL."
+  - id: w1084
+    text: "The end of days."
+  - id: w1085
+    text: "The entire cast of Downton Abbey."
+  - id: w1086
+    text: "The entire Mormon Tabernacle Chior."
+  - id: w1087
+    text: "The entire Mormon Tabernacle Choir."
+  - id: w1088
+    text: "The female orgasm."
+  - id: w1089
+    text: "The FLQ."
+  - id: w1090
+    text: "The flute."
+  - id: w1091
+    text: "The folly of man."
+  - id: w1092
+    text: "The forbidden fruit."
+  - id: w1093
+    text: "The Force."
+  - id: w1094
+    text: "The French."
+  - id: w1095
+    text: "The gays."
+  - id: w1096
+    text: "The glass ceiling."
+  - id: w1097
+    text: "The Great Depression."
+  - id: w1098
+    text: "The Great Emu War."
+  - id: w1099
+    text: "The Gulags."
+  - id: w1100
+    text: "The guys from Queer Eye."
+  - id: w1101
+    text: "The Hamburglar."
+  - id: w1102
+    text: "The hardworking Mexican."
+  - id: w1103
+    text: "the heat of a luxurious bed"
+  - id: w1104
+    text: "The Hemsworth brothers."
+  - id: w1105
+    text: "The hiccups."
+  - id: w1106
+    text: "The Hillsborough Disaster."
+  - id: w1107
+    text: "The Holy Bible."
+  - id: w1108
+    text: "The homosexual agenda."
+  - id: w1109
+    text: "The homosexual lifestyle."
+  - id: w1110
+    text: "The Honey Monster."
+  - id: w1111
+    text: "The Human Centipede: infinity edition."
+  - id: w1112
+    text: "The Hustle."
+  - id: w1113
+    text: "The illusion of choice in a late-stage capitalist society."
+  - id: w1114
+    text: "The inevitable heat death of the universe."
+  - id: w1115
+    text: "The invisible hand."
+  - id: w1116
+    text: "The Jews."
+  - id: w1117
+    text: "The KKK."
+  - id: w1118
+    text: "The Kool-Aid Man."
+  - id: w1119
+    text: "The land of chocolate."
+  - id: w1120
+    text: "The light of a billion suns."
+  - id: w1121
+    text: "The Little Engine That Could."
+  - id: w1122
+    text: "The magic of live theatre."
+  - id: w1123
+    text: "The Make-A-Wish Foundation."
+  - id: w1124
+    text: "The Make-A-Wish\u00ae Foundation."
+  - id: w1125
+    text: "The milk man."
+  - id: w1126
+    text: "The milkman."
+  - id: w1127
+    text: "The miracle of childbirth."
+  - id: w1128
+    text: "The morbidly obese."
+  - id: w1129
+    text: "The North."
+  - id: w1130
+    text: "The Official Languages Act. La Loi sur les langues officielles."
+  - id: w1131
+    text: "The only gay person in a hundred kilometers."
+  - id: w1132
+    text: "The only gay person in a hundred miles."
+  - id: w1133
+    text: "The opioid epidemic."
+  - id: w1134
+    text: "The past."
+  - id: w1135
+    text: "The Patriarchy."
+  - id: w1136
+    text: "The penny whistle solo from \"My Heart Will Go On.\""
+  - id: w1137
+    text: "The People's Elbow."
+  - id: w1138
+    text: "The petty troubles of the landed gentry."
+  - id: w1139
+    text: "The pirate's life."
+  - id: w1140
+    text: "The placenta."
+  - id: w1141
+    text: "The plot of a Michael Bay movie."
+  - id: w1142
+    text: "The Pope."
+  - id: w1143
+    text: "The profoundly handicapped."
+  - id: w1144
+    text: "The prunes I've been saving for you in my armpits."
+  - id: w1145
+    text: "The Rapture."
+  - id: w1146
+    text: "The Red Hot Chili Peppers."
+  - id: w1147
+    text: "The Red Menace."
+  - id: w1148
+    text: "The Rev. Dr. Martin Luther King, Jr."
+  - id: w1149
+    text: "The rhythms of Africa."
+  - id: w1150
+    text: "The Royal Canadian Mounted Police."
+  - id: w1151
+    text: "The Russians."
+  - id: w1152
+    text: "The Scouts."
+  - id: w1153
+    text: "The screams...the terrible screams."
+  - id: w1154
+    text: "The Smell of Primark."
+  - id: w1155
+    text: "The South."
+  - id: w1156
+    text: "The Stig."
+  - id: w1157
+    text: "The Strictly Come Dancing season finale."
+  - id: w1158
+    text: "The sudden appearance of the Go Compare man."
+  - id: w1159
+    text: "The Superdome."
+  - id: w1160
+    text: "The taint; the grundle; the fleshy fun-bridge."
+  - id: w1161
+    text: "The Tempur-Pedic\u00ae Swedish Sleep System\u2122."
+  - id: w1162
+    text: "The terrorists."
+  - id: w1163
+    text: "The Thong Song."
+  - id: w1164
+    text: "The Three-Fifths compromise."
+  - id: w1165
+    text: "The Three-Fifths Compromise."
+  - id: w1166
+    text: "The token minority."
+  - id: w1167
+    text: "The total collapse of the global financial system."
+  - id: w1168
+    text: "The Trail of Tears."
+  - id: w1169
+    text: "The true meaning of Christmas."
+  - id: w1170
+    text: "The Ubermensch."
+  - id: w1171
+    text: "The Underground Railroad."
+  - id: w1172
+    text: "The unstoppable tide of Islam."
+  - id: w1173
+    text: "The violation of our most basic human rights."
+  - id: w1174
+    text: "The Virginia Tech Massacre."
+  - id: w1175
+    text: "The way James Bond treats women."
+  - id: w1176
+    text: "The White Australia Policy."
+  - id: w1177
+    text: "The wifi password."
+  - id: w1178
+    text: "The wonders of the Orient."
+  - id: w1179
+    text: "The World of Warcraft."
+  - id: w1180
+    text: "The wrath of Vladimir Putin."
+  - id: w1181
+    text: "Therapy."
+  - id: w1182
+    text: "Theresa May."
+  - id: w1183
+    text: "These hoes."
+  - id: w1184
+    text: "Third base."
+  - id: w1185
+    text: "This answer is postmodern."
+  - id: w1186
+    text: "This month's mass shooting."
+  - id: w1187
+    text: "This year's mass shooting."
+  - id: w1188
+    text: "Those times when you get sand in your vagina."
+  - id: w1189
+    text: "Three dicks at the same time."
+  - id: w1190
+    text: "Throwing a virgin into a volcano."
+  - id: w1191
+    text: "Throwing grapes at a man until he loses touch with reality."
+  - id: w1192
+    text: "Tickle Me Elmo."
+  - id: w1193
+    text: "Tickle Me Elmo\u2122."
+  - id: w1194
+    text: "Tickling Sean Hannity, even after he tells you to stop."
+  - id: w1195
+    text: "Tiger Woods."
+  - id: w1196
+    text: "Tiny terrorists"
+  - id: w1197
+    text: "Tom Cruise."
+  - id: w1198
+    text: "Tongueing a balloon knot arsehole"
+  - id: w1199
+    text: "Toni Morrison's vagina."
+  - id: w1200
+    text: "Tony Abbott in budgie smugglers."
+  - id: w1201
+    text: "Too much hair gel."
+  - id: w1202
+    text: "Tories."
+  - id: w1203
+    text: "Total control of the media."
+  - id: w1204
+    text: "Touching a pug right on his penis."
+  - id: w1205
+    text: "Trench foot."
+  - id: w1206
+    text: "Tripping balls."
+  - id: w1207
+    text: "Tweeting."
+  - id: w1208
+    text: "Twenty tonnes of bat shit."
+  - id: w1209
+    text: "Twinkies\u00ae."
+  - id: w1210
+    text: "Two midgets shitting into a bucket."
+  - id: w1211
+    text: "Unfathomable stupidity."
+  - id: w1212
+    text: "Uppercuts."
+  - id: w1213
+    text: "Used knickers."
+  - id: w1214
+    text: "Used panties."
+  - id: w1215
+    text: "Vegemite\u2122."
+  - id: w1216
+    text: "Vehicular homicide."
+  - id: w1217
+    text: "Vehicular manslaughter."
+  - id: w1218
+    text: "Viagra\u00ae."
+  - id: w1219
+    text: "Vigilante justice."
+  - id: w1220
+    text: "Vigorous jazz hands."
+  - id: w1221
+    text: "Vikings."
+  - id: w1222
+    text: "Vladimir Putin."
+  - id: w1223
+    text: "Vomiting into a kangaroo's pouch."
+  - id: w1224
+    text: "Vomiting seafood and bleeding anally."
+  - id: w1225
+    text: "Vomiting seafood and bleeding anally."
+  - id: w1226
+    text: "Waiting 'til marriage."
+  - id: w1227
+    text: "Waiting till marriage."
+  - id: w1228
+    text: "Waking up half-naked in a Denny's parking lot."
+  - id: w1229
+    text: "Waking up half-naked in a Little Chef car park."
+  - id: w1230
+    text: "Waking up half-naked in a Macca's car park."
+  - id: w1231
+    text: "Waking up in Idris Elba's arms."
+  - id: w1232
+    text: "Walking in on Dad peeing into Mom's mouth."
+  - id: w1233
+    text: "Wanking into a pool of children's tears."
+  - id: w1234
+    text: "Waterboarding."
+  - id: w1235
+    text: "Wear lip gloss on my anus."
+  - id: w1236
+    text: "Wearing Blues under your Klan robe."
+  - id: w1237
+    text: "Wearing underwear inside out to avoid doing laundry."
+  - id: w1238
+    text: "Wearing underwear inside-out to avoid doing laundry."
+  - id: w1239
+    text: "Wet dreams."
+  - id: w1240
+    text: "What that mouth do."
+  - id: w1241
+    text: "What's left of the Great Barrier Reef."
+  - id: w1242
+    text: "When you fart and a little bit comes out."
+  - id: w1243
+    text: "Whining until you get your way."
+  - id: w1244
+    text: "Whipping it out."
+  - id: w1245
+    text: "Whiskas\u00ae Catmilk."
+  - id: w1246
+    text: "White people."
+  - id: w1247
+    text: "White power."
+  - id: w1248
+    text: "White privilege."
+  - id: w1249
+    text: "White privilege."
+  - id: w1250
+    text: "White-man scalps."
+  - id: w1251
+    text: "Whoever the Prime Minister is these days."
+  - id: w1252
+    text: "Wifely duties."
+  - id: w1253
+    text: "Will Smith."
+  - id: w1254
+    text: "William Shatner."
+  - id: w1255
+    text: "Winking at old people."
+  - id: w1256
+    text: "Wiping her bum."
+  - id: w1257
+    text: "Wiping her butt."
+  - id: w1258
+    text: "Wizard music."
+  - id: w1259
+    text: "Women in yoghurt adverts."
+  - id: w1260
+    text: "Women in yoghurt commercials."
+  - id: w1261
+    text: "Women in yogurt commercials."
+  - id: w1262
+    text: "Women of color."
+  - id: w1263
+    text: "Women of colour."
+  - id: w1264
+    text: "Women voting."
+  - id: w1265
+    text: "Women's undies."
+  - id: w1266
+    text: "Women's undies."
+  - id: w1267
+    text: "Wondering if it's possible to get some of that salsa to go."
+  - id: w1268
+    text: "Words."
+  - id: w1269
+    text: "World peace."
+  - id: w1270
+    text: "Worshipping that pussy."
+  - id: w1271
+    text: "Xenophobia."
+  - id: w1272
+    text: "Yelling \"BABY KILLERS\" at boots in an airport terminal."
+  - id: w1273
+    text: "YOU MUST CONSTRUCT ADDITIONAL PYLONS."
+  - id: w1274
+    text: "Your mum."
+  - id: w1275
+    text: "Your weird brother."

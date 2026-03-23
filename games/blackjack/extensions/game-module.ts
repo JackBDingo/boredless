@@ -271,9 +271,37 @@ class BlackjackV2Module implements GameModule {
 
     this.states.set(roomId, roomState);
 
+    // Wrap the context so phase broadcasts use the wrapper's rich state
+    // instead of the declarative module's generic state.
+    const wrappedCtx: GameContext = {
+      ...ctx,
+      broadcastPhase: (phase, _publicState) => {
+        // Substitute the wrapper's blackjack-specific public state
+        const currentState = this.states.get(roomId);
+        const publicState = currentState && currentState.players.length > 0
+          ? this.buildPlayingPublicState(currentState)
+          : _publicState;
+        ctx.broadcastPhase(phase, publicState);
+      },
+      broadcastPrivateState: (getState) => {
+        // Substitute the wrapper's blackjack-specific private state
+        const currentState = this.states.get(roomId);
+        if (currentState && currentState.players.length > 0) {
+          ctx.broadcastPrivateState((playerId) =>
+            this.buildPlayingPrivateState(currentState, playerId),
+          );
+        } else {
+          ctx.broadcastPrivateState(getState);
+        }
+      },
+    };
+
+    // Also store the wrapped context for use in handleInput broadcasts
+    roomState.ctx = wrappedCtx;
+
     // Delegate setup to DeclarativeGameModule — it handles phase machine,
     // state manager, timers, and broadcasts
-    declarativeModule.setup(players, ctx);
+    declarativeModule.setup(players, wrappedCtx);
   }
 
   // ---------------------------------------------------------------------------

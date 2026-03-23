@@ -302,6 +302,12 @@ class BlackjackV2Module implements GameModule {
     // Delegate setup to DeclarativeGameModule — it handles phase machine,
     // state manager, timers, and broadcasts
     declarativeModule.setup(players, wrappedCtx);
+
+    // Initialize scores to starting chip count (the declarative module
+    // already called initScores(playerIds) which sets all to 0)
+    for (const p of internalPlayers) {
+      wrappedCtx.addPoints(p.playerId, BJ_STARTING_CHIPS);
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -445,6 +451,8 @@ class BlackjackV2Module implements GameModule {
           return true;
         case 'bj_resolve_results':
           handleResolveResults(bjCtx);
+          // Broadcast scores after resolving results so the standings phase has data
+          state.ctx.broadcastScores();
           return true;
         default:
           return false;
@@ -615,7 +623,17 @@ class BlackjackV2Module implements GameModule {
 
   private buildPlayingPublicState(state: BlackjackRoomState): Record<string, unknown> {
     const dealerCards = state.dealerCards;
-    const dealerScore = dealerCards[0] ? handValue([dealerCards[0]]).score : 0;
+    const currentPhase = this.getCurrentPhase(state.roomId);
+
+    // Show full dealer hand during dealer, results, and scores phases
+    const hideHole = currentPhase === PHASE.BETTING
+      || currentPhase === PHASE.DEALING
+      || currentPhase === PHASE.PLAYING;
+
+    const visibleDealerCards = hideHole ? [dealerCards[0]].filter(Boolean) : dealerCards;
+    const dealerScore = visibleDealerCards.length > 0
+      ? handValue(visibleDealerCards).score
+      : 0;
 
     const seats = state.players.map(p => ({
       playerId: p.playerId,
@@ -634,9 +652,9 @@ class BlackjackV2Module implements GameModule {
     return {
       gameId: 'blackjack',
       seats,
-      dealerCards: [dealerCards[0]], // Only show first card during playing
+      dealerCards: visibleDealerCards,
       dealerScore,
-      dealerHoleHidden: true,
+      dealerHoleHidden: hideHole,
       roundNumber: state.roundNumber,
       lastAction: state.lastAction,
     };

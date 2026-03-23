@@ -117,7 +117,6 @@ export function BBPhone({ phase, privateState, timerMs, submitInput, myPlayer, u
         </div>
       </header>
 
-      </div>
 
       {/* Main content — good side margins, flex-1 to fill */}
       <div className="relative z-10 flex flex-col flex-1 px-6 pb-20">

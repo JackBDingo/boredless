@@ -136,7 +136,6 @@ export function BBDisplay({ phase, publicState, scores, timerMs, useGameEvent: _
       {/* Main — centered with generous side margins */}
       <main className="relative z-10 flex flex-col flex-1 items-center justify-center px-16 lg:px-24 xl:px-32 pb-12 overflow-hidden">
 
-        </div>
 
         {/* INSTRUCTIONS */}
         {phase.phaseType === PhaseType.INSTRUCTIONS && (

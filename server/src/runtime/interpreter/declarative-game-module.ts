@@ -943,6 +943,9 @@ export class DeclarativeGameModule implements GameModule {
           gameId: this.gamePackage.manifest.id,
           winners: victoryResult.winners,
         });
+
+        // Auto-return to lobby after 15 seconds
+        setTimeout(() => roomManager.autoReturnToLobby(roomId), 15_000);
         return;
       }
     }
@@ -961,6 +964,9 @@ export class DeclarativeGameModule implements GameModule {
 
     ctx.setRoomStatus(RoomStatus.GAME_ENDED);
     ctx.log.info('Game ended', { gameId: this.gamePackage.manifest.id });
+
+    // Auto-return to lobby after 15 seconds
+    setTimeout(() => roomManager.autoReturnToLobby(roomId), 15_000);
   }
 
   private handleAction(roomId: string, action: PhaseAction, ctx: GameContext): void {

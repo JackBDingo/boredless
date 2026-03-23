@@ -376,14 +376,38 @@ class RoomManager {
     if (!room) return false;
     if (room.hostPlayerId !== requestingPlayerId) return false;
 
+    this.doReturnToLobby(roomId);
+    return true;
+  }
+
+  /** Server-initiated return to lobby (no auth check) */
+  autoReturnToLobby(roomId: string): void {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+    // Only act if the game actually ended (don't interrupt active games)
+    if (room.status !== RoomStatus.GAME_ENDED) return;
+    this.doReturnToLobby(roomId);
+    logger.info('Auto-returned to lobby after game end', { roomId });
+  }
+
+  private doReturnToLobby(roomId: string): void {
+    const room = this.rooms.get(roomId);
+    if (!room) return;
+
     room.status = RoomStatus.IN_LOBBY;
     room.selectedGameId = null;
     this.gameStates.delete(roomId);
     room.updatedAt = Date.now();
 
+    // Reset all non-removed players back to connected status
+    for (const player of room.players) {
+      if (player.status !== PlayerStatus.REMOVED) {
+        player.status = PlayerStatus.CONNECTED;
+      }
+    }
+
     // Broadcast full state
     this.broadcastRoomState(roomId);
-    return true;
   }
 
   // === Getters ===

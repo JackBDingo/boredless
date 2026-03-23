@@ -26,53 +26,52 @@ function TimerBar({ seconds, totalSeconds }: { seconds: number; totalSeconds: nu
   );
 }
 
-function CardView({ card, faceDown, small }: { card?: Card; faceDown?: boolean; small?: boolean }) {
-  const w = small ? 'w-16 h-24' : 'w-24 h-36';
+function CardView({ card, faceDown, size = 'small' }: { card?: Card; faceDown?: boolean; size?: 'tiny' | 'small' | 'normal' }) {
+  const sizeMap = {
+    tiny:   { w: 'w-11 h-16', rank: 'text-[10px]', suit: 'text-[8px]', center: 'text-base', inset: 'inset-0.5', corner: 'top-0.5 left-1', radius: 'rounded-lg', dot: 'w-3 h-3' },
+    small:  { w: 'w-14 h-20', rank: 'text-xs',     suit: 'text-[9px]', center: 'text-xl',   inset: 'inset-1',   corner: 'top-1 left-1.5', radius: 'rounded-lg', dot: 'w-4 h-4' },
+    normal: { w: 'w-20 h-28', rank: 'text-sm',     suit: 'text-xs',    center: 'text-2xl',  inset: 'inset-1.5', corner: 'top-1.5 left-2',  radius: 'rounded-xl', dot: 'w-5 h-5' },
+  };
+  const s = sizeMap[size];
   if (faceDown || !card) {
     return (
-      <div className={`${w} rounded-xl bg-gradient-to-br from-emerald-900/60 to-emerald-800/40 border border-emerald-500/20 flex items-center justify-center relative overflow-hidden`}>
-        <div className="absolute inset-1.5 rounded-lg border border-emerald-500/15" />
-        <div className="w-6 h-6 rounded-full border-2 border-emerald-500/25" />
+      <div className={`${s.w} ${s.radius} bg-gradient-to-br from-emerald-900/60 to-emerald-800/40 border border-emerald-500/20 flex items-center justify-center relative overflow-hidden`}>
+        <div className={`absolute ${s.inset} ${s.radius} border border-emerald-500/15`} />
+        <div className={`${s.dot} rounded-full border-2 border-emerald-500/25`} />
       </div>
     );
   }
   const color = SUIT_COLORS[card.suit] ?? '#1e293b';
   const symbol = SUIT_SYMBOLS[card.suit] ?? '';
-  const rankSize = small ? 'text-sm' : 'text-lg';
-  const suitCorner = small ? 'text-xs' : 'text-sm';
-  const centerSize = small ? 'text-2xl' : 'text-4xl';
   return (
-    <div className={`${w} rounded-xl bg-white border border-gray-200 shadow-lg relative overflow-hidden`}>
-      <div className="absolute top-1.5 left-2 flex flex-col items-center leading-none">
-        <span className={`${rankSize} font-bold`} style={{ color }}>{card.rank}</span>
-        <span className={`${suitCorner} -mt-0.5`} style={{ color }}>{symbol}</span>
+    <div className={`${s.w} ${s.radius} bg-white border border-gray-200 shadow-md relative overflow-hidden`}>
+      <div className={`absolute ${s.corner} flex flex-col items-center leading-none`}>
+        <span className={`${s.rank} font-bold`} style={{ color }}>{card.rank}</span>
+        <span className={`${s.suit} -mt-px`} style={{ color }}>{symbol}</span>
       </div>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className={`${centerSize}`} style={{ color }}>{symbol}</span>
-      </div>
-      <div className="absolute bottom-1.5 right-2 flex flex-col items-center leading-none rotate-180">
-        <span className={`${rankSize} font-bold`} style={{ color }}>{card.rank}</span>
-        <span className={`${suitCorner} -mt-0.5`} style={{ color }}>{symbol}</span>
+        <span className={s.center} style={{ color }}>{symbol}</span>
       </div>
     </div>
   );
 }
 
-function HandDisplay({ hand, active }: { hand: PlayerHand; active: boolean }) {
+function HandDisplay({ hand, active, compact }: { hand: PlayerHand; active: boolean; compact?: boolean }) {
   const { score, soft } = handValue(hand.cards);
   const bust = hand.bust;
   const bj = hand.blackjack;
+  const cardSize = compact ? 'tiny' as const : 'small' as const;
   return (
-    <div className={`flex flex-col items-center gap-2 px-3 py-2 rounded-xl border ${
+    <div className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border ${
       active ? 'border-emerald-500/30 bg-emerald-500/[0.05]' : 'border-white/[0.06] bg-white/[0.02]'
     }`}>
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1">
         {hand.cards.map((card: Card, i: number) => (
-          <CardView key={i} card={card} small />
+          <CardView key={i} card={card} size={cardSize} />
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <span className={`text-sm font-bold tabular-nums ${bj ? 'text-yellow-400' : bust ? 'text-red-400' : 'text-white/70'}`}>
+        <span className={`text-xs font-bold tabular-nums ${bj ? 'text-yellow-400' : bust ? 'text-red-400' : 'text-white/70'}`}>
           {bj ? 'Blackjack!' : bust ? `BUST (${score})` : `${score}${soft ? ' soft' : ''}`}
         </span>
         {hand.doubled && <span className="text-[10px] text-amber-400/60 font-medium">2x</span>}
@@ -271,74 +270,88 @@ export function BJPhone({ phase, privateState, publicState, timerMs, submitInput
 
         {/* ── PLAYING PHASE ── */}
         {phase.phaseType === BJPhase.PLAYING && (
-          <div className="flex flex-col flex-1 gap-4 pt-3">
-            {/* Dealer visible card */}
-            {pub?.dealerCards?.length > 0 && (
-              <div className="flex flex-col items-center gap-1.5">
-                <span className="text-white/25 text-xs font-medium tracking-widest uppercase">Dealer Shows</span>
-                <CardView card={pub.dealerCards[0]} small />
-              </div>
-            )}
-
-            {/* My hands */}
-            {state?.hands && state.hands.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <span className="text-white/25 text-xs font-medium tracking-widest uppercase text-center">Your Hand</span>
-                {state.hands.map((hand: PlayerHand, i: number) => (
-                  <HandDisplay key={i} hand={hand} active={i === state.activeHandIndex && !allSettled} />
-                ))}
-              </div>
-            )}
-
-            {/* Result banner */}
-            {state?.result && <ResultBanner result={state.result} amount={state.resultAmount} />}
-
-            {/* Action buttons */}
-            {!allSettled && activeHand && !activeHand.stood && !activeHand.bust && !activeHand.blackjack && (
-              <div className="flex flex-col gap-3 mt-auto">
-                <div className="flex gap-2">
-                  <ActionBtn
-                    label="HIT"
-                    bg="bg-emerald-600" text="text-white"
-                    onClick={() => handleAction('hit')}
-                    disabled={actionSent}
-                  />
-                  <ActionBtn
-                    label="STAND"
-                    bg="bg-sky-600" text="text-white"
-                    onClick={() => handleAction('stand')}
-                    disabled={actionSent}
-                  />
+          <div className="flex flex-col flex-1 justify-between pt-4 pb-2">
+            {/* Top section: dealer + your hand */}
+            <div className="flex flex-col items-center gap-5">
+              {/* Dealer card - compact */}
+              {pub?.dealerCards?.length > 0 && (
+                <div className="flex flex-col items-center gap-1.5">
+                  <span className="text-white/20 text-[10px] font-semibold tracking-[0.2em] uppercase">Dealer Shows</span>
+                  <div className="flex items-center gap-1">
+                    <CardView card={pub.dealerCards[0]} size="small" />
+                    <CardView faceDown size="small" />
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  {state?.canDouble && (
+              )}
+
+              {/* Divider */}
+              <div className="w-16 h-px bg-white/[0.06]" />
+
+              {/* Your hand */}
+              {state?.hands && state.hands.length > 0 && (
+                <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+                  <span className="text-white/20 text-[10px] font-semibold tracking-[0.2em] uppercase">Your Hand</span>
+                  {state.hands.map((hand: PlayerHand, i: number) => (
+                    <HandDisplay key={i} hand={hand} active={i === state.activeHandIndex && !allSettled} />
+                  ))}
+                </div>
+              )}
+
+              {/* Result banner */}
+              {state?.result && (
+                <div className="w-full max-w-xs">
+                  <ResultBanner result={state.result} amount={state.resultAmount} />
+                </div>
+              )}
+            </div>
+
+            {/* Bottom: Action buttons */}
+            <div className="mt-6">
+              {!allSettled && activeHand && !activeHand.stood && !activeHand.bust && !activeHand.blackjack ? (
+                <div className="flex flex-col gap-2.5 max-w-xs mx-auto w-full">
+                  <div className="flex gap-2.5">
                     <ActionBtn
-                      label="DOUBLE"
-                      bg="bg-amber-600" text="text-white"
-                      sublabel={`-${activeHand.bet}`}
-                      onClick={() => handleAction('double')}
+                      label="HIT"
+                      bg="bg-emerald-600" text="text-white"
+                      onClick={() => handleAction('hit')}
                       disabled={actionSent}
                     />
-                  )}
-                  {state?.canSplit && (
                     <ActionBtn
-                      label="SPLIT"
-                      bg="bg-purple-600" text="text-white"
-                      sublabel={`-${activeHand.bet}`}
-                      onClick={() => handleAction('split')}
+                      label="STAND"
+                      bg="bg-sky-600" text="text-white"
+                      onClick={() => handleAction('stand')}
                       disabled={actionSent}
                     />
+                  </div>
+                  {(state?.canDouble || state?.canSplit) && (
+                    <div className="flex gap-2.5">
+                      {state?.canDouble && (
+                        <ActionBtn
+                          label="DOUBLE"
+                          bg="bg-amber-600" text="text-white"
+                          sublabel={`-${activeHand.bet}`}
+                          onClick={() => handleAction('double')}
+                          disabled={actionSent}
+                        />
+                      )}
+                      {state?.canSplit && (
+                        <ActionBtn
+                          label="SPLIT"
+                          bg="bg-purple-600" text="text-white"
+                          sublabel={`-${activeHand.bet}`}
+                          onClick={() => handleAction('split')}
+                          disabled={actionSent}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
-
-            {/* Settled state */}
-            {allSettled && !state?.result && (
-              <div className="flex flex-col items-center justify-center gap-2 mt-auto py-4">
-                <p className="text-white/40 text-sm">Waiting for dealer…</p>
-              </div>
-            )}
+              ) : allSettled && !state?.result ? (
+                <div className="flex flex-col items-center gap-2 py-4">
+                  <p className="text-white/30 text-sm">Waiting for dealer…</p>
+                </div>
+              ) : null}
+            </div>
           </div>
         )}
 
@@ -354,9 +367,9 @@ export function BJPhone({ phase, privateState, publicState, timerMs, submitInput
               <p className="text-white/30 text-sm">Watch the TV</p>
             </div>
             {state?.hands && state.hands.length > 0 && (
-              <div className="flex flex-col gap-2 w-full">
+              <div className="flex flex-col gap-2 w-full max-w-xs">
                 {state.hands.map((hand: PlayerHand, i: number) => (
-                  <HandDisplay key={i} hand={hand} active={false} />
+                  <HandDisplay key={i} hand={hand} active={false} compact />
                 ))}
               </div>
             )}
@@ -374,9 +387,9 @@ export function BJPhone({ phase, privateState, publicState, timerMs, submitInput
             {state?.result && <ResultBanner result={state.result} amount={state.resultAmount} />}
 
             {state?.hands && state.hands.length > 0 && (
-              <div className="flex flex-col gap-2 w-full">
+              <div className="flex flex-col gap-2 w-full max-w-xs">
                 {state.hands.map((hand: PlayerHand, i: number) => (
-                  <HandDisplay key={i} hand={hand} active={false} />
+                  <HandDisplay key={i} hand={hand} active={false} compact />
                 ))}
               </div>
             )}

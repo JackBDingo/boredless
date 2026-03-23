@@ -5,6 +5,8 @@ import { PhaseType } from '@boredless/shared';
 import { BSPhase } from '../phases.js';
 import { Anchor, RotateCcw, Trophy, Monitor, CheckCircle } from 'lucide-react';
 import { PoweredByLogo } from '@phone/components/PoweredByLogo';
+import spritesheetUrl from '../assets/ships-spritesheet.png';
+import { SPRITES, SHIP_SPRITE_MAP, SHEET_WIDTH, SHEET_HEIGHT } from '../assets/spritesheet.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 const COLS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -47,6 +49,100 @@ function overlaps(cells: string[], placedShips: PlacedShip[]): boolean {
   return cells.some(c => occupied.has(c));
 }
 
+// ── Water tile cell background ────────────────────────────────────────────────
+/** Returns inline style for a water-tile background using the spritesheet */
+function waterTileStyle(cellPx: number): React.CSSProperties {
+  const sprite = SPRITES.water;
+  const scale = cellPx / sprite.width;
+  return {
+    backgroundImage: `url(${spritesheetUrl})`,
+    backgroundSize: `${SHEET_WIDTH * scale}px ${SHEET_HEIGHT * scale}px`,
+    backgroundPosition: `-${sprite.x * scale}px -${sprite.y * scale}px`,
+    backgroundRepeat: 'no-repeat',
+  };
+}
+
+// ── Ship sprite renderer ───────────────────────────────────────────────────────
+/**
+ * Renders a ship from the spritesheet.
+ * The ship is always drawn vertically in the sheet.
+ * For horizontal placement, rotate -90deg (via CSS transform).
+ *
+ * @param shipId    - Ship ID matching SHIP_SPRITE_MAP keys
+ * @param cellPx    - Width/height of one grid cell in pixels
+ * @param size      - Number of cells the ship occupies
+ * @param horizontal - Whether the ship is placed horizontally
+ * @param opacity   - Opacity (0–1)
+ */
+interface ShipSpriteProps {
+  shipId: string;
+  cellPx: number;
+  size: number;
+  horizontal: boolean;
+  opacity?: number;
+  style?: React.CSSProperties;
+}
+
+function ShipSprite({ shipId, cellPx, size, horizontal, opacity = 1, style }: ShipSpriteProps) {
+  const spriteName = SHIP_SPRITE_MAP[shipId];
+  if (!spriteName) return null;
+  const sprite = SPRITES[spriteName];
+
+  // The ship occupies `size` cells.
+  // We render it as a box that is: cellPx * size tall, cellPx wide (vertical orientation).
+  // Scale factor: fit the sprite height into `size * cellPx` px.
+  const renderHeight = cellPx * size;
+  const renderWidth = cellPx;
+  const scaleH = renderHeight / sprite.height;
+  // Use the same scale for X so the ship doesn't stretch horizontally.
+  // Center it horizontally within the cell.
+  const scaledW = sprite.width * scaleH;
+
+  // Background for the vertical sprite
+  const sheetScale = scaleH;
+  const bgSize = `${SHEET_WIDTH * sheetScale}px ${SHEET_HEIGHT * sheetScale}px`;
+  const bgPosX = -(sprite.x * sheetScale) + (renderWidth - scaledW) / 2;
+  const bgPosY = -(sprite.y * sheetScale);
+  const bgPos = `${bgPosX}px ${bgPosY}px`;
+
+  // When horizontal, rotate the whole element -90deg around its center.
+  // The container must be sized for the HORIZONTAL footprint (size*cellPx wide, cellPx tall).
+  const containerStyle: React.CSSProperties = horizontal
+    ? {
+        width: renderHeight,  // rotated: height becomes width
+        height: renderWidth,  // rotated: width becomes height
+        position: 'relative',
+        ...style,
+      }
+    : {
+        width: renderWidth,
+        height: renderHeight,
+        position: 'relative',
+        ...style,
+      };
+
+  const innerStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: renderWidth,
+    height: renderHeight,
+    backgroundImage: `url(${spritesheetUrl})`,
+    backgroundSize: bgSize,
+    backgroundPosition: bgPos,
+    backgroundRepeat: 'no-repeat',
+    opacity,
+    transformOrigin: horizontal ? `${renderWidth / 2}px ${renderWidth / 2}px` : undefined,
+    transform: horizontal ? `rotate(-90deg) translateX(-${renderHeight - renderWidth}px)` : undefined,
+  };
+
+  return (
+    <div style={containerStyle}>
+      <div style={innerStyle} />
+    </div>
+  );
+}
+
 // ── Setup phase: ship placement UI ───────────────────────────────────────────
 interface SetupGridProps {
   placedShips: PlacedShip[];
@@ -59,8 +155,11 @@ interface SetupGridProps {
 }
 
 function SetupGrid({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   placedShips, selectedShip, horizontal, hoveredCell, onCellTap, onCellHover, playerColor,
 }: SetupGridProps) {
+  const CELL_PX = 32; // w-8 / h-8
+
   // Cells occupied by placed ships
   const occupiedCells = new Set(placedShips.flatMap(s => s.cells));
 
@@ -74,6 +173,37 @@ function SetupGrid({
     if (cells) {
       previewCells = cells;
       previewValid = !overlaps(cells, placedShips);
+    }
+  }
+
+  // Build a map from cell → ship info for placed ships
+  const cellToShip = new Map<string, PlacedShip>();
+  for (const ps of placedShips) {
+    for (const c of ps.cells) cellToShip.set(c, ps);
+  }
+
+  // Build a map from cell → position-in-ship (0-indexed) and ship size
+  const cellShipInfo = new Map<string, { index: number; size: number; shipId: string; isFirst: boolean }>();
+  for (const ps of placedShips) {
+    for (let i = 0; i < ps.cells.length; i++) {
+      cellShipInfo.set(ps.cells[i]!, {
+        index: i,
+        size: ps.cells.length,
+        shipId: ps.shipId,
+        isFirst: i === 0,
+      });
+    }
+  }
+
+  // Determine orientation of placed ships
+  const shipOrientation = new Map<string, boolean>(); // shipId → isHorizontal
+  for (const ps of placedShips) {
+    if (ps.cells.length >= 2) {
+      const c0 = ps.cells[0]!;
+      const c1 = ps.cells[1]!;
+      shipOrientation.set(ps.shipId, c0[0] !== c1[0]); // different cols = horizontal
+    } else {
+      shipOrientation.set(ps.shipId, true);
     }
   }
 
@@ -100,25 +230,108 @@ function SetupGrid({
             const isOccupied = occupiedCells.has(cell);
             const isPreview = previewCells.includes(cell);
             const isPreviewBad = isPreview && !previewValid;
+            const shipInfo = cellShipInfo.get(cell);
+            const isHoriz = shipInfo ? (shipOrientation.get(shipInfo.shipId) ?? true) : true;
+
+            // Ship sprite overlay for occupied cells
+            // Only render the sprite on the FIRST cell of the ship
+            const showSprite = isOccupied && shipInfo?.isFirst;
 
             let bg = 'bg-sky-950/40 border-sky-900/30 active:bg-sky-800/40';
-            if (isOccupied) bg = `border-sky-600/30`;
-            if (isPreview && previewValid) bg = 'border-sky-400/50';
-            if (isPreviewBad) bg = 'bg-red-900/40 border-red-700/40';
+            let borderStyle: React.CSSProperties = {};
+            if (isOccupied) {
+              bg = 'border-sky-600/30';
+              borderStyle = { backgroundColor: `${playerColor}25`, borderColor: `${playerColor}45` };
+            }
+            if (isPreview && previewValid) {
+              bg = 'border-sky-400/50';
+              borderStyle = { backgroundColor: `${playerColor}20` };
+            }
+            if (isPreviewBad) {
+              bg = 'bg-red-900/40 border-red-700/40';
+              borderStyle = {};
+            }
 
             return (
               <button
                 key={cell}
-                className={`w-8 h-8 aspect-square border rounded-[2px] flex items-center justify-center transition-all duration-75 ${bg}`}
-                style={isOccupied ? { backgroundColor: `${playerColor}40`, borderColor: `${playerColor}60` } : isPreview && previewValid ? { backgroundColor: `${playerColor}30` } : undefined}
+                className={`w-8 h-8 aspect-square border rounded-[2px] flex items-center justify-center transition-all duration-75 relative overflow-visible ${bg}`}
+                style={{
+                  ...borderStyle,
+                  ...waterTileStyle(CELL_PX),
+                }}
                 onPointerEnter={() => onCellHover(cell)}
                 onPointerLeave={() => onCellHover(null)}
                 onClick={() => onCellTap(cell)}
                 aria-label={cell}
               >
-                {isOccupied && <div className="w-4 h-3 rounded-[1px]" style={{ backgroundColor: `${playerColor}80` }} />}
-                {isPreview && previewValid && <div className="w-4 h-3 rounded-[1px] opacity-60" style={{ backgroundColor: playerColor }} />}
-                {isPreviewBad && <div className="w-4 h-3 rounded-[1px] bg-red-500/60" />}
+                {/* Dark overlay on empty cells */}
+                {!isOccupied && !isPreview && (
+                  <div className="absolute inset-0 bg-[#06080f]/60 rounded-[1px]" />
+                )}
+                {/* Slight tint for preview */}
+                {isPreview && previewValid && (
+                  <div className="absolute inset-0 rounded-[1px]" style={{ backgroundColor: `${playerColor}30` }} />
+                )}
+                {isPreviewBad && (
+                  <div className="absolute inset-0 bg-red-900/50 rounded-[1px]" />
+                )}
+                {/* Ship sprite — positioned relative to the FIRST cell, spans full ship length */}
+                {showSprite && shipInfo && (
+                  <div
+                    className="absolute z-10 pointer-events-none"
+                    style={
+                      isHoriz
+                        ? { top: 0, left: 0, width: CELL_PX * shipInfo.size, height: CELL_PX }
+                        : { top: 0, left: 0, width: CELL_PX, height: CELL_PX * shipInfo.size }
+                    }
+                  >
+                    <ShipSprite
+                      shipId={shipInfo.shipId}
+                      cellPx={CELL_PX}
+                      size={shipInfo.size}
+                      horizontal={isHoriz}
+                      opacity={0.9}
+                    />
+                  </div>
+                )}
+                {/* Preview ship sprite — only on first preview cell */}
+                {isPreview && previewValid && selectedShip && previewCells[0] === cell && (
+                  <div
+                    className="absolute z-10 pointer-events-none"
+                    style={
+                      horizontal
+                        ? { top: 0, left: 0, width: CELL_PX * selectedShip.size, height: CELL_PX }
+                        : { top: 0, left: 0, width: CELL_PX, height: CELL_PX * selectedShip.size }
+                    }
+                  >
+                    <ShipSprite
+                      shipId={selectedShip.id}
+                      cellPx={CELL_PX}
+                      size={selectedShip.size}
+                      horizontal={horizontal}
+                      opacity={0.6}
+                    />
+                  </div>
+                )}
+                {isPreviewBad && previewCells[0] === cell && selectedShip && (
+                  <div
+                    className="absolute z-10 pointer-events-none"
+                    style={
+                      horizontal
+                        ? { top: 0, left: 0, width: CELL_PX * selectedShip.size, height: CELL_PX }
+                        : { top: 0, left: 0, width: CELL_PX, height: CELL_PX * selectedShip.size }
+                    }
+                  >
+                    <ShipSprite
+                      shipId={selectedShip.id}
+                      cellPx={CELL_PX}
+                      size={selectedShip.size}
+                      horizontal={horizontal}
+                      opacity={0.35}
+                    />
+                  </div>
+                )}
               </button>
             );
           })}
@@ -140,7 +353,33 @@ interface TargetGridProps {
 }
 
 function TargetGrid({ hits, misses, sunkShips, firedCells, selectedCell, onCellTap, playerColor }: TargetGridProps) {
+  const CELL_PX = 32;
   const sunkCells = new Set(sunkShips.flatMap(s => s.cells));
+
+  // For sunk ships — render ship sprites on first cell
+  const cellToSunkShip = new Map<string, PlacedShip>();
+  for (const ps of sunkShips) {
+    for (const c of ps.cells) cellToSunkShip.set(c, ps);
+  }
+  const cellShipInfo = new Map<string, { index: number; size: number; shipId: string; isFirst: boolean }>();
+  for (const ps of sunkShips) {
+    for (let i = 0; i < ps.cells.length; i++) {
+      cellShipInfo.set(ps.cells[i]!, {
+        index: i,
+        size: ps.cells.length,
+        shipId: ps.shipId,
+        isFirst: i === 0,
+      });
+    }
+  }
+  const shipOrientation = new Map<string, boolean>();
+  for (const ps of sunkShips) {
+    if (ps.cells.length >= 2) {
+      shipOrientation.set(ps.shipId, ps.cells[0]![0] !== ps.cells[1]![0]);
+    } else {
+      shipOrientation.set(ps.shipId, true);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center select-none">
@@ -167,25 +406,56 @@ function TargetGrid({ hits, misses, sunkShips, firedCells, selectedCell, onCellT
             const isFired = firedCells.includes(cell);
             const isSelected = selectedCell === cell;
             const canTarget = !isFired;
-
-            let bg = 'bg-sky-950/40 border-sky-900/30';
-            if (isSunk) bg = 'bg-red-900/80 border-red-700/60';
-            else if (isHit) bg = 'bg-red-600/60 border-red-500/50';
-            else if (isMiss) bg = 'bg-slate-700/30 border-slate-600/30';
-            else if (isSelected) bg = `border-2`;
+            const shipInfo = cellShipInfo.get(cell);
+            const isHoriz = shipInfo ? (shipOrientation.get(shipInfo.shipId) ?? true) : true;
 
             return (
               <button
                 key={cell}
                 disabled={!canTarget}
-                className={`w-8 h-8 aspect-square border rounded-[2px] flex items-center justify-center transition-all duration-75 ${bg} ${canTarget && !isSelected ? 'active:bg-sky-700/40' : ''} ${!canTarget ? 'cursor-default' : ''}`}
-                style={isSelected ? { borderColor: playerColor, backgroundColor: `${playerColor}30` } : undefined}
+                className={`w-8 h-8 aspect-square border rounded-[2px] flex items-center justify-center transition-all duration-75 relative overflow-visible ${canTarget && !isSelected ? 'active:bg-sky-700/40' : ''} ${!canTarget ? 'cursor-default' : ''}`}
+                style={{
+                  ...(isSelected ? { borderColor: playerColor, borderWidth: 2 } : { borderColor: 'rgba(56,189,248,0.12)' }),
+                  ...waterTileStyle(CELL_PX),
+                }}
                 onClick={() => canTarget && onCellTap(cell)}
                 aria-label={cell}
               >
-                {isSunk && <div className="w-3 h-3 rounded-full bg-red-800" />}
-                {isHit && !isSunk && <div className="w-3 h-3 rounded-full bg-red-400" />}
-                {isMiss && <div className="w-2 h-2 rounded-full bg-slate-400/50" />}
+                {/* Base ocean overlay */}
+                <div className={`absolute inset-0 rounded-[1px] ${isSunk ? 'bg-red-950/60' : 'bg-[#06080f]/55'}`} />
+                {/* Selected highlight */}
+                {isSelected && (
+                  <div className="absolute inset-0 rounded-[1px]" style={{ backgroundColor: `${playerColor}25` }} />
+                )}
+                {/* Sunk ship sprite */}
+                {isSunk && shipInfo?.isFirst && (
+                  <div
+                    className="absolute z-10 pointer-events-none"
+                    style={
+                      isHoriz
+                        ? { top: 0, left: 0, width: CELL_PX * shipInfo.size, height: CELL_PX }
+                        : { top: 0, left: 0, width: CELL_PX, height: CELL_PX * shipInfo.size }
+                    }
+                  >
+                    <ShipSprite
+                      shipId={shipInfo.shipId}
+                      cellPx={CELL_PX}
+                      size={shipInfo.size}
+                      horizontal={isHoriz}
+                      opacity={0.5}
+                    />
+                  </div>
+                )}
+                {/* Hit / miss markers */}
+                {isSunk && (
+                  <div className="relative z-20 text-[14px] leading-none">🔴</div>
+                )}
+                {isHit && !isSunk && (
+                  <div className="relative z-20 text-[14px] leading-none">🔴</div>
+                )}
+                {isMiss && (
+                  <div className="relative z-20 text-[12px] leading-none">⚪</div>
+                )}
               </button>
             );
           })}
@@ -203,10 +473,32 @@ interface OwnBoardMiniProps {
 }
 
 function OwnBoardMini({ ships, incomingShots, playerColor }: OwnBoardMiniProps) {
+  const CELL_PX = 14; // w-3.5
   const shipCells = new Set(ships.flatMap(s => s.cells));
   const hitCells = new Set(incomingShots.filter(s => s.result === 'hit').map(s => s.cell));
   const missCells = new Set(incomingShots.filter(s => s.result === 'miss').map(s => s.cell));
   const sunkCells = new Set(ships.filter(s => s.sunk).flatMap(s => s.cells));
+
+  // Build ship position info for sprites
+  const cellShipInfo = new Map<string, { index: number; size: number; shipId: string; isFirst: boolean }>();
+  for (const ps of ships) {
+    for (let i = 0; i < ps.cells.length; i++) {
+      cellShipInfo.set(ps.cells[i]!, {
+        index: i,
+        size: ps.cells.length,
+        shipId: ps.shipId,
+        isFirst: i === 0,
+      });
+    }
+  }
+  const shipOrientation = new Map<string, boolean>();
+  for (const ps of ships) {
+    if (ps.cells.length >= 2) {
+      shipOrientation.set(ps.shipId, ps.cells[0]![0] !== ps.cells[1]![0]);
+    } else {
+      shipOrientation.set(ps.shipId, true);
+    }
+  }
 
   return (
     <div className="flex flex-col items-center">
@@ -218,19 +510,57 @@ function OwnBoardMini({ ships, incomingShots, playerColor }: OwnBoardMiniProps) 
             const isHit = hitCells.has(cell);
             const isMiss = missCells.has(cell);
             const isShip = shipCells.has(cell);
-
-            let bg = 'bg-sky-950/30';
-            if (isSunk) bg = 'bg-red-900/70';
-            else if (isHit) bg = 'bg-red-500/60';
-            else if (isMiss) bg = 'bg-slate-600/30';
-            else if (isShip) bg = '';
+            const shipInfo = cellShipInfo.get(cell);
+            const isHoriz = shipInfo ? (shipOrientation.get(shipInfo.shipId) ?? true) : true;
 
             return (
               <div
                 key={cell}
-                className={`w-3.5 h-3.5 border-[0.5px] border-sky-900/20 ${bg}`}
-                style={isShip && !isHit && !isSunk ? { backgroundColor: `${playerColor}40` } : undefined}
-              />
+                className="w-3.5 h-3.5 border-[0.5px] border-sky-900/20 relative overflow-visible"
+                style={waterTileStyle(CELL_PX)}
+              >
+                {/* Base overlay */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    backgroundColor: isSunk
+                      ? 'rgba(127,29,29,0.6)'
+                      : isHit
+                      ? 'rgba(239,68,68,0.45)'
+                      : isMiss
+                      ? 'rgba(71,85,105,0.3)'
+                      : isShip
+                      ? `${playerColor}25`
+                      : 'rgba(6,8,15,0.55)',
+                  }}
+                />
+                {/* Ship sprite on first cell */}
+                {isShip && shipInfo?.isFirst && (
+                  <div
+                    className="absolute z-10 pointer-events-none"
+                    style={
+                      isHoriz
+                        ? { top: 0, left: 0, width: CELL_PX * shipInfo.size, height: CELL_PX }
+                        : { top: 0, left: 0, width: CELL_PX, height: CELL_PX * shipInfo.size }
+                    }
+                  >
+                    <ShipSprite
+                      shipId={shipInfo.shipId}
+                      cellPx={CELL_PX}
+                      size={shipInfo.size}
+                      horizontal={isHoriz}
+                      opacity={isSunk ? 0.35 : 0.85}
+                    />
+                  </div>
+                )}
+                {/* Hit/miss markers */}
+                {(isHit || isSunk) && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center text-[8px] leading-none">🔴</div>
+                )}
+                {isMiss && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center text-[7px] leading-none">⚪</div>
+                )}
+              </div>
             );
           })}
         </div>
@@ -246,7 +576,6 @@ export function BSPhone({ phase, privateState, timerMs, submitInput, myPlayer, u
   const playerColor = myPlayer?.playerColor ?? '#38bdf8';
 
   const seconds = timerMs !== null ? Math.ceil(timerMs / 1000) : null;
-  const totalSeconds = phase.timerTotalMs !== null ? Math.ceil(phase.timerTotalMs / 1000) : 30;
 
   // ── Setup state ──────────────────────────────────────────────────────────
   const [selectedShip, setSelectedShip] = useState<Ship | null>(null);

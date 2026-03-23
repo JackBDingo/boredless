@@ -3,6 +3,8 @@ import type { BSPublicState, PlacedShip } from '../types.js';
 import { PhaseType } from '@boredless/shared';
 import { BSPhase } from '../phases.js';
 import { Anchor, Trophy } from 'lucide-react';
+import spritesheetUrl from '../assets/ships-spritesheet.png';
+import { SPRITES, SHIP_SPRITE_MAP, SHEET_WIDTH, SHEET_HEIGHT } from '../assets/spritesheet.js';
 
 // ── Column labels A–J ─────────────────────────────────────────────────────────
 const COLS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
@@ -47,6 +49,69 @@ function ScoreList({ scores }: { scores: { playerId: string; playerName: string;
   );
 }
 
+// ── Water tile style ───────────────────────────────────────────────────────────
+function waterTileStyle(cellPx: number): React.CSSProperties {
+  const sprite = SPRITES.water;
+  const scale = cellPx / sprite.width;
+  return {
+    backgroundImage: `url(${spritesheetUrl})`,
+    backgroundSize: `${SHEET_WIDTH * scale}px ${SHEET_HEIGHT * scale}px`,
+    backgroundPosition: `-${sprite.x * scale}px -${sprite.y * scale}px`,
+    backgroundRepeat: 'no-repeat',
+  };
+}
+
+// ── Ship sprite component ──────────────────────────────────────────────────────
+interface ShipSpriteProps {
+  shipId: string;
+  cellPx: number;
+  size: number;
+  horizontal: boolean;
+  opacity?: number;
+}
+
+function ShipSprite({ shipId, cellPx, size, horizontal, opacity = 1 }: ShipSpriteProps) {
+  const spriteName = SHIP_SPRITE_MAP[shipId];
+  if (!spriteName) return null;
+  const sprite = SPRITES[spriteName];
+
+  const renderHeight = cellPx * size;
+  const renderWidth = cellPx;
+  const scaleH = renderHeight / sprite.height;
+  const scaledW = sprite.width * scaleH;
+
+  const sheetScale = scaleH;
+  const bgSize = `${SHEET_WIDTH * sheetScale}px ${SHEET_HEIGHT * sheetScale}px`;
+  const bgPosX = -(sprite.x * sheetScale) + (renderWidth - scaledW) / 2;
+  const bgPosY = -(sprite.y * sheetScale);
+  const bgPos = `${bgPosX}px ${bgPosY}px`;
+
+  const containerStyle: React.CSSProperties = horizontal
+    ? { width: renderHeight, height: renderWidth, position: 'relative' }
+    : { width: renderWidth, height: renderHeight, position: 'relative' };
+
+  const innerStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: renderWidth,
+    height: renderHeight,
+    backgroundImage: `url(${spritesheetUrl})`,
+    backgroundSize: bgSize,
+    backgroundPosition: bgPos,
+    backgroundRepeat: 'no-repeat',
+    opacity,
+    transformOrigin: horizontal ? `${renderWidth / 2}px ${renderWidth / 2}px` : undefined,
+    transform: horizontal ? `rotate(-90deg) translateX(-${renderHeight - renderWidth}px)` : undefined,
+  };
+
+  return (
+    <div style={containerStyle}>
+      <div style={innerStyle} />
+    </div>
+  );
+}
+
 // ── Cell type resolution ───────────────────────────────────────────────────────
 type CellRenderState = 'empty' | 'ship' | 'hit' | 'miss' | 'sunk';
 
@@ -55,9 +120,8 @@ function getCellState(
   hits: string[],
   misses: string[],
   sunkShips: PlacedShip[],
-  showShips?: PlacedShip[],   // for result phase — show all ships
+  showShips?: PlacedShip[],
 ): CellRenderState {
-  // Check sunk first (sunk cells are always 'sunk')
   if (sunkShips.some(s => s.cells.includes(cell))) return 'sunk';
   if (hits.includes(cell)) return 'hit';
   if (misses.includes(cell)) return 'miss';
@@ -65,34 +129,53 @@ function getCellState(
   return 'empty';
 }
 
-// ── Grid cell colors ──────────────────────────────────────────────────────────
-function cellBg(state: CellRenderState): string {
-  switch (state) {
-    case 'sunk':  return 'bg-red-900/80 border-red-700/60';
-    case 'hit':   return 'bg-red-500/70 border-red-400/60';
-    case 'miss':  return 'bg-slate-400/20 border-slate-400/30';
-    case 'ship':  return 'bg-sky-800/50 border-sky-600/30';
-    default:      return 'bg-sky-950/40 border-sky-900/30';
-  }
-}
-
 // ── Single 10×10 board ────────────────────────────────────────────────────────
 interface BoardProps {
   hits: string[];
   misses: string[];
   sunkShips: PlacedShip[];
-  revealShips?: PlacedShip[];   // result phase: show all ships
+  revealShips?: PlacedShip[];
   isActive: boolean;
   label: string;
   shipsRemaining: number;
   playerColor: string;
-  lastShotCell?: string;        // flash the last shot
+  lastShotCell?: string;
 }
 
 function BattleGrid({
   hits, misses, sunkShips, revealShips,
   isActive, label, shipsRemaining, playerColor, lastShotCell,
 }: BoardProps) {
+  const CELL_PX = 28; // w-7
+
+  // Collect all ships to render sprites for (sunk + revealed)
+  const allShipsToShow: PlacedShip[] = [
+    ...sunkShips,
+    ...(revealShips ?? []).filter(s => !sunkShips.some(ss => ss.shipId === s.shipId)),
+  ];
+
+  const cellShipInfo = new Map<string, { index: number; size: number; shipId: string; isFirst: boolean }>();
+  for (const ps of allShipsToShow) {
+    for (let i = 0; i < ps.cells.length; i++) {
+      cellShipInfo.set(ps.cells[i]!, {
+        index: i,
+        size: ps.cells.length,
+        shipId: ps.shipId,
+        isFirst: i === 0,
+      });
+    }
+  }
+  const shipOrientation = new Map<string, boolean>();
+  for (const ps of allShipsToShow) {
+    if (ps.cells.length >= 2) {
+      shipOrientation.set(ps.shipId, ps.cells[0]![0] !== ps.cells[1]![0]);
+    } else {
+      shipOrientation.set(ps.shipId, true);
+    }
+  }
+
+  const sunkSet = new Set(sunkShips.flatMap(s => s.cells));
+
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Player label */}
@@ -112,7 +195,7 @@ function BattleGrid({
 
       {/* Col labels */}
       <div className="flex">
-        <div className="w-5" /> {/* row label spacer */}
+        <div className="w-5" />
         {COLS.map(c => (
           <div key={c} className="w-7 h-4 flex items-center justify-center text-[9px] font-medium text-white/25 select-none">
             {c}
@@ -123,7 +206,6 @@ function BattleGrid({
       {/* Grid rows */}
       {ROWS.map(row => (
         <div key={row} className="flex items-center">
-          {/* Row label */}
           <div className="w-5 h-7 flex items-center justify-center text-[9px] font-medium text-white/25 select-none">
             {row}
           </div>
@@ -131,24 +213,64 @@ function BattleGrid({
             const cell = `${col}${row}`;
             const cs = getCellState(cell, hits, misses, sunkShips, revealShips);
             const isLastShot = cell === lastShotCell;
+            const shipInfo = cellShipInfo.get(cell);
+            const isHoriz = shipInfo ? (shipOrientation.get(shipInfo.shipId) ?? true) : true;
+            const isFromSunk = sunkSet.has(cell);
+
             return (
               <div
                 key={cell}
-                className={`w-7 h-7 border rounded-[2px] flex items-center justify-center transition-all duration-300 ${cellBg(cs)} ${
+                className={`w-7 h-7 border rounded-[2px] flex items-center justify-center transition-all duration-300 relative overflow-visible ${
                   isLastShot ? 'ring-1 ring-yellow-400/60' : ''
                 }`}
+                style={{
+                  borderColor: 'rgba(56,189,248,0.12)',
+                  ...waterTileStyle(CELL_PX),
+                }}
               >
+                {/* Base ocean overlay */}
+                <div
+                  className="absolute inset-0 rounded-[1px]"
+                  style={{
+                    backgroundColor: cs === 'sunk'
+                      ? 'rgba(127,29,29,0.55)'
+                      : cs === 'hit'
+                      ? 'rgba(127,29,29,0.35)'
+                      : cs === 'miss'
+                      ? 'rgba(30,41,59,0.25)'
+                      : cs === 'ship'
+                      ? 'rgba(14,165,233,0.12)'
+                      : 'rgba(6,8,15,0.50)',
+                  }}
+                />
+                {/* Ship sprite for sunk / revealed ships */}
+                {(cs === 'sunk' || cs === 'ship') && shipInfo?.isFirst && (
+                  <div
+                    className="absolute z-10 pointer-events-none"
+                    style={
+                      isHoriz
+                        ? { top: 0, left: 0, width: CELL_PX * shipInfo.size, height: CELL_PX }
+                        : { top: 0, left: 0, width: CELL_PX, height: CELL_PX * shipInfo.size }
+                    }
+                  >
+                    <ShipSprite
+                      shipId={shipInfo.shipId}
+                      cellPx={CELL_PX}
+                      size={shipInfo.size}
+                      horizontal={isHoriz}
+                      opacity={isFromSunk ? 0.55 : 0.75}
+                    />
+                  </div>
+                )}
+                {/* Hit/miss/sunk markers */}
                 {cs === 'hit' && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                  <div className="relative z-20 text-[13px] leading-none">🔴</div>
                 )}
                 {cs === 'sunk' && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-800" />
+                  <div className="relative z-20 text-[13px] leading-none">🔴</div>
                 )}
                 {cs === 'miss' && (
-                  <div className="w-1.5 h-1.5 rounded-full bg-slate-400/60" />
-                )}
-                {cs === 'ship' && (
-                  <div className="w-4 h-3 rounded-[1px] bg-sky-500/50" />
+                  <div className="relative z-20 text-[11px] leading-none">⚪</div>
                 )}
               </div>
             );
@@ -164,7 +286,6 @@ function BattleGrid({
 export function BSDisplay({ phase, publicState, scores, timerMs, useGameEvent: _useGameEvent }: DisplayProps) {
   const state = publicState as unknown as BSPublicState;
   const seconds = timerMs !== null ? Math.ceil(timerMs / 1000) : null;
-  const totalSeconds = phase.timerTotalMs !== null ? Math.ceil(phase.timerTotalMs / 1000) : 30;
   const isUrgent = seconds !== null && seconds <= 5;
 
   const lastShotCell = state.lastShot?.cell;

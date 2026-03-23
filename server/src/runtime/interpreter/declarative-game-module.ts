@@ -89,6 +89,8 @@ export interface ExtensionActionContext {
   playerInfo: Array<{ id: string; name: string }>;
   /** Set a global state field */
   setGlobal: (field: string, value: unknown) => void;
+  /** Set a per-player state field */
+  setPlayer: (playerId: string, field: string, value: unknown) => void;
   /** Get a player's current score */
   getScore: (playerId: string) => number;
   /** Award points to a player */
@@ -863,6 +865,7 @@ export class DeclarativeGameModule implements GameModule {
     const mySubmission = room.inputCollector?.getSubmission(playerId) ?? null;
 
     const privateState: Record<string, unknown> = {
+      gameId: this.gamePackage.manifest.id,
       globals: projected.globals,
       players: projected.players,
       teams: projected.teams,
@@ -1144,6 +1147,9 @@ export class DeclarativeGameModule implements GameModule {
       playerInfo: room.players.map(p => ({ id: p.id, name: p.name })),
       setGlobal: (field: string, value: unknown) => {
         room.stateManager.setGlobal(field, value);
+      },
+      setPlayer: (playerId: string, field: string, value: unknown) => {
+        room.stateManager.setPlayer(playerId, field, value);
       },
       getScore: (playerId: string) => ctx.getScore(playerId),
       addPoints: (playerId: string, amount: number) => {

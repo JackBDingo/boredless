@@ -78,11 +78,15 @@ function extractBBState(raw: Record<string, unknown>): BBPublicState {
     : playerList.filter(p => p['has_voted']).length;
 
   let answers: BBPublicState['answers'] = [];
-  const rawAnswers = g['answers_json'];
+  let rawAnswers: unknown = g['answers_json'];
+  if (typeof rawAnswers === 'string') {
+    try { rawAnswers = JSON.parse(rawAnswers); } catch { /* ignore */ }
+  }
+  // answers_json is { answers: [...] } wrapper or bare array
   if (Array.isArray(rawAnswers)) {
     answers = rawAnswers;
-  } else if (typeof rawAnswers === 'string') {
-    try { answers = JSON.parse(rawAnswers); } catch { /* ignore */ }
+  } else if (rawAnswers && typeof rawAnswers === 'object' && Array.isArray((rawAnswers as any).answers)) {
+    answers = (rawAnswers as any).answers;
   }
 
   let revealData: BBPublicState['revealData'] = null;

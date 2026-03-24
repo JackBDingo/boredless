@@ -1000,7 +1000,13 @@ export class DeclarativeGameModule implements GameModule {
         if (this.extensionActionHandler) {
           const extCtx = this.buildExtensionContext(roomId, ctx);
           const handled = this.extensionActionHandler(action.action, extCtx);
-          if (handled) break;
+          if (handled) {
+            // Extension may have awarded points — broadcast updated scores
+            if (action.action.includes('score')) {
+              ctx.broadcastScores();
+            }
+            break;
+          }
         }
         ctx.log.warn('[interpreter] Unknown action from PhaseMachine', { action: action.action });
         break;
@@ -1051,6 +1057,9 @@ export class DeclarativeGameModule implements GameModule {
         });
       }
     }
+
+    // Broadcast updated scores to all clients
+    ctx.broadcastScores();
   }
 
   private handleContentDraw(
